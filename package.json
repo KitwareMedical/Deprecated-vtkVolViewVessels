@@ -1,0 +1,48 @@
+{
+    "name": "tube",
+    "version": "0.0.0-semantically-release",
+    "description": "Medical Web Viewer",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kitware/slicer-web.git"
+    },
+    "license": "BSD-3-Clause",
+    "bugs": {
+        "url": "https://github.com/kitware/slicer-web/issues"
+    },
+    "homepage": "https://github.com/kitware/slicer-web#readme",
+    "main": "./dist/slicer-web.js",
+    "dependencies": {
+        "vtk.js": "5.1.6",
+        "paraviewweb": "2.5.6",
+        "daikon": "1.2.17"
+    },
+    "devDependencies": {
+        "font-awesome": "4.5.0",
+        "normalize.css": "4.1.1",
+        "kw-doc": "1.1.1",
+        "kw-web-suite": "3.1.1",
+        "monologue.js": "0.3.5",
+        "mout": "1.0.0",
+        "react": "15.3.1",
+        "react-dom": "15.3.1",
+        "d3": "3.5.17",
+        "axios": "0.14.0",
+        "gl-matrix": "2.3.1",
+        "hammerjs": "2.0.8",
+        "babel-polyfill": "6.16.0"
+    },
+    "scripts": {
+        "start": "webpack-dev-server",
+        "build": "webpack --progress --colors",
+        "build:debug": "webpack --progress --colors --display-modules",
+        "build:release": "npm run build -- -p",
+        "commit": "git cz",
+        "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    },
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-conventional-changelog"
+        }
+    }
+}

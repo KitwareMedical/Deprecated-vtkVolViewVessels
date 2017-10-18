@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.rootContainer {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+.verticalContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.horizontalContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.itemStretch {
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.controller {
+  height: 200px;
+}
+
+.button {
+  flex: none;
+  padding: 0px 10px;
+  border-radius: 5px;
+  margin: 2px 5px;
+  background-color: lightgray;
+  cursor: pointer;
+  height: 100%;
+}
+
+.slider {
+  flex: 1;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 5px;
+  margin-left: 10px;
+}
+
+.padding {
+  padding: 10px;
+}
+
+.controlLine {
+  height: 2rem;
+  line-height: 2rem;
+  padding: 5px 10px;
+}
