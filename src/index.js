@@ -1,8 +1,14 @@
+import macro from 'vtk.js/Sources/macro';
+import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
+import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
+
 import SliceViewer from './ui/SliceViewer';
-import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
-import network from './network';
+import VolumeViewer from './ui/VolumeViewer';
+
 import style from './Tube.mcss';
+
+import mode from './mode';
 
 // ----------------------------------------------------------------------------
 // DOM handling
@@ -24,24 +30,30 @@ const controllerContainer = container.querySelector('.js-controller');
 // ----------------------------------------------------------------------------
 
 const sliceViewer = new SliceViewer(leftPaneContainer);
-const volumeViewer = new VolumeViewer(rightPaneContainer);
 const tubeController = new TubeController(controllerContainer);
+const volumeViewer = new VolumeViewer(rightPaneContainer);
 
-let subscription = null;
-let dataManager = null;
+const sharedContext = {};
 
 // ----------------------------------------------------------------------------
 
-export function startApplication() {
+export function startApplication(dataManager) {
+  sharedContext.dataManager = dataManager;
   // We are ready to talk to the server...
-  const imageData = dataManager.ITKTube.getVolumeData();
-  console.log(imageData);
+  dataManager.ITKTube.getVolumeData().then((dataDescription) => {
+    const values = new window[dataDescription.typedArray](dataDescription.scalars);
+    const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
+    delete dataDescription.scalars;
+    delete dataDescription.typedArray;
+    const imageData = vtkImageData.newInstance(dataDescription);
+    imageData.getPointData().setScalars(dataArray);
 
-  sliceViewer.updateData(imageData);
-  volumeViewer.updateData(imageData);
-  tubeController.updateData(imageData);
+    sliceViewer.updateData(imageData);
+    volumeViewer.updateData(imageData);
+    tubeController.updateData(imageData);
+  });
 
-  subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem) => {
+  sharedContext.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem) => {
     console.log('Tube item update', tubeItem);
   });
 }
@@ -49,31 +61,23 @@ export function startApplication() {
 // ----------------------------------------------------------------------------
 
 export function stopApplication() {
-  if (subscription) {
-    dataManager.ITKTube.unsubscribe();
+  if (sharedContext.subscription) {
+    sharedContext.dataManager.ITKTube.unsubscribe();
   }
   //
-  dataManager.exit(10);
+  sharedContext.dataManager.exit(10);
 }
 
 // ----------------------------------------------------------------------------
-
-export function connectToServer() {
-  network.onReady(() => {
-    dataManager = network.getClient();
-    startApplication();
-  });
-  network.connect({ application: 'ITKTube' });
-}
-
+// Expect a server for now or not?
 // ----------------------------------------------------------------------------
 
-export function localMode() {
-  // FIXME todo...
-}
+mode.local.run(startApplication, stopApplication);
+// mode.remote.run(startApplication, stopApplication);
 
-// ----------------------------------------------------------------------------
-// Expect a server for now
-// ----------------------------------------------------------------------------
+const resizeHandler = macro.debounce(() => {
+  [sliceViewer, tubeController, volumeViewer].forEach(e => e.resize());
+}, 50);
 
-// connectToServer();
+// Register window resize handler so workbench redraws when browser is resized
+window.onresize = resizeHandler;

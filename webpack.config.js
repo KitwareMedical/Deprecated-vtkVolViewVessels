@@ -5,8 +5,7 @@ const autoprefixer = require('autoprefixer');
 const entry = path.join(__dirname, './src/index.js');
 const sourcePath = path.join(__dirname, './src');
 const outputPath = path.join(__dirname, './dist');
-
-const linterRules = require('vtk.js/Utilities/config/rules-linter.js');
+const eslintrcPath = path.join(__dirname, './.eslintrc.js');
 
 module.exports = {
   entry,
@@ -57,7 +56,8 @@ module.exports = {
         loader: 'url-loader?limit=60000',
         include: /fonts/,
       },
-    ].concat(linterRules),
+      { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre', options: { configFile: eslintrcPath } },
+    ],
   },
   resolve: {
     modules: [

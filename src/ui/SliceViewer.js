@@ -7,7 +7,7 @@ import vtkImageSlice         from 'vtk.js/Sources/Rendering/Core/ImageSlice';
 import style from '../Tube.mcss';
 
 const htmlTemplate = `
-  <div class="js-renderer ${style.itemStretch}"></div>
+  <div class="js-renderer ${style.itemStretch} ${style.overflowHidder}"></div>
   <div class="${style.horizontalContainer} ${style.controlLine}">
     <label class="${style.label}">Window</label>
     <input class="js-slider-window ${style.slider}" type="range" min="0" value="0" max="10" />
@@ -24,8 +24,13 @@ const htmlTemplate = `
 
 function updateSlider(el, props) {
   Object.keys(props).forEach((attributeName) => {
-    el.setAttribute(attributeName, props[attributeName]);
+    if (attributeName === 'value') {
+      el.value = props[attributeName];
+    } else {
+      el.setAttribute(attributeName, props[attributeName]);
+    }
   });
+  el.dispatchEvent(new Event('input'));
 }
 
 export default class SliceViewer {
@@ -37,8 +42,8 @@ export default class SliceViewer {
 
     this.renderWindowContainer = container.querySelector('.js-renderer');
     this.windowSlider = container.querySelector('.js-slider-window');
-    this.levelSlider = container.querySelector('.js-slider-window');
-    this.sliceSlider = container.querySelector('.js-slider-window');
+    this.levelSlider = container.querySelector('.js-slider-level');
+    this.sliceSlider = container.querySelector('.js-slider-slice');
 
     // Create vtk.js rendering pieces
     this.renderWindow = vtkRenderWindow.newInstance();
@@ -71,12 +76,21 @@ export default class SliceViewer {
     this.sliceSlider.addEventListener('input', (event) => {
       const value = Number(event.target.value);
       this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](value);
+      console.log('slice', value);
       this.render();
     });
 
     [].forEach.call(container.querySelectorAll('.js-slice-normal-button'), (button) => {
       button.addEventListener('click', (event) => {
         this.currentSlicingMode = Number(event.target.dataset.currentSlicingMode);
+        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
+        const viewUp = [0, 0, 0];
+        viewUp[(this.currentSlicingMode + 1) % 3] = 1;
+
+        console.log(position, viewUp, this.currentSlicingMode);
+
+        this.camera.set({ position, viewUp });
+        this.render();
         this.updateSliceSlider();
       });
     });
@@ -84,7 +98,7 @@ export default class SliceViewer {
 
   updateSliceSlider() {
     if (this.dataset) {
-      const max = this.dataset.getDimensions()[this.currentSlicingMode];
+      const max = this.dataset.getDimensions()[this.currentSlicingMode] - 1;
       const value = Math.ceil(max / 2);
       updateSlider(this.sliceSlider, { max, value });
       this.renderer.resetCamera();
@@ -99,7 +113,7 @@ export default class SliceViewer {
 
     const range = imageDataToLoad.getPointData().getScalars().getRange();
     updateSlider(this.windowSlider, { min: 0, max: (range[1] - range[0]), value: (range[1] - range[0]) });
-    updateSlider(this.levelSlider, { min: range[0], max: range[1], value: range[1] });
+    updateSlider(this.levelSlider, { min: range[0], max: range[1], value: (range[1] + range[0]) * 0.5 });
     this.updateSliceSlider();
 
     if (needToAddActor) {
@@ -117,6 +131,7 @@ export default class SliceViewer {
     if (this.renderWindowContainer) {
       this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
       this.openGlRenderWindow.setSize(this.boundingRect.width, this.boundingRect.height);
+      this.renderer.resetCamera();
       this.render();
     }
   }

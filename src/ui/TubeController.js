@@ -3,4 +3,11 @@ export default class TubeController {
     this.root = container;
     container.style.background = 'blue';
   }
+
+  resize() {
+  }
+
+  updateData() {
+  }
+
 }

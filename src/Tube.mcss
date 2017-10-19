@@ -28,6 +28,8 @@ body {
 .itemStretch {
   flex: 1;
   box-sizing: border-box;
+  min-height: 1px;
+  min-width: 1px;
 }
 
 .controller {
@@ -46,12 +48,15 @@ body {
 
 .slider {
   flex: 1;
+  min-height: 1px;
+  min-width: 1px;
 }
 
 .label {
   font-weight: bold;
   margin-right: 5px;
   margin-left: 10px;
+  user-select: none;
 }
 
 .padding {
@@ -62,4 +67,8 @@ body {
   height: 2rem;
   line-height: 2rem;
   padding: 5px 10px;
+}
+
+.overflowHidder {
+  overflow: hidden;
 }
