@@ -37,4 +37,6 @@ Once the build is done, copy `run.sh.example` to `run.sh`. Edit the first two li
 your current environment. The `ITKBuildRoot` points to the build directory of ITKTubeTK.
 The `source...` line points to the activate script of your virtualenv. 
 
-Once that is set up, run `./run.sh server/itk-tube.py`.
+Once that is set up, run `./run.sh server/itk-tube.py`. Note that the run script isn't
+required. If your environment exports all the needed variables from the run script,
+then the run script is not needed.
