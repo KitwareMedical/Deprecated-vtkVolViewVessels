@@ -58,7 +58,7 @@ export default class SliceViewer {
     this.interactor.setView(this.openGlRenderWindow);
 
     this.actor = vtkImageSlice.newInstance();
-    this.mapper = vtkImageMapper.newInstance();
+    this.mapper = vtkImageMapper.newInstance({ renderToRectangle: true, sliceAtFocalPoint: false });
     this.actor.setMapper(this.mapper);
     this.camera = this.renderer.getActiveCamera();
     this.camera.setParallelProjection(true);
@@ -92,8 +92,8 @@ export default class SliceViewer {
 
     this.sliceSlider.addEventListener('input', (event) => {
       const value = Number(event.target.value);
+      this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
       this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](value);
-      console.log('slice', value);
       this.render();
     });
 
@@ -105,11 +105,7 @@ export default class SliceViewer {
         const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
         const viewUp = [0, 0, 0];
         viewUp[(this.currentSlicingMode + 1) % 3] = 1;
-
-        console.log(position, viewUp, this.currentSlicingMode);
-
         this.camera.set({ position, viewUp });
-        this.render();
         this.updateSliceSlider();
       });
     });
@@ -121,6 +117,7 @@ export default class SliceViewer {
       const value = Math.ceil(max / 2);
       updateSlider(this.sliceSlider, { max, value });
       this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
       this.render();
     }
   }
