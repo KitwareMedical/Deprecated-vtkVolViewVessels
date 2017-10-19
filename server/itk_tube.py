@@ -153,11 +153,11 @@ class ItkTubeProtocol(LinkProtocol):
         pointer = long(self.itkImage.GetBufferPointer())
         imageBuffer = ctypes.cast(pointer, ctypes.POINTER(itkCTypeToCtype[self.itkPixelType]))
         size = self.itkImage.GetLargestPossibleRegion().GetSize()
-        itkBinaryImageContent = imageBuffer[size[0]*size[1]*size[2]-1]
+        itkBinaryImageContent = imageBuffer[:size[0]*size[1]*size[2]-1]
 
         # Send data to client
         return {
-            "extent": list(size),
+            "extent": (0, size[0]-1, 0, size[1]-1, 0, size[2]-1),
             "origin": list(self.itkImage.GetOrigin()),
             "spacing": list(self.itkImage.GetSpacing()),
             "typedArray": itkCTypeToJsArray[self.itkPixelType],
