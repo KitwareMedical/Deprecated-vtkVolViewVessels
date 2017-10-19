@@ -1,8 +1,11 @@
-import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
-import vtkRenderer           from 'vtk.js/Sources/Rendering/Core/Renderer';
-import vtkRenderWindow       from 'vtk.js/Sources/Rendering/Core/RenderWindow';
-import vtkImageMapper        from 'vtk.js/Sources/Rendering/Core/ImageMapper';
-import vtkImageSlice         from 'vtk.js/Sources/Rendering/Core/ImageSlice';
+import vtkCellPicker              from 'vtk.js/Sources/Rendering/Core/CellPicker';
+import vtkImageMapper             from 'vtk.js/Sources/Rendering/Core/ImageMapper';
+import vtkImageSlice              from 'vtk.js/Sources/Rendering/Core/ImageSlice';
+import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
+import vtkPickerInteractorStyle   from 'vtk.js/Sources/Rendering/Core/CellPicker/example/PickerInteractorStyle';
+import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
+import vtkRenderWindow            from 'vtk.js/Sources/Rendering/Core/RenderWindow';
+import vtkRenderWindowInteractor  from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
 
 import style from '../Tube.mcss';
 
@@ -51,6 +54,9 @@ export default class SliceViewer {
     this.renderWindow.addRenderer(this.renderer);
     this.openGlRenderWindow = vtkOpenGLRenderWindow.newInstance();
     this.renderWindow.addView(this.openGlRenderWindow);
+    this.interactor = vtkRenderWindowInteractor.newInstance();
+    this.interactor.setView(this.openGlRenderWindow);
+
     this.actor = vtkImageSlice.newInstance();
     this.mapper = vtkImageMapper.newInstance();
     this.actor.setMapper(this.mapper);
@@ -59,6 +65,17 @@ export default class SliceViewer {
 
     this.openGlRenderWindow.setContainer(this.renderWindowContainer);
     this.resize();
+
+    // Setup picking
+    this.picker = vtkCellPicker.newInstance();
+    this.picker.setPickFromList(1);
+    this.picker.initializePickList();
+    this.picker.addPickList(this.actor);
+
+    this.iStyle = vtkPickerInteractorStyle.newInstance();
+    this.iStyle.setContainer(this.renderWindowContainer);
+    this.renderWindow.getInteractor().setInteractorStyle(this.iStyle);
+    this.renderWindow.getInteractor().setPicker(this.picker);
 
     // Add DOM listeners
     this.windowSlider.addEventListener('input', (event) => {
@@ -82,6 +99,8 @@ export default class SliceViewer {
 
     [].forEach.call(container.querySelectorAll('.js-slice-normal-button'), (button) => {
       button.addEventListener('click', (event) => {
+        console.log(this.picker.getPickedPositions());
+
         this.currentSlicingMode = Number(event.target.dataset.currentSlicingMode);
         const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
         const viewUp = [0, 0, 0];
