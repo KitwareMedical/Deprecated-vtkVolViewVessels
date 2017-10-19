@@ -24,7 +24,9 @@ import os
 import argparse
 
 # import itk modules.
-# FIXME
+import itk
+from itkTypes import itkCType
+import ctypes
 
 # import Twisted reactor for later callback
 from twisted.internet import reactor
@@ -32,19 +34,18 @@ from twisted.internet import reactor
 # import Web connectivity
 from wslink import register
 from wslink import server
-from wslink.websocket import LinkProtocol
+from wslink.websocket import ServerProtocol
+
+from itk_tube import ItkTubeProtocol
 
 # =============================================================================
 # Create Web Server to handle requests
 # =============================================================================
 
-class _ItkTubeServer(LinkProtocol):
+class _ItkTubeServer(ServerProtocol):
 
     dataFile = ''
     authKey = 'wslink-secret'
-    tubeProcessingQueue = []
-    timelapse = 0.1 # Time in seconds
-    processingLoad = 0
 
     @staticmethod
     def add_arguments(parser):
@@ -56,58 +57,13 @@ class _ItkTubeServer(LinkProtocol):
         _ItkTubeServer.dataFile = args.dataFile
 
     def initialize(self):
-        # Load file in ITK
-        # FIXME
+        # register custom protocol
+        protocol = ItkTubeProtocol()
+        protocol.loadDataFile(self.dataFile)
+        self.registerLinkProtocol(protocol)
 
         # Update authentication key to use
         self.updateSecret(_ItkTubeServer.authKey)
-
-    def scheduleQueueProcessing(self):
-        if _ItkTubeServer.processingLoad == 0:
-            _ItkTubeServer.processingLoad += 1
-            reactor.callLater(_ItkTubeServer.timelapse, self.processQueue)
-
-    def processQueue(self):
-        _ItkTubeServer.processingLoad -= 1
-        # Find anything in the queue that need processing
-        # FIXME
-        # FIXME if nothing in 'queued' then return
-        itemToProcess = { 'id': 0, 'position': (5, 5, 5), 'status': 'queued' }
-        itemToProcess['status'] = 'computing'
-        self.publish('itk.tube.mesh', itemToProcess)
-
-        # Compute mesh
-        # FIXME
-        itemToProcess['mesh'] = [{ 'position': [1, 2, 3], 'radius': 4.5 }, { 'position': [4, 5, 10], 'radius': 4.5 }]
-
-        # Publish any update
-        self.publish('itk.tube.mesh', itemToProcess)
-
-        # Reschedule ourself
-        self.scheduleQueueProcessing()
-
-    @register('itk.volume.get')
-    def getVolumeData(self):
-        # Get ITK image data
-        # FIXME
-        itkBinaryImageContent = 'fixme'
-
-        # Send data to client
-        return {
-            "extent": [0, 10, 0, 10, 0, 10],
-            "origin": [0, 0, 0],
-            "spacing": [0.1, 0.15, 0.3],
-            "typedArray": 'Float32Array'
-            "scalars": self.addAttachment(itkBinaryImageContent);
-        }
-
-    @register('itk.tube.generate')
-    def generateTube(self, i, j, k):
-        id = len(tubeProcessingQueue)
-        tubeProcessingQueue.append({ 'id': id, 'position': (i, j, k), 'status': 'queued' });
-        scheduleQueueProcessing()
-        return id
-
 
 # =============================================================================
 # Main: Parse args and start server
