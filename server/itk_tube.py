@@ -36,6 +36,9 @@ from wslink import register
 from wslink import server
 from wslink.websocket import LinkProtocol
 
+# import tube utils
+from tubeutils import GetTubePoints
+
 # map from itkCType to ctype
 itkCTypeToCtype = {
         itk.B: ctypes.c_bool,
@@ -78,9 +81,11 @@ itkCTypeToJsArray = {
 
 class ItkTubeProtocol(LinkProtocol):
 
-    tubeProcessingQueue = []
     timelapse = 0.1 # Time in seconds
     processingLoad = 0
+
+    def __init__(self):
+        self.tubeProcessingQueue = list()
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -100,8 +105,10 @@ class ItkTubeProtocol(LinkProtocol):
 
     def processQueue(self):
         self.processingLoad -= 1
-        # Find anything in the queue that need processing
+        if len(self.tubeProcessingQueue) == 0:
+            return
 
+        # Find anything in the queue that need processing
         itemToProcess = self.tubeProcessingQueue.pop(0)
         itemToProcess['status'] = 'computing'
         self.publish('itk.tube.mesh', itemToProcess)
@@ -118,8 +125,8 @@ class ItkTubeProtocol(LinkProtocol):
         tube = self.segmentTubes.ExtractTube(index, self.curTubeIndex, True)
         if tube:
             self.curTubeIndex += 1
-
-            itemToProcess['mesh'] = [{ 'position': [1, 2, 3], 'radius': 4.5 }, { 'position': [4, 5, 10], 'radius': 4.5 }]
+            points = GetTubePoints(tube)
+            itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
         else:
             itemToProcess['mesh'] = None
 

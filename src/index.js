@@ -133,7 +133,13 @@ export function startApplication(dataManager) {
     });
   });
 
-  sharedContext.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem) => {
+  sharedContext.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
+    // TODO figure out why remote sends as array
+    let tubeItem = tubeItem_;
+    if (tubeItem instanceof Array) {
+      tubeItem = tubeItem[0];
+    }
+
     tubeController.udpateTubeItem(tubeItem);
 
     if (tubeItem.mesh) {
