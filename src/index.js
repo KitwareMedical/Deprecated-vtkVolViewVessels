@@ -4,7 +4,7 @@ import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
 import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
-import vtkConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
+// import vtkConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
 
 import SliceViewer from './ui/SliceViewer';
 import TubeController from './ui/TubeController';
