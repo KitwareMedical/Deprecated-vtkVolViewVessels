@@ -13,7 +13,7 @@
     "homepage": "https://github.com/kitware/slicer-web#readme",
     "main": "./dist/slicer-web.js",
     "dependencies": {
-        "vtk.js": "5.1.6",
+        "vtk.js": "5.1.8",
         "paraviewweb": "2.5.6",
         "daikon": "1.2.17"
     },
