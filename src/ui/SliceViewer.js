@@ -1,12 +1,13 @@
-import vtkCellPicker              from 'vtk.js/Sources/Rendering/Core/CellPicker';
-import vtkImageMapper             from 'vtk.js/Sources/Rendering/Core/ImageMapper';
-import vtkImageSlice              from 'vtk.js/Sources/Rendering/Core/ImageSlice';
-import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
-import vtkPickerInteractorStyle   from 'vtk.js/Sources/Rendering/Core/CellPicker/example/PickerInteractorStyle';
-import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
-import vtkRenderWindow            from 'vtk.js/Sources/Rendering/Core/RenderWindow';
-import vtkRenderWindowInteractor  from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
+import vtkPicker                      from 'vtk.js/Sources/Rendering/Core/CellPicker';
+import vtkImageMapper                 from 'vtk.js/Sources/Rendering/Core/ImageMapper';
+import vtkImageSlice                  from 'vtk.js/Sources/Rendering/Core/ImageSlice';
+import vtkOpenGLRenderWindow          from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
+// import vtkPickerInteractorStyle   from 'vtk.js/Sources/Rendering/Core/CellPicker/example/PickerInteractorStyle';
+import vtkRenderer                    from 'vtk.js/Sources/Rendering/Core/Renderer';
+import vtkRenderWindow                from 'vtk.js/Sources/Rendering/Core/RenderWindow';
+import vtkRenderWindowInteractor      from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
 
+import vtkTubePickerInteractorStyle   from '../util/TubePickerInteractorStyle';
 import style from '../Tube.mcss';
 
 const htmlTemplate = `
@@ -25,7 +26,7 @@ const htmlTemplate = `
   </div>
 `;
 
-function updateSlider(el, props) {
+function updateSlider(el, props, forceUpdate = true) {
   Object.keys(props).forEach((attributeName) => {
     if (attributeName === 'value') {
       el.value = props[attributeName];
@@ -33,11 +34,14 @@ function updateSlider(el, props) {
       el.setAttribute(attributeName, props[attributeName]);
     }
   });
-  el.dispatchEvent(new Event('input'));
+  if (forceUpdate) {
+    el.dispatchEvent(new Event('input'));
+  }
 }
 
 export default class SliceViewer {
   constructor(container) {
+    this.listeners = [];
     this.currentSlicingMode = 2;
     this.root = container;
     container.classList.add(style.verticalContainer);
@@ -58,24 +62,33 @@ export default class SliceViewer {
     this.interactor.setView(this.openGlRenderWindow);
 
     this.actor = vtkImageSlice.newInstance();
-    this.mapper = vtkImageMapper.newInstance({ renderToRectangle: true, sliceAtFocalPoint: false });
+    this.mapper = vtkImageMapper.newInstance(); // { renderToRectangle: true }
     this.actor.setMapper(this.mapper);
     this.camera = this.renderer.getActiveCamera();
     this.camera.setParallelProjection(true);
 
     this.openGlRenderWindow.setContainer(this.renderWindowContainer);
+    this.interactor.initialize();
+    this.interactor.bindEvents(this.renderWindowContainer);
     this.resize();
 
     // Setup picking
-    this.picker = vtkCellPicker.newInstance();
-    this.picker.setPickFromList(1);
+    this.picker = vtkPicker.newInstance();
+    this.picker.setPickFromList(true);
     this.picker.initializePickList();
     this.picker.addPickList(this.actor);
 
-    this.iStyle = vtkPickerInteractorStyle.newInstance();
-    this.iStyle.setContainer(this.renderWindowContainer);
+    this.iStyle = vtkTubePickerInteractorStyle.newInstance();
     this.renderWindow.getInteractor().setInteractorStyle(this.iStyle);
     this.renderWindow.getInteractor().setPicker(this.picker);
+
+    // Add pick listener
+    this.picker.onPickChange(() => {
+      const { actors, cellIJK } = this.picker.get('cellIJK', 'actors');
+      if (actors.length) {
+        this.listeners.forEach(l => l(...cellIJK));
+      }
+    });
 
     // Add DOM listeners
     this.windowSlider.addEventListener('input', (event) => {
@@ -90,22 +103,32 @@ export default class SliceViewer {
       this.render();
     });
 
+    // Synch UI based on prop change
+    this.actor.getProperty().onModified(() => {
+      const { colorWindow, colorLevel } = this.actor.getProperty().get('colorWindow', 'colorLevel');
+      updateSlider(this.levelSlider, { value: colorLevel }, false);
+      updateSlider(this.windowSlider, { value: colorWindow }, false);
+    });
+
     this.sliceSlider.addEventListener('input', (event) => {
       const value = Number(event.target.value);
-      this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
       this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](value);
       this.render();
     });
 
     [].forEach.call(container.querySelectorAll('.js-slice-normal-button'), (button) => {
       button.addEventListener('click', (event) => {
-        console.log(this.picker.getPickedPositions());
-
         this.currentSlicingMode = Number(event.target.dataset.currentSlicingMode);
+        this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
+        this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](0); // FIXME force change to render (bug in imageMapper)
+
         const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
         const viewUp = [0, 0, 0];
-        viewUp[(this.currentSlicingMode + 1) % 3] = 1;
+        viewUp[(this.currentSlicingMode + 2) % 3] = 1;
         this.camera.set({ position, viewUp });
+        this.renderer.resetCamera();
+        this.renderer.resetCameraClippingRange();
+        this.render();
         this.updateSliceSlider();
       });
     });
@@ -116,8 +139,6 @@ export default class SliceViewer {
       const max = this.dataset.getDimensions()[this.currentSlicingMode] - 1;
       const value = Math.ceil(max / 2);
       updateSlider(this.sliceSlider, { max, value });
-      this.renderer.resetCamera();
-      this.renderer.resetCameraClippingRange();
       this.render();
     }
   }
@@ -130,13 +151,21 @@ export default class SliceViewer {
     const range = imageDataToLoad.getPointData().getScalars().getRange();
     updateSlider(this.windowSlider, { min: 0, max: (range[1] - range[0]), value: (range[1] - range[0]) });
     updateSlider(this.levelSlider, { min: range[0], max: range[1], value: (range[1] + range[0]) * 0.5 });
-    this.updateSliceSlider();
 
     if (needToAddActor) {
       this.renderer.addActor(this.actor);
+      this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
+      this.mapper.setZSlice(0);
+      const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
+      const viewUp = [0, 0, 0];
+      viewUp[(this.currentSlicingMode + 2) % 3] = 1;
+      this.camera.set({ position, viewUp });
+      this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
+      this.render();
     }
 
-    this.render();
+    this.updateSliceSlider();
   }
 
   render() {
@@ -148,7 +177,12 @@ export default class SliceViewer {
       this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
       this.openGlRenderWindow.setSize(this.boundingRect.width, this.boundingRect.height);
       this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
       this.render();
     }
+  }
+
+  onTubeRequest(callback) {
+    this.listeners.push(callback);
   }
 }

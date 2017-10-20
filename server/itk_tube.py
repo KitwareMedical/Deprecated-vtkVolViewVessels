@@ -137,7 +137,7 @@ class ItkTubeProtocol(LinkProtocol):
 
         componentType = base.GetComponentType()
         itkctype = itkCType.GetCType(base.GetComponentTypeAsString(componentType))
-        imageType = itk.Image[itkctype, base.GetNumberOfDimensions()] 
+        imageType = itk.Image[itkctype, base.GetNumberOfDimensions()]
 
         reader = itk.ImageFileReader[imageType].New()
         reader.SetFileName(filename)
@@ -167,6 +167,7 @@ class ItkTubeProtocol(LinkProtocol):
     @register('itk.tube.generate')
     def generateTube(self, i, j, k, scale=2.0):
         id = len(self.tubeProcessingQueue)
-        self.tubeProcessingQueue.append({ 'id': id, 'position': (i, j, k), 'scale': scale, 'status': 'queued' });
+        itemToProcess = { 'id': id, 'position': (i, j, k), 'scale': scale, 'status': 'queued' }
+        self.tubeProcessingQueue.append(itemToProcess);
         self.scheduleQueueProcessing()
-        return id
+        return itemToProcess

@@ -24,6 +24,7 @@ const htmlTemplate = `
 
 export default class VolumeViewer {
   constructor(container) {
+    this.meshes = {};
     this.root = container;
     container.classList.add(style.verticalContainer);
     container.innerHTML = htmlTemplate;
@@ -60,13 +61,17 @@ export default class VolumeViewer {
 
     // Add DOM listeners
     this.opacitySlider.addEventListener('input', (event) => {
-      const value = Number(event.target.value);
       if (this.dataset) {
-        this.actor.getProperty().setScalarOpacityUnitDistance(0,
-          vtkBoundingBox.getDiagonalLength(this.dataset.getBounds()) / Math.max(...this.dataset.getDimensions()) * 2 * value);
-        this.render();
+        this.updateScalarOpacityUnitDistance();
       }
     });
+  }
+
+  updateScalarOpacityUnitDistance() {
+    const value = Number(this.opacitySlider.value);
+    this.actor.getProperty().setScalarOpacityUnitDistance(0,
+      vtkBoundingBox.getDiagonalLength(this.dataset.getBounds()) / Math.max(...this.dataset.getDimensions()) * 2 * value);
+    this.render();
   }
 
   updateData(imageDataToLoad) {
@@ -86,8 +91,25 @@ export default class VolumeViewer {
     if (needToAddActor) {
       this.renderer.addActor(this.actor);
       this.renderer.resetCamera();
+      this.updateScalarOpacityUnitDistance();
     }
 
+    this.render();
+  }
+
+  addGeometry(id, pipeline) {
+    this.meshes[id] = pipeline;
+    this.renderer.addActor(pipeline.actor);
+    this.render();
+  }
+
+  removeGeometry(id) {
+    this.renderer.removeActor(this.meshes[id].actor);
+    this.render();
+  }
+
+  updateGeometryVisibility(id, visibility) {
+    this.meshes[id].actor.setVisibility(visibility);
     this.render();
   }
 

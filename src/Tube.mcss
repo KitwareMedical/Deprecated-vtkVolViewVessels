@@ -44,6 +44,7 @@ body {
   background-color: lightgray;
   cursor: pointer;
   height: 100%;
+  user-select: none;
 }
 
 .slider {
@@ -71,4 +72,29 @@ body {
 
 .overflowHidder {
   overflow: hidden;
+}
+
+.border {
+  padding: 10px;
+  border-radius: 5px;
+  border: solid 1px gray;
+  margin: 5px;
+}
+
+.overflowScroll {
+  overflow: auto;
+  margin-top: 10px;
+}
+
+.table {
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.table td {
+  text-align: center;
 }

@@ -1,6 +1,9 @@
 import macro from 'vtk.js/Sources/macro';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
+import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
+import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
+import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
 
 import SliceViewer from './ui/SliceViewer';
 import TubeController from './ui/TubeController';
@@ -35,6 +38,34 @@ const volumeViewer = new VolumeViewer(rightPaneContainer);
 
 const sharedContext = {};
 
+function toPipeline(metadata) {
+  const source = vtkPolyData.newInstance();
+  const mapper = vtkMapper.newInstance();
+  const actor = vtkActor.newInstance();
+
+  const size = metadata.length;
+  const coords = new Float32Array(size * 3);
+  const radiusArray = new Float32Array(size);
+  const cell = new Uint16Array(size + 1);
+
+  cell[0] = size;
+  metadata.forEach(({ x, y, z, radius }, index) => {
+    coords[(index * 3) + 0] = x;
+    coords[(index * 3) + 1] = y;
+    coords[(index * 3) + 2] = z;
+    radiusArray[index] = radius;
+    cell[index + 1] = index;
+  });
+  source.getPoints().setData(coords, 3);
+  source.getLines().setData(cell);
+  source.getPointData().setScalars(vtkDataArray.newInstance({ name: 'radius', values: radiusArray }));
+
+  actor.setMapper(mapper);
+  mapper.setInputData(source);
+
+  return { actor, mapper, source };
+}
+
 // ----------------------------------------------------------------------------
 
 export function startApplication(dataManager) {
@@ -50,11 +81,20 @@ export function startApplication(dataManager) {
 
     sliceViewer.updateData(imageData);
     volumeViewer.updateData(imageData);
-    tubeController.updateData(imageData);
+
+    // Link tube request
+    sliceViewer.onTubeRequest((i, j, k) => {
+      const tubeScale = tubeController.getScale();
+      dataManager.ITKTube.generateTube(i, j, k, tubeScale);
+    });
   });
 
   sharedContext.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem) => {
-    console.log('Tube item update', tubeItem);
+    tubeController.udpateTubeItem(tubeItem);
+
+    if (tubeItem.mesh) {
+      volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
+    }
   });
 }
 
