@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
@@ -16,11 +15,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.vti$/,
-        use: 'raw-loader',
-      },
-      {
-        test: /\.vtp$/,
+        test: /\.vt[ip]$/,
         use: 'raw-loader',
       },
       {
@@ -31,12 +26,22 @@ module.exports = {
       {
         test: /\.js$/,
         include: /node_modules(\/|\\)vtk\.js(\/|\\)/,
-        loader: 'babel-loader?presets[]=es2015',
+        use: [
+          { loader: 'babel-loader', options: { presets: ['es2015'] } },
+        ],
+      },
+      {
+        test: /\.js$/,
+        use: [
+          { loader: 'babel-loader', options: { presets: ['es2015'] } },
+        ],
       },
       {
         test: /\.js$/,
         include: /node_modules(\/|\\)paraviewweb(\/|\\)/,
-        loader: 'babel-loader?presets[]=es2015',
+        use: [
+          { loader: 'babel-loader', options: { presets: ['es2015'] } },
+        ],
       },
       { test: /\.(png|jpg)$/, use: 'url-loader?limit=81920' },
       { test: /\.html$/, loader: 'html-loader' },
@@ -44,7 +49,7 @@ module.exports = {
       { test: /\.mcss$/,
         use: [
           { loader: 'style-loader' },
-          { loader: 'css-loader', options: { localIdentName: '[sha512:hash:base32]-[name]-[local]', modules: true } },
+          { loader: 'css-loader', options: { localIdentName: '[sha512:hash:5]-[name]-[local]', modules: true } },
           { loader: 'postcss-loader', options: { plugins: () => [autoprefixer('last 3 version', 'ie >= 10')] } },
         ],
       },

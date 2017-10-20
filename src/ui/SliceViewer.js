@@ -122,7 +122,7 @@ export default class SliceViewer {
         this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
         this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](0); // FIXME force change to render (bug in imageMapper)
 
-        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
+        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 1) : v));
         const viewUp = [0, 0, 0];
         viewUp[(this.currentSlicingMode + 2) % 3] = 1;
         this.camera.set({ position, viewUp });
@@ -156,7 +156,7 @@ export default class SliceViewer {
       this.renderer.addActor(this.actor);
       this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
       this.mapper.setZSlice(0);
-      const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 100000) : v));
+      const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 1) : v));
       const viewUp = [0, 0, 0];
       viewUp[(this.currentSlicingMode + 2) % 3] = 1;
       this.camera.set({ position, viewUp });

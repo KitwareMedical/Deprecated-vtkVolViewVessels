@@ -4,6 +4,7 @@ import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
 import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
+import vtkConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
 
 import SliceViewer from './ui/SliceViewer';
 import TubeController from './ui/TubeController';
@@ -39,26 +40,67 @@ const volumeViewer = new VolumeViewer(rightPaneContainer);
 const sharedContext = {};
 
 function toPipeline(metadata) {
+  // Fake tube filter which should be properly written in vtk.js
   const source = vtkPolyData.newInstance();
   const mapper = vtkMapper.newInstance();
   const actor = vtkActor.newInstance();
 
-  const size = metadata.length;
-  const coords = new Float32Array(size * 3);
-  const radiusArray = new Float32Array(size);
-  const cell = new Uint16Array(size + 1);
+  // Standard line + radius data
+  // const size = metadata.length;
+  // const coords = new Float32Array(size * 3);
+  // const radiusArray = new Float32Array(size);
+  // const cell = new Uint16Array(size + 1);
 
-  cell[0] = size;
-  metadata.forEach(({ x, y, z, radius }, index) => {
-    coords[(index * 3) + 0] = x;
-    coords[(index * 3) + 1] = y;
-    coords[(index * 3) + 2] = z;
-    radiusArray[index] = radius;
-    cell[index + 1] = index;
+  // cell[0] = size;
+  // metadata.forEach(({ x, y, z, radius }, index) => {
+  //   coords[(index * 3) + 0] = x;
+  //   coords[(index * 3) + 1] = y;
+  //   coords[(index * 3) + 2] = z;
+  //   radiusArray[index] = radius;
+  //   cell[index + 1] = index;
+  // });
+  // source.getPoints().setData(coords, 3);
+  // source.getLines().setData(cell);
+  // source.getPointData().setScalars(vtkDataArray.newInstance({ name: 'radius', values: radiusArray }));
+
+  // Generate tube directly
+  const nbSides = 6;
+  const nbPoints = metadata.length * nbSides;
+  const nbPolys = (metadata.length - 1) * (nbSides - 1);
+  const coords = new Float32Array(nbPoints * 3);
+  const cell = new Uint16Array(nbPolys + 1);
+  const radiusArray = new Float32Array(nbPoints);
+  const coneSourceHelper = vtkConeSource.newInstance({ height: 0, capping: false, resolution: nbSides });
+  cell[0] = nbPolys;
+  let cellOffset = 1;
+  metadata.forEach(({ x, y, z, radius }, index, array) => {
+    coneSourceHelper.setCenter(x, y, z);
+    coneSourceHelper.setRadius(radius);
+
+    if (index + 1 < array.length) {
+      coneSourceHelper.setDirection(array[index + 1].x - x, array[index + 1].y - y, array[index + 1].z - z);
+    } else {
+      coneSourceHelper.setDirection(x - array[index - 1].x, y - array[index - 1].y, z - array[index - 1].z);
+    }
+    coneSourceHelper.update();
+    coords.set(new Float32Array(coneSourceHelper.getOutputData().getPoints().getData().buffer, 4 * 3), index * 3); // Skip first point
+
+    if (index > 0) {
+      for (let i = 1; i < nbSides; i++) {
+        cell[cellOffset++] = ((index - 1) * nbSides) + i - 1;
+        cell[cellOffset++] = ((index - 1) * nbSides) + i;
+        cell[cellOffset++] = ((index) * nbSides) + i;
+        cell[cellOffset++] = ((index) * nbSides) + i - 1;
+      }
+    }
+    for (let i = 0; i < nbSides; i++) {
+      radiusArray[(index * nbSides) + i] = radius;
+    }
   });
   source.getPoints().setData(coords, 3);
-  source.getLines().setData(cell);
+  source.getPolys().setData(cell);
   source.getPointData().setScalars(vtkDataArray.newInstance({ name: 'radius', values: radiusArray }));
+
 
   actor.setMapper(mapper);
   mapper.setInputData(source);
@@ -81,6 +123,8 @@ export function startApplication(dataManager) {
 
     sliceViewer.updateData(imageData);
     volumeViewer.updateData(imageData);
+    volumeViewer.getPiecewiseFunctionWidget().setContainer(tubeController.getPiecewiseEditorContainer());
+    volumeViewer.resize();
 
     // Link tube request
     sliceViewer.onTubeRequest((i, j, k) => {

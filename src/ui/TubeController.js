@@ -9,7 +9,7 @@ const htmlTemplate = `
     <div class="js-tubes ${style.itemStretch} ${style.overflowScroll}">
     </div>
   </div>
-  <div class="js-volume-controller ${style.verticalContainer} ${style.itemStretch} ${style.border}" style="background: red;">
+  <div class="js-volume-controller ${style.verticalContainer} ${style.itemStretch} ${style.border}">
   </div>
 `;
 
@@ -44,5 +44,9 @@ export default class TubeController {
 
   getScale() {
     return Number(this.scaleElement.value) / 10;
+  }
+
+  getPiecewiseEditorContainer() {
+    return this.volumeControllerContainer;
   }
 }
