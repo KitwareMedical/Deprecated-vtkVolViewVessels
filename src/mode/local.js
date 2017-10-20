@@ -21,7 +21,7 @@ function generateNewMesh(scale) {
 
     newPoint.x += ((Math.random() - 0.5) * (bounds[1] - bounds[0])) / 10;
     newPoint.y += ((Math.random() - 0.5) * (bounds[3] - bounds[2])) / 10;
-    newPoint.z += ((Math.random() - 0.5) * (bounds[5] - bounds[5])) / 10;
+    newPoint.z += ((Math.random() - 0.5) * (bounds[5] - bounds[4])) / 10;
     newPoint.radius += 0.01;
 
     mesh.push(newPoint);
