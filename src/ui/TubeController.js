@@ -36,7 +36,7 @@ export default class TubeController {
         ).join('');
   }
 
-  udpateTubeItem(item) {
+  updateTubeItem(item) {
     // console.log(item);
     this.tubes[item.id] = item;
     this.render();
