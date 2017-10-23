@@ -140,9 +140,8 @@ export function startApplication(dataManager) {
       tubeItem = tubeItem[0];
     }
 
-    tubeController.updateTubeItem(tubeItem);
-
     if (tubeItem.mesh) {
+      tubeController.updateTubeItem(tubeItem);
       volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
     }
   });
