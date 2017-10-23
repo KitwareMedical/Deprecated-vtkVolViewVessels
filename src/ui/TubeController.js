@@ -30,8 +30,8 @@ export default class TubeController {
   render() {
     // id: tubes.length, position: [i, j, k], scale, status:
     this.tubesContainer.innerHTML = [].concat(
-        `<table class="${style.table}"><tr><th>Position</th><th>Scale</th><th>Status</th></tr>`,
-        Object.keys(this.tubes).map(i => this.tubes[i]).map(i => `<tr><td>${i.position}</td><td>${i.scale}</td><td>${i.status}</td></tr>`),
+        `<table class="${style.table}"><tr><th>Position</th><th># of points</th><th>Status</th></tr>`,
+        Object.keys(this.tubes).map(i => this.tubes[i]).map(i => `<tr><td>${i.position}</td><td>${i.mesh.length}</td><td>${i.status}</td></tr>`),
         '</table>',
         ).join('');
   }
