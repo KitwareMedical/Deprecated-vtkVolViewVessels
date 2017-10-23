@@ -122,9 +122,8 @@ class ItkTubeProtocol(LinkProtocol):
             raise Exception('scale/scaleNorm < 0.3')
         self.segmentTubes.SetRadius(itemToProcess['scale']/scaleNorm)
 
-        tube = self.segmentTubes.ExtractTube(index, self.curTubeIndex, True)
+        tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
         if tube:
-            self.curTubeIndex += 1
             points = GetTubePoints(tube)
             itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
         else:
@@ -173,8 +172,8 @@ class ItkTubeProtocol(LinkProtocol):
 
     @register('itk.tube.generate')
     def generateTube(self, i, j, k, scale=2.0):
-        id = len(self.tubeProcessingQueue)
-        itemToProcess = { 'id': id, 'position': (i, j, k), 'scale': scale, 'status': 'queued' }
-        self.tubeProcessingQueue.append(itemToProcess);
+        itemToProcess = { 'id': self.curTubeIndex, 'position': (i, j, k), 'scale': scale, 'status': 'queued' }
+        self.curTubeIndex += 1
+        self.tubeProcessingQueue.append(itemToProcess)
         self.scheduleQueueProcessing()
         return itemToProcess
