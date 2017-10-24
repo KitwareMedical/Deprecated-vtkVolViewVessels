@@ -18,7 +18,15 @@ export default class SliceViewer extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      windowMin: 0,
+      windowMax: 10,
+      windowValue: 0,
+
+      levelMin: 0,
+      levelMax: 10,
+      levelValue: 0,
+    };
 
     this.currentSlicingMode = 2;
 
@@ -68,9 +76,15 @@ export default class SliceViewer extends React.Component {
       const needToAddActor = this.props.imageData == null;
       this.mapper.setInputData(props.imageData);
 
-      // const range = props.imageData.getPointData().getScalars().getRange();
-      // updateSlider(this.windowSlider, { min: 0, max: (range[1] - range[0]), value: (range[1] - range[0]) });
-      // updateSlider(this.levelSlider, { min: range[0], max: range[1], value: (range[1] + range[0]) * 0.5 });
+      const range = props.imageData.getPointData().getScalars().getRange();
+      this.setState((prevState, _props) => ({
+        windowMin: 0,
+        windowMax: (range[1] - range[0]),
+        windowValue: (range[1] - range[0]),
+        levelMin: range[0],
+        levelMax: range[1],
+        levelValue: (range[1] + range[0]) * 0.5,
+      }));
 
       if (needToAddActor) {
         this.renderer.addActor(this.actor);
@@ -87,6 +101,24 @@ export default class SliceViewer extends React.Component {
 
       // this.updateSliceSlider();
     }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.windowValue !== this.state.windowValue) {
+      this.actor.getProperty().setColorWindow(this.state.windowValue);
+      this.updateRenderer();
+    } else if (prevState.levelValue !== this.state.levelValue) {
+      this.actor.getProperty().setColorLevel(this.state.levelValue);
+      this.updateRenderer();
+    }
+  }
+
+  onLevelChanged(value) {
+    this.setState((prevState, props) => ({ levelValue: Number(value) }));
+  }
+
+  onWindowChanged(value) {
+    this.setState((prevState, props) => ({ windowValue: Number(value) }));
   }
 
   resize() {
@@ -109,9 +141,23 @@ export default class SliceViewer extends React.Component {
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <label className={style.label}>Window</label>
-          <input className={['js-slider-window', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+          <input
+            className={['js-slider-window', style.slider].join(' ')}
+            type="range"
+            min={this.state.windowMin}
+            value={this.state.windowValue}
+            max={this.state.windowMax}
+            onInput={ev => this.onWindowChanged(ev.target.value)}
+          />
           <label className={style.label}>Level</label>
-          <input className={['js-slider-level', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+          <input
+            className={['js-slider-level', style.slider].join(' ')}
+            type="range"
+            min={this.state.levelMin}
+            value={this.state.levelValue}
+            max={this.state.levelMax}
+            onInput={ev => this.onLevelChanged(ev.target.value)}
+          />
         </div>
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="0">X</div>
