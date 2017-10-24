@@ -27,11 +27,10 @@ export default class SliceViewer extends React.Component {
       levelMax: 10,
       levelValue: 0,
 
+      sliceMode: 2, // Z normal
       slice: 0,
       sliceMax: 0,
     };
-
-    this.currentSlicingMode = 2;
 
     // Create vtk.js rendering pieces
     this.renderWindow = vtkRenderWindow.newInstance();
@@ -97,11 +96,11 @@ export default class SliceViewer extends React.Component {
 
       if (needToAddActor) {
         this.renderer.addActor(this.actor);
-        this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
+        this.mapper.setCurrentSlicingMode(this.state.sliceMode);
         this.mapper.setZSlice(0);
-        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 1) : v));
+        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.state.sliceMode ? (v + 1) : v));
         const viewUp = [0, 0, 0];
-        viewUp[(this.currentSlicingMode + 2) % 3] = 1;
+        viewUp[(this.state.sliceMode + 2) % 3] = 1;
         this.camera.set({ position, viewUp });
         this.renderer.resetCamera();
         this.renderer.resetCameraClippingRange();
@@ -122,9 +121,24 @@ export default class SliceViewer extends React.Component {
     }
 
     if (prevState.slice !== this.state.slice) {
-      this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](this.state.slice);
+      this.mapper[`set${'XYZ'[this.state.sliceMode]}Slice`](this.state.slice);
       this.updateRenderer();
     }
+
+    if (prevState.sliceMode !== this.state.sliceMode) {
+      this.mapper.setCurrentSlicingMode(this.state.sliceMode);
+      // this.mapper[`set${'XYZ'[this.state.sliceMode]}Slice`](0); // FIXME force change to render (bug in imageMapper)
+
+      const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.state.sliceMode ? (v + 1) : v));
+      const viewUp = [0, 0, 0];
+      viewUp[(this.state.sliceMode + 2) % 3] = 1;
+      this.camera.set({ position, viewUp });
+      this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
+      this.resetSliceSlider();
+      this.updateRenderer();
+    }
+
 
     if (prevProps.imageData !== this.props.imageData) {
       this.resetSliceSlider();
@@ -144,6 +158,10 @@ export default class SliceViewer extends React.Component {
     this.setState((prevState, props) => ({ slice: value }));
   }
 
+  onSliceNormalChanged(sliceMode) {
+    this.setState((prevState, props) => ({ sliceMode }));
+  }
+
   resize() {
     if (this.renderWindowContainer) {
       this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
@@ -159,7 +177,7 @@ export default class SliceViewer extends React.Component {
   }
 
   resetSliceSlider() {
-    const max = this.props.imageData.getDimensions()[this.currentSlicingMode] - 1;
+    const max = this.props.imageData.getDimensions()[this.state.sliceMode] - 1;
     const value = Math.ceil(max / 2);
     this.setState((prevState, props) => ({ sliceMax: max, slice: value }));
   }
@@ -189,9 +207,9 @@ export default class SliceViewer extends React.Component {
           />
         </div>
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
-          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="0">X</div>
-          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="1">Y</div>
-          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="2">Z</div>
+          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(0)}>X</button>
+          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(1)}>Y</button>
+          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(2)}>Z</button>
           <input
             className={['js-slider-slice', style.slider].join(' ')}
             type="range"
