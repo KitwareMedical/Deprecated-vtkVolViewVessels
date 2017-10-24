@@ -21,7 +21,7 @@ export default class VolumeViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      opacityValue: 0,
+      opacityValue: 25,
     };
 
     // Create vtk.js rendering pieces
@@ -124,6 +124,12 @@ export default class VolumeViewer extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.opacityValue !== this.state.opacityValue) {
+      this.updateScalarOpacityUnitDistance();
+    }
+  }
+
   setPiecewiseWidgetContainer(container) {
     this.transferFunctionWidget.setContainer(container);
   }
@@ -154,15 +160,20 @@ export default class VolumeViewer extends React.Component {
   }
 
   render() {
-    this.updateScalarOpacityUnitDistance();
-
     return (
       <div className={['js-right-pane', style.itemStretch].join(' ')}>
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <div className={[style.horizontalContainer, style.controlLine, style.itemStretch].join(' ')}>
             <label className={style.label}>Sampling</label>
-            <input className={['js-slider-opacity', style.slider].join(' ')} type="range" min="1" value="25" max="100" />
+            <input
+              className={['js-slider-opacity', style.slider].join(' ')}
+              type="range"
+              min="1"
+              value={this.state.opacityValue}
+              max="100"
+              onInput={ev => this.setState({ opacityValue: ev.target.value })}
+            />
           </div>
           <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
             <select className={['js-preset', style.itemStretch].join(' ')} />
