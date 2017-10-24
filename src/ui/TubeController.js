@@ -8,6 +8,10 @@ export default class TubeController extends React.Component {
     this.state = {};
   }
 
+  get piecewiseEditorContainer() {
+    return this.volumeController;
+  }
+
   render() {
     return (
       <div className={['js-controller', style.horizontalContainer, style.controller].join(' ')}>
@@ -18,7 +22,10 @@ export default class TubeController extends React.Component {
           </div>
           <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')} />
         </div>
-        <div className={['js-volume-controller', style.verticalContainer, style.itemStretch, style.border].join(' ')} />
+        <div
+          ref={(r) => { this.volumeController = r; }}
+          className={['js-volume-controller', style.verticalContainer, style.itemStretch, style.border].join(' ')}
+        />
       </div>
     );
   }

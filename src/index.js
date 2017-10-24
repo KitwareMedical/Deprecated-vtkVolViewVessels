@@ -27,6 +27,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
     this.props.mode.run(this.startApplication.bind(this));
   }
 
@@ -44,11 +45,6 @@ class App extends React.Component {
       this.setState((prevState, props) => ({ imageData }));
 
       /*
-      sliceViewer.updateData(imageData);
-      volumeViewer.updateData(imageData);
-      volumeViewer.getPiecewiseFunctionWidget().setContainer(tubeController.getPiecewiseEditorContainer());
-      volumeViewer.resize();
-
       // Link tube request
       sliceViewer.onTubeRequest((i, j, k) => {
         const tubeScale = tubeController.getScale();
@@ -78,9 +74,9 @@ class App extends React.Component {
       <div>
         <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
           <SliceViewer imageData={this.state.imageData} />
-          <VolumeViewer />
+          <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} />
         </div>
-        <TubeController />
+        <TubeController ref={(r) => { this.tubeController = r; }} />
       </div>
     );
   }
