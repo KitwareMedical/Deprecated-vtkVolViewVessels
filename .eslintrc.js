@@ -32,6 +32,9 @@ module.exports = {
 
     // May want to remove at some point
     'no-restricted-properties': 0,
+
+    // react allow object prop type
+    "react/forbid-prop-types": [0, { "forbid": ["any", "array"] }],
   },
   // plugins: [
   //   'prettier'

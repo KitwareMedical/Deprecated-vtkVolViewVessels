@@ -1,25 +1,97 @@
 import { render } from 'react-dom';
 import React from 'react';
+import PropTypes from 'prop-types';
+
+// import macro from 'vtk.js/Sources/macro';
+import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
+import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
+// import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
+// import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor';
+// import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
+// import vtkConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource';
 
 import style from './Tube.mcss';
+
+import mode from './mode';
 
 import SliceViewer from './ui/SliceViewer';
 import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
 
-function App(props) {
-  return (
-    <div>
-      <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
-        <SliceViewer />
-        <VolumeViewer />
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      imageData: null,
+    };
+  }
+
+  componentDidMount() {
+    this.props.mode.run(this.startApplication.bind(this));
+  }
+
+  startApplication(dataManager) {
+    this.dataManager = dataManager;
+    // We are ready to talk to the server...
+    dataManager.ITKTube.getVolumeData().then((dataDescription) => {
+      const values = new window[dataDescription.typedArray](dataDescription.scalars);
+      const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
+      delete dataDescription.scalars;
+      delete dataDescription.typedArray;
+      const imageData = vtkImageData.newInstance(dataDescription);
+      imageData.getPointData().setScalars(dataArray);
+
+      this.setState((prevState, props) => ({ imageData }));
+
+      /*
+      sliceViewer.updateData(imageData);
+      volumeViewer.updateData(imageData);
+      volumeViewer.getPiecewiseFunctionWidget().setContainer(tubeController.getPiecewiseEditorContainer());
+      volumeViewer.resize();
+
+      // Link tube request
+      sliceViewer.onTubeRequest((i, j, k) => {
+        const tubeScale = tubeController.getScale();
+        dataManager.ITKTube.generateTube(i, j, k, tubeScale);
+      });
+      */
+    });
+
+    /*
+    this.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
+      // TODO figure out why remote sends as array
+      let tubeItem = tubeItem_;
+      if (tubeItem instanceof Array) {
+        tubeItem = tubeItem[0];
+      }
+
+      if (tubeItem.mesh) {
+        tubeController.updateTubeItem(tubeItem);
+        volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
+      }
+    });
+    */
+  }
+
+  render() {
+    return (
+      <div>
+        <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
+          <SliceViewer imageData={this.state.imageData} />
+          <VolumeViewer />
+        </div>
+        <TubeController />
       </div>
-      <TubeController />
-    </div>
-  );
+    );
+  }
 }
 
-render(<App />, document.querySelector('.content'));
+App.propTypes = {
+  mode: PropTypes.object.isRequired,
+};
+
+render(<App mode={mode.local} />, document.querySelector('.content'));
+// render(<App modeInit={mode.remote} />, document.querySelector('.content'));
 
 /*
 

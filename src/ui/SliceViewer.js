@@ -20,6 +20,8 @@ export default class SliceViewer extends React.Component {
     super(props);
     this.state = {};
 
+    this.currentSlicingMode = 2;
+
     // Create vtk.js rendering pieces
     this.renderWindow = vtkRenderWindow.newInstance();
     this.renderer = vtkRenderer.newInstance();
@@ -61,14 +63,44 @@ export default class SliceViewer extends React.Component {
     this.resize();
   }
 
+  componentWillReceiveProps(props) {
+    if (props.imageData !== this.props.imageData) {
+      const needToAddActor = this.props.imageData == null;
+      this.mapper.setInputData(props.imageData);
+
+      // const range = props.imageData.getPointData().getScalars().getRange();
+      // updateSlider(this.windowSlider, { min: 0, max: (range[1] - range[0]), value: (range[1] - range[0]) });
+      // updateSlider(this.levelSlider, { min: range[0], max: range[1], value: (range[1] + range[0]) * 0.5 });
+
+      if (needToAddActor) {
+        this.renderer.addActor(this.actor);
+        this.mapper.setCurrentSlicingMode(this.currentSlicingMode);
+        this.mapper.setZSlice(0);
+        const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.currentSlicingMode ? (v + 1) : v));
+        const viewUp = [0, 0, 0];
+        viewUp[(this.currentSlicingMode + 2) % 3] = 1;
+        this.camera.set({ position, viewUp });
+        this.renderer.resetCamera();
+        this.renderer.resetCameraClippingRange();
+        this.updateRenderer();
+      }
+
+      // this.updateSliceSlider();
+    }
+  }
+
   resize() {
     if (this.renderWindowContainer) {
       this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
       this.openGlRenderWindow.setSize(this.boundingRect.width, this.boundingRect.height);
       this.renderer.resetCamera();
       this.renderer.resetCameraClippingRange();
-      this.render();
+      this.updateRenderer();
     }
+  }
+
+  updateRenderer() {
+    this.renderWindow.render();
   }
 
   render() {
@@ -94,10 +126,12 @@ export default class SliceViewer extends React.Component {
 
 SliceViewer.propTypes = {
   onPickIJK: PropTypes.func,
+  imageData: PropTypes.object,
 };
 
 SliceViewer.defaultProps = {
   onPickIJK: null,
+  imageData: null,
 };
 
 
