@@ -1,3 +1,28 @@
+import { render } from 'react-dom';
+import React from 'react';
+
+import style from './Tube.mcss';
+
+import SliceViewer from './ui/SliceViewer';
+import VolumeViewer from './ui/VolumeViewer';
+import TubeController from './ui/TubeController';
+
+function App(props) {
+  return (
+    <div>
+      <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
+        <SliceViewer />
+        <VolumeViewer />
+      </div>
+      <TubeController />
+    </div>
+  );
+}
+
+render(<App />, document.querySelector('.content'));
+
+/*
+
 import macro from 'vtk.js/Sources/macro';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
@@ -9,8 +34,6 @@ import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper';
 import SliceViewer from './ui/SliceViewer';
 import TubeController from './ui/TubeController';
 import VolumeViewer from './ui/VolumeViewer';
-
-import style from './Tube.mcss';
 
 import mode from './mode';
 
@@ -170,3 +193,4 @@ const resizeHandler = macro.debounce(() => {
 
 // Register window resize handler so workbench redraws when browser is resized
 window.onresize = resizeHandler;
+*/

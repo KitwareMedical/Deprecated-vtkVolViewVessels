@@ -1,3 +1,107 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import vtkPicker                      from 'vtk.js/Sources/Rendering/Core/CellPicker';
+import vtkImageMapper                 from 'vtk.js/Sources/Rendering/Core/ImageMapper';
+import vtkImageSlice                  from 'vtk.js/Sources/Rendering/Core/ImageSlice';
+import vtkOpenGLRenderWindow          from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
+// import vtkPickerInteractorStyle   from 'vtk.js/Sources/Rendering/Core/CellPicker/example/PickerInteractorStyle';
+import vtkRenderer                    from 'vtk.js/Sources/Rendering/Core/Renderer';
+import vtkRenderWindow                from 'vtk.js/Sources/Rendering/Core/RenderWindow';
+import vtkRenderWindowInteractor      from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
+
+import vtkTubePickerInteractorStyle   from '../util/TubePickerInteractorStyle';
+
+import style from '../Tube.mcss';
+
+export default class SliceViewer extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+
+    // Create vtk.js rendering pieces
+    this.renderWindow = vtkRenderWindow.newInstance();
+    this.renderer = vtkRenderer.newInstance();
+    this.renderWindow.addRenderer(this.renderer);
+    this.openGlRenderWindow = vtkOpenGLRenderWindow.newInstance();
+    this.renderWindow.addView(this.openGlRenderWindow);
+    this.interactor = vtkRenderWindowInteractor.newInstance();
+    this.interactor.setView(this.openGlRenderWindow);
+
+    this.actor = vtkImageSlice.newInstance();
+    this.mapper = vtkImageMapper.newInstance(); // { renderToRectangle: true }
+    this.actor.setMapper(this.mapper);
+    this.camera = this.renderer.getActiveCamera();
+    this.camera.setParallelProjection(true);
+
+    // Setup picking
+    this.picker = vtkPicker.newInstance();
+    this.picker.setPickFromList(true);
+    this.picker.initializePickList();
+    this.picker.addPickList(this.actor);
+
+    this.iStyle = vtkTubePickerInteractorStyle.newInstance();
+    this.renderWindow.getInteractor().setInteractorStyle(this.iStyle);
+    this.renderWindow.getInteractor().setPicker(this.picker);
+
+    // Add pick listener
+    this.picker.onPickChange(() => {
+      const { actors, cellIJK } = this.picker.get('cellIJK', 'actors');
+      if (actors.length && this.props.onPickIJK) {
+        this.props.onPickIJK(...cellIJK);
+      }
+    });
+  }
+
+  componentDidMount() {
+    this.openGlRenderWindow.setContainer(this.renderWindowContainer);
+    this.interactor.initialize();
+    this.interactor.bindEvents(this.renderWindowContainer);
+    this.resize();
+  }
+
+  resize() {
+    if (this.renderWindowContainer) {
+      this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
+      this.openGlRenderWindow.setSize(this.boundingRect.width, this.boundingRect.height);
+      this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
+      this.render();
+    }
+  }
+
+  render() {
+    return (
+      <div className={['js-left-pane', style.itemStretch].join(' ')}>
+        <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
+        <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
+          <label className={style.label}>Window</label>
+          <input className={['js-slider-window', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+          <label className={style.label}>Level</label>
+          <input className={['js-slider-level', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+        </div>
+        <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
+          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="0">X</div>
+          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="1">Y</div>
+          <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="2">Z</div>
+          <input className={['js-slider-slice', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+        </div>
+      </div>
+    );
+  }
+}
+
+SliceViewer.propTypes = {
+  onPickIJK: PropTypes.func,
+};
+
+SliceViewer.defaultProps = {
+  onPickIJK: null,
+};
+
+
+/*
 import vtkPicker                      from 'vtk.js/Sources/Rendering/Core/CellPicker';
 import vtkImageMapper                 from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageSlice                  from 'vtk.js/Sources/Rendering/Core/ImageSlice';
@@ -186,3 +290,4 @@ export default class SliceViewer {
     this.listeners.push(callback);
   }
 }
+*/

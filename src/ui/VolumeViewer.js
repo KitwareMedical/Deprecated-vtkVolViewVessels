@@ -1,3 +1,91 @@
+import React from 'react';
+// import PropTypes from 'prop-types';
+
+// import vtkBoundingBox             from 'vtk.js/Sources/Common/DataModel/BoundingBox';
+import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
+import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
+import vtkRenderWindow            from 'vtk.js/Sources/Rendering/Core/RenderWindow';
+import vtkRenderWindowInteractor  from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
+import vtkVolume                  from 'vtk.js/Sources/Rendering/Core/Volume';
+import vtkVolumeMapper            from 'vtk.js/Sources/Rendering/Core/VolumeMapper';
+// import vtkPiecewiseGaussianWidget from 'vtk.js/Sources/Interaction/Widgets/PiecewiseGaussianWidget';
+import vtkColorTransferFunction   from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction';
+import vtkPiecewiseFunction       from 'vtk.js/Sources/Common/DataModel/PiecewiseFunction';
+import ColorMaps                  from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps.json';
+
+import style from '../Tube.mcss';
+
+const presets = ColorMaps.filter(p => p.RGBPoints).filter(p => p.ColorSpace !== 'CIELAB');
+
+export default class VolumeViewer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+
+    // Create vtk.js rendering pieces
+    this.renderWindow = vtkRenderWindow.newInstance();
+    this.renderer = vtkRenderer.newInstance();
+    this.renderWindow.addRenderer(this.renderer);
+    this.openGlRenderWindow = vtkOpenGLRenderWindow.newInstance();
+    this.renderWindow.addView(this.openGlRenderWindow);
+    this.interactor = vtkRenderWindowInteractor.newInstance();
+    this.interactor.setView(this.openGlRenderWindow);
+    this.actor = vtkVolume.newInstance();
+    this.mapper = vtkVolumeMapper.newInstance();
+    this.actor.setMapper(this.mapper);
+    this.camera = this.renderer.getActiveCamera();
+
+    this.piecewiseFunction = vtkPiecewiseFunction.newInstance();
+    this.lookupTable = vtkColorTransferFunction.newInstance();
+    this.lookupTable.applyColorMap(presets[0]);
+
+    this.actor.getProperty().setRGBTransferFunction(0, this.lookupTable);
+    this.actor.getProperty().setScalarOpacity(0, this.piecewiseFunction);
+    this.actor.getProperty().setInterpolationTypeToFastLinear();
+  }
+
+  componentDidMount() {
+    this.openGlRenderWindow.setContainer(this.renderWindowContainer);
+    this.interactor.initialize();
+    this.interactor.bindEvents(this.renderWindowContainer);
+    this.resize();
+  }
+
+  resize() {
+    if (this.renderWindowContainer) {
+      this.boundingRect = this.renderWindowContainer.getBoundingClientRect();
+      this.openGlRenderWindow.setSize(this.boundingRect.width, this.boundingRect.height);
+      this.renderer.resetCamera();
+      this.render();
+
+      if (this.transferFunctionWidget) {
+        const rect = this.transferFunctionWidget.get('container').container.getBoundingClientRect();
+        this.transferFunctionWidget.setSize(rect.width, rect.height);
+        this.lookupTable.modified();
+        this.transferFunctionWidget.render();
+      }
+    }
+  }
+
+  render() {
+    return (
+      <div className={['js-right-pane', style.itemStretch].join(' ')}>
+        <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
+        <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
+          <div className={[style.horizontalContainer, style.controlLine, style.itemStretch].join(' ')}>
+            <label className={style.label}>Sampling</label>
+            <input className={['js-slider-opacity', style.slider].join(' ')} type="range" min="1" value="25" max="100" />
+          </div>
+          <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
+            <select className={['js-preset', style.itemStretch].join(' ')} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+/*
 import vtkBoundingBox             from 'vtk.js/Sources/Common/DataModel/BoundingBox';
 import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
@@ -213,3 +301,4 @@ export default class VolumeViewer {
     }
   }
 }
+*/
