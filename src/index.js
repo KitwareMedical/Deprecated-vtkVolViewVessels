@@ -2,7 +2,7 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-// import macro from 'vtk.js/Sources/macro';
+import macro from 'vtk.js/Sources/macro';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 // import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
@@ -42,6 +42,12 @@ class App extends React.Component {
       const imageData = vtkImageData.newInstance(dataDescription);
       imageData.getPointData().setScalars(dataArray);
 
+      const resizeHandler = macro.debounce(() => {
+        [this.sliceViewer, this.volumeViewer, this.tubeController].forEach(e => e.resize());
+      }, 50);
+      // Register window resize handler so workbench redraws when browser is resized
+      window.onresize = resizeHandler;
+
       this.setState((prevState, props) => ({ imageData }));
 
       /*
@@ -73,7 +79,7 @@ class App extends React.Component {
     return (
       <div>
         <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
-          <SliceViewer imageData={this.state.imageData} />
+          <SliceViewer ref={(r) => { this.sliceViewer = r; }} imageData={this.state.imageData} />
           <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} />
         </div>
         <TubeController ref={(r) => { this.tubeController = r; }} />
@@ -254,11 +260,4 @@ export function stopApplication() {
 
 mode.local.run(startApplication, stopApplication);
 // mode.remote.run(startApplication, stopApplication);
-
-const resizeHandler = macro.debounce(() => {
-  [sliceViewer, tubeController, volumeViewer].forEach(e => e.resize());
-}, 50);
-
-// Register window resize handler so workbench redraws when browser is resized
-window.onresize = resizeHandler;
 */
