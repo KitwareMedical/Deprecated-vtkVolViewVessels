@@ -26,6 +26,9 @@ export default class SliceViewer extends React.Component {
       levelMin: 0,
       levelMax: 10,
       levelValue: 0,
+
+      slice: 0,
+      sliceMax: 0,
     };
 
     this.currentSlicingMode = 2;
@@ -98,8 +101,6 @@ export default class SliceViewer extends React.Component {
         this.renderer.resetCameraClippingRange();
         this.updateRenderer();
       }
-
-      // this.updateSliceSlider();
     }
   }
 
@@ -107,8 +108,20 @@ export default class SliceViewer extends React.Component {
     if (prevState.windowValue !== this.state.windowValue) {
       this.actor.getProperty().setColorWindow(this.state.windowValue);
       this.updateRenderer();
-    } else if (prevState.levelValue !== this.state.levelValue) {
+    }
+
+    if (prevState.levelValue !== this.state.levelValue) {
       this.actor.getProperty().setColorLevel(this.state.levelValue);
+      this.updateRenderer();
+    }
+
+    if (prevState.slice !== this.state.slice) {
+      this.mapper[`set${'XYZ'[this.currentSlicingMode]}Slice`](this.state.slice);
+      this.updateRenderer();
+    }
+
+    if (prevProps.imageData !== this.props.imageData) {
+      this.resetSliceSlider();
       this.updateRenderer();
     }
   }
@@ -119,6 +132,10 @@ export default class SliceViewer extends React.Component {
 
   onWindowChanged(value) {
     this.setState((prevState, props) => ({ windowValue: Number(value) }));
+  }
+
+  onSliceChanged(value) {
+    this.setState((prevState, props) => ({ slice: value }));
   }
 
   resize() {
@@ -133,6 +150,12 @@ export default class SliceViewer extends React.Component {
 
   updateRenderer() {
     this.renderWindow.render();
+  }
+
+  resetSliceSlider() {
+    const max = this.props.imageData.getDimensions()[this.currentSlicingMode] - 1;
+    const value = Math.ceil(max / 2);
+    this.setState((prevState, props) => ({ sliceMax: max, slice: value }));
   }
 
   render() {
@@ -163,7 +186,14 @@ export default class SliceViewer extends React.Component {
           <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="0">X</div>
           <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="1">Y</div>
           <div className={['js-slice-normal-button', style.button].join(' ')} data-current-slicing-mode="2">Z</div>
-          <input className={['js-slider-slice', style.slider].join(' ')} type="range" min="0" value="0" max="10" />
+          <input
+            className={['js-slider-slice', style.slider].join(' ')}
+            type="range"
+            min="0"
+            value={this.state.slice}
+            max={this.state.sliceMax}
+            onInput={ev => this.onSliceChanged(Number(ev.target.value))}
+          />
         </div>
       </div>
     );
