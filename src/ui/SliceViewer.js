@@ -65,6 +65,12 @@ export default class SliceViewer extends React.Component {
         this.props.onPickIJK(...cellIJK);
       }
     });
+
+    // Synch UI based on prop change
+    this.actor.getProperty().onModified(() => {
+      const { colorWindow, colorLevel } = this.actor.getProperty().get('colorWindow', 'colorLevel');
+      this.setState((prevState, _props) => ({ windowValue: colorWindow, levelValue: colorLevel }));
+    });
   }
 
   componentDidMount() {
