@@ -88,7 +88,7 @@ class App extends React.Component {
             imageData={this.state.imageData}
             onPickIJK={(i, j, k) => this.segmentTube(i, j, k)}
           />
-          <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} />
+          <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} tubes={this.state.tubes} />
         </div>
         <TubeController ref={(r) => { this.tubeController = r; }} tubes={this.state.tubes} />
       </div>
