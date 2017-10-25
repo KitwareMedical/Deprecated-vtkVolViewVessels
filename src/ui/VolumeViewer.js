@@ -29,7 +29,7 @@ export default class VolumeViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      opacityValue: 25,
+      opacityValue: 10,
       colorMap: presets[0].Name,
     };
 
@@ -129,17 +129,14 @@ export default class VolumeViewer extends React.Component {
         this.renderer.resetCamera();
       }
 
-      const maxOpacity = vtkBoundingBox.getDiagonalLength(props.imageData.getBounds());
-      this.setState((prevState, _props) => ({ opacityValue: maxOpacity / 15 }));
+      this.setState((prevState, _props) => ({ opacityValue: 10 }));
 
       this.resize();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.opacityValue !== this.state.opacityValue) {
-      this.updateScalarOpacityUnitDistance();
-    }
+    this.updateScalarOpacityUnitDistance();
 
     if (prevState.colorMap !== this.state.colorMap) {
       this.lookupTable.applyColorMap(presets.find(p => (p.Name === this.state.colorMap)));
