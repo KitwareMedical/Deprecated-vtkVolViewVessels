@@ -25,11 +25,13 @@ class App extends React.Component {
       imageData: null,
       tubes: [],
     };
+
+    this.subscription = null;
   }
 
   componentDidMount() {
     this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
-    this.props.mode.run(this.startApplication.bind(this));
+    this.props.mode.run(this.startApplication.bind(this), this.stopApplication.bind(this));
   }
 
   startApplication(dataManager) {
@@ -73,6 +75,14 @@ class App extends React.Component {
         // this.volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
       }
     });
+  }
+
+  stopApplication() {
+    if (this.subscription) {
+      this.dataManager.ITKTube.unsubscribe();
+    }
+    //
+    this.dataManager.exit(10);
   }
 
   segmentTube(i, j, k) {
