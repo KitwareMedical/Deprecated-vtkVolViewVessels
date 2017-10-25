@@ -172,7 +172,8 @@ class ItkTubeProtocol(LinkProtocol):
 
     @register('itk.tube.generate')
     def generateTube(self, i, j, k, scale=2.0):
-        itemToProcess = { 'id': self.curTubeIndex, 'position': (i, j, k), 'scale': scale, 'status': 'queued' }
+        coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
+        itemToProcess = { 'id': self.curTubeIndex, 'position': coords, 'scale': scale, 'status': 'queued' }
         self.curTubeIndex += 1
         self.tubeProcessingQueue.append(itemToProcess)
         self.scheduleQueueProcessing()
