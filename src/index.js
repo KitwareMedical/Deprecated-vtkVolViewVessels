@@ -30,6 +30,17 @@ class App extends React.Component {
     this.props.mode.run(this.startApplication.bind(this), this.stopApplication.bind(this));
   }
 
+  setTubeVisibility(id, visible) {
+    const tubes = this.state.tubes.map((tube) => {
+      if (tube.id === id) {
+        tube.visible = visible;
+      }
+      return tube;
+    });
+    this.volumeViewer.setTubeVisibility(id, visible);
+    this.setState((prevState, props) => ({ tubes }));
+  }
+
   startApplication(dataManager) {
     this.dataManager = dataManager;
     // We are ready to talk to the server...
@@ -58,6 +69,9 @@ class App extends React.Component {
       }
 
       if (tubeItem.mesh) {
+        // set tube visibility to on by default
+        tubeItem.visible = true;
+
         this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
       }
     });
@@ -86,7 +100,11 @@ class App extends React.Component {
           />
           <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} tubes={this.state.tubes} />
         </div>
-        <TubeController ref={(r) => { this.tubeController = r; }} tubes={this.state.tubes} />
+        <TubeController
+          ref={(r) => { this.tubeController = r; }}
+          tubes={this.state.tubes}
+          onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
+        />
       </div>
     );
   }

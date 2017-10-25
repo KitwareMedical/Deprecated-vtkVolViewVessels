@@ -20,7 +20,25 @@ export default class TubeController extends React.Component {
   }
 
   render() {
-    const tubeRows = this.props.tubes.map(t => <tr key={t.id}><td>{t.position}</td><td>{t.mesh.length}</td><td>{t.status}</td></tr>);
+    const tubeRows = this.props.tubes.map(t =>
+      (
+        <tr key={t.id}>
+          <td>{t.position}</td>
+          <td>{t.mesh.length}</td>
+          <td>{t.status}</td>
+          <td>
+            <button onClick={ev => this.props.onSetTubeVisibility(t.id, !t.visible)}>
+              <i className={t.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
+            </button>
+          </td>
+          <td>
+            <button>
+              <i className="fa fa-trash" />
+            </button>
+          </td>
+        </tr>
+      ),
+    );
 
     return (
       <div className={['js-controller', style.horizontalContainer, style.controller].join(' ')}>
@@ -40,7 +58,13 @@ export default class TubeController extends React.Component {
           <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')}>
             <table className={style.table}>
               <thead>
-                <tr><th>Position</th><th># of points</th><th>Status</th></tr>
+                <tr>
+                  <th>Position</th>
+                  <th># of points</th>
+                  <th>Status</th>
+                  <th><i className="fa fa-eye" /></th>
+                  <th><i className="fa fa-trash" /></th>
+                </tr>
               </thead>
               <tbody>
                 {tubeRows}
@@ -60,4 +84,9 @@ export default class TubeController extends React.Component {
 
 TubeController.propTypes = {
   tubes: PropTypes.array.isRequired,
+  onSetTubeVisibility: PropTypes.func,
+};
+
+TubeController.defaultProps = {
+  onSetTubeVisibility: () => {},
 };

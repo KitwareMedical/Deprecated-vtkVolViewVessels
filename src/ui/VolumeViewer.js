@@ -193,6 +193,11 @@ export default class VolumeViewer extends React.Component {
     this.transferFunctionWidget.setContainer(container);
   }
 
+  setTubeVisibility(id, visible) {
+    this.tubePipelineCache[id].actor.setVisibility(visible);
+    this.renderWindow.render();
+  }
+
   createPipeline(metadata) {
     // Fake tube filter which should be properly written in vtk.js
     const source = vtkPolyData.newInstance();
