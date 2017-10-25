@@ -19,6 +19,10 @@ export default class TubeController extends React.Component {
     this.setState((prevState, props) => ({ scale: Number(this.scaleSlider.value) / 10 }));
   }
 
+  resize() {
+    // empty for now
+  }
+
   render() {
     const tubeRows = this.props.tubes.map(t =>
       (
