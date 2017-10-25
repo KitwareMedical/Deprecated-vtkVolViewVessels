@@ -1,52 +1,63 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
 import style from '../Tube.mcss';
 
-const htmlTemplate = `
-  <div class="${style.verticalContainer} ${style.itemStretch} ${style.border}">
-    <div class="${style.horizontalContainer}">
-      <label class="${style.label}">Scale</label>
-      <input class="js-scale ${style.slider}" type="range" min="0" value="5" max="10" />
-    </div>
-    <div class="js-tubes ${style.itemStretch} ${style.overflowScroll}">
-    </div>
-  </div>
-  <div class="js-volume-controller ${style.verticalContainer} ${style.itemStretch} ${style.border}">
-  </div>
-`;
-
-export default class TubeController {
-  constructor(container) {
-    this.root = container;
-    container.classList.add(style.horizontalContainer);
-    container.innerHTML = htmlTemplate;
-    this.scaleElement = container.querySelector('.js-scale');
-    this.tubesContainer = container.querySelector('.js-tubes');
-    this.volumeControllerContainer = container.querySelector('.js-volume-controller');
-    this.tubes = {};
+export default class TubeController extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      scale: 2,
+    };
   }
 
-  resize() {
+  get piecewiseEditorContainer() {
+    return this.volumeController;
+  }
+
+  updateScale() {
+    this.setState((prevState, props) => ({ scale: Number(this.scaleSlider.value) / 10 }));
   }
 
   render() {
-    // id: tubes.length, position: [i, j, k], scale, status:
-    this.tubesContainer.innerHTML = [].concat(
-        `<table class="${style.table}"><tr><th>Position</th><th># of points</th><th>Status</th></tr>`,
-        Object.keys(this.tubes).map(i => this.tubes[i]).map(i => `<tr><td>${i.position}</td><td>${i.mesh.length}</td><td>${i.status}</td></tr>`),
-        '</table>',
-        ).join('');
-  }
+    const tubeRows = this.props.tubes.map(t => <tr key={t.id}><td>{t.position}</td><td>{t.mesh.length}</td><td>{t.status}</td></tr>);
 
-  updateTubeItem(item) {
-    // console.log(item);
-    this.tubes[item.id] = item;
-    this.render();
-  }
+    return (
+      <div className={['js-controller', style.horizontalContainer, style.controller].join(' ')}>
+        <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
+          <div className={style.horizontalContainer}>
+            <label className={style.label}>Scale</label>
+            <input
+              ref={(r) => { this.scaleSlider = r; }}
+              className={['js-scale', style.slider].join(' ')}
+              type="range"
+              min="0"
+              value={this.state.scale * 10}
+              max="100"
+              onInput={ev => this.updateScale()}
+            />
+          </div>
+          <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')}>
+            <table className={style.table}>
+              <thead>
+                <tr><th>Position</th><th># of points</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {tubeRows}
+              </tbody>
+            </table>
+          </div>
 
-  getScale() {
-    return Number(this.scaleElement.value) / 10;
-  }
-
-  getPiecewiseEditorContainer() {
-    return this.volumeControllerContainer;
+        </div>
+        <div
+          ref={(r) => { this.volumeController = r; }}
+          className={['js-volume-controller', style.verticalContainer, style.itemStretch, style.border].join(' ')}
+        />
+      </div>
+    );
   }
 }
+
+TubeController.propTypes = {
+  tubes: PropTypes.array.isRequired,
+};
