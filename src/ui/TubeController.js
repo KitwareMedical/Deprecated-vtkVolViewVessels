@@ -5,11 +5,17 @@ import style from '../Tube.mcss';
 export default class TubeController extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      scale: 2,
+    };
   }
 
   get piecewiseEditorContainer() {
     return this.volumeController;
+  }
+
+  updateScale() {
+    this.setState((prevState, props) => ({ scale: Number(this.scaleSlider.value) / 10 }));
   }
 
   render() {
@@ -18,7 +24,15 @@ export default class TubeController extends React.Component {
         <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
           <div className={style.horizontalContainer}>
             <label className={style.label}>Scale</label>
-            <input className={['js-scale', style.slider].join(' ')} type="range" min="0" value="5" max="10" />
+            <input
+              ref={(r) => { this.scaleSlider = r; }}
+              className={['js-scale', style.slider].join(' ')}
+              type="range"
+              min="0"
+              value={this.state.scale * 10}
+              max="100"
+              onInput={ev => this.updateScale()}
+            />
           </div>
           <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')} />
         </div>
