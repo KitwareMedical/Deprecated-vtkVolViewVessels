@@ -41,6 +41,13 @@ class App extends React.Component {
     this.setState((prevState, props) => ({ tubes }));
   }
 
+  deleteTube(tubeId) {
+    this.dataManager.ITKTube.deleteTube(tubeId).then(() => {
+      const tubes = this.state.tubes.filter(tube => tube.id !== tubeId);
+      this.setState((prevState, props) => ({ tubes }));
+    });
+  }
+
   startApplication(dataManager) {
     this.dataManager = dataManager;
     // We are ready to talk to the server...
@@ -104,6 +111,7 @@ class App extends React.Component {
           ref={(r) => { this.tubeController = r; }}
           tubes={this.state.tubes}
           onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
+          onDeleteTube={id => this.deleteTube(id)}
         />
       </div>
     );

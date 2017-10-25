@@ -87,6 +87,16 @@ function buildDataProvider() {
       onTubeGeneratorChange(callback) {
         tubeListeners.push(callback);
       },
+      deleteTube(tubeId) {
+        return new Promise((resolve, reject) => {
+          for (let i = 0; i < tubes.length; ++i) {
+            if (tubes[i].id === tubeId) {
+              tubes.splice(i, 1);
+              break;
+            }
+          }
+        });
+      },
       unsubscribe() {
       },
     },

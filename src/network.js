@@ -11,6 +11,7 @@ const customProtocols = {
     getVolumeData: () => session.call('itk.volume.get', []),
     generateTube: (i, j, k) => session.call('itk.tube.generate', [i, j, k]),
     onTubeGeneratorChange: callback => session.subscribe('itk.tube.mesh', callback),
+    deleteTube: tubeId => session.call('itk.tube.delete', [tubeId]),
     unsubscribe: subscription => session.unsubscribe(subscription),
   }),
 };

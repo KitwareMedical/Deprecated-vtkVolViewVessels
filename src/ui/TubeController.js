@@ -32,7 +32,7 @@ export default class TubeController extends React.Component {
             </button>
           </td>
           <td>
-            <button>
+            <button onClick={ev => this.props.onDeleteTube(t.id)}>
               <i className="fa fa-trash" />
             </button>
           </td>
@@ -85,8 +85,10 @@ export default class TubeController extends React.Component {
 TubeController.propTypes = {
   tubes: PropTypes.array.isRequired,
   onSetTubeVisibility: PropTypes.func,
+  onDeleteTube: PropTypes.func,
 };
 
 TubeController.defaultProps = {
   onSetTubeVisibility: () => {},
+  onDeleteTube: () => {},
 };

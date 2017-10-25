@@ -86,6 +86,7 @@ class ItkTubeProtocol(LinkProtocol):
 
     def __init__(self):
         self.tubeProcessingQueue = list()
+        self.idToSpatialObject = dict()
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -146,6 +147,7 @@ class ItkTubeProtocol(LinkProtocol):
         tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
         if tube:
             self.segmentTubes.AddTube(tube)
+            self.idToSpatialObject[itemToProcess['id']] = tube
             tube.ComputeObjectToWorldTransform()
 
             points = GetTubePoints(tube)
@@ -214,3 +216,9 @@ class ItkTubeProtocol(LinkProtocol):
         self.tubeProcessingQueue.append(itemToProcess)
         self.scheduleQueueProcessing()
         return itemToProcess
+
+    @register('itk.tube.delete')
+    def deleteTube(self, tubeId):
+        tube = self.idToSpatialObject[tubeId]
+        tube.GetParent().RemoveSpatialObject(tube)
+        del self.idToSpatialObject[tubeId]
