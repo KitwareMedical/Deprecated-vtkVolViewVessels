@@ -91,12 +91,33 @@ class ItkTubeProtocol(LinkProtocol):
         # Load file in ITK
         self.loadItkImage(filename)
 
+        # setup image to world transform, since segmenttubes
+        # will use the world coords.
+        self.imageToWorldTransform = itk.CompositeTransform[itk.D, 3].New()
+        translate = itk.TranslationTransform[itk.D, 3].New()
+        translate.Translate(self.itkImage.GetOrigin())
+        scale = itk.ScaleTransform[itk.D, 3].New()
+        scale.Scale(self.itkImage.GetSpacing())
+        self.imageToWorldTransform.AppendTransform(translate)
+        self.imageToWorldTransform.AppendTransform(scale)
+
         # setup segmenter
         imgType = itk.Image[self.itkPixelType, self.dimensions]
         self.segmentTubes = itk.SegmentTubes[imgType].New()
         self.segmentTubes.SetInputImage(self.itkImage)
         self.segmentTubes.SetDebug(True)
         self.curTubeIndex = 0
+
+        scaleVector = self.itkImage.GetSpacing()
+        offsetVector = self.itkImage.GetOrigin()
+
+        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
+                .SetScale(scaleVector)
+        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
+                .SetOffset(offsetVector)
+        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
+                .SetMatrix(self.itkImage.GetDirection())
+        self.segmentTubes.GetTubeGroup().ComputeObjectToWorldTransform()
 
     def scheduleQueueProcessing(self):
         if self.processingLoad == 0:
@@ -124,7 +145,22 @@ class ItkTubeProtocol(LinkProtocol):
 
         tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
         if tube:
+            self.segmentTubes.AddTube(tube)
+            tube.ComputeObjectToWorldTransform()
+
             points = GetTubePoints(tube)
+
+            # transform tube points properly
+            tube.ComputeObjectToWorldTransform()
+            transform = tube.GetIndexToWorldTransform()
+            scaling = [transform.GetMatrix()(i,i) for i in range(3)]
+            scale = sum(scaling) / len(scaling)
+
+            for i in range(len(points)):
+                pt, radius = points[i]
+                pt = transform.TransformPoint(pt)
+                points[i] = (pt, radius*scale)
+
             itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
         else:
             itemToProcess['mesh'] = None
