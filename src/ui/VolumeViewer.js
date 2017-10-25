@@ -15,13 +15,18 @@ import ColorMaps                  from 'vtk.js/Sources/Rendering/Core/ColorTrans
 
 import style from '../Tube.mcss';
 
-const presets = ColorMaps.filter(p => p.RGBPoints).filter(p => p.ColorSpace !== 'CIELAB');
+const presets = ColorMaps
+  .filter(p => p.RGBPoints)
+  .filter(p => p.ColorSpace !== 'CIELAB')
+  .sort((a, b) => a.Name.localeCompare(b.Name))
+  .filter((p, i, arr) => !i || p.Name !== arr[i - 1].Name);
 
 export default class VolumeViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       opacityValue: 25,
+      colorMap: presets[0].Name,
     };
 
     // Create vtk.js rendering pieces
@@ -39,6 +44,7 @@ export default class VolumeViewer extends React.Component {
 
     this.piecewiseFunction = vtkPiecewiseFunction.newInstance();
     this.lookupTable = vtkColorTransferFunction.newInstance();
+    // Synced with initial state
     this.lookupTable.applyColorMap(presets[0]);
 
     this.actor.getProperty().setRGBTransferFunction(0, this.lookupTable);
@@ -128,6 +134,23 @@ export default class VolumeViewer extends React.Component {
     if (prevState.opacityValue !== this.state.opacityValue) {
       this.updateScalarOpacityUnitDistance();
     }
+
+    if (prevState.colorMap !== this.state.colorMap) {
+      this.lookupTable.applyColorMap(presets.find(p => (p.Name === this.state.colorMap)));
+      if (this.props.imageData) {
+        const dataRange = this.props.imageData.getPointData().getScalars().getRange();
+        this.lookupTable.setMappingRange(...dataRange);
+        this.lookupTable.updateRange();
+      }
+      if (this.transferFunctionWidget) {
+        this.transferFunctionWidget.render();
+      }
+      this.renderWindow.render();
+    }
+  }
+
+  onColorMapChange() {
+    this.setState((prevState, props) => ({ colorMap: this.presetSelector.value }));
   }
 
   setPiecewiseWidgetContainer(container) {
@@ -160,6 +183,8 @@ export default class VolumeViewer extends React.Component {
   }
 
   render() {
+    const presetElms = presets.map(p => <option key={p.Name} value={p.Name}>{p.Name}</option>);
+
     return (
       <div className={['js-right-pane', style.itemStretch].join(' ')}>
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
@@ -176,7 +201,13 @@ export default class VolumeViewer extends React.Component {
             />
           </div>
           <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
-            <select className={['js-preset', style.itemStretch].join(' ')} />
+            <select
+              ref={(r) => { this.presetSelector = r; }}
+              className={['js-preset', style.itemStretch].join(' ')}
+              onChange={ev => this.onColorMapChange()}
+            >
+              {presetElms}
+            </select>
           </div>
         </div>
       </div>
