@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --progress --colors --watch",
+    "build": "webpack --progress --colors",
     "build:debug": "webpack --progress --colors --display-modules",
     "build:release": "npm run build -- -p",
     "commit": "git cz",
