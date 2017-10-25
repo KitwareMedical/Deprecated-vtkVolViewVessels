@@ -23,6 +23,8 @@ r"""
 import os
 import argparse
 
+import numpy as np
+
 # import itk modules.
 import itk
 from itkTypes import itkCType
@@ -73,6 +75,24 @@ itkCTypeToJsArray = {
         itk.UL: 'UInt32Array',
         itk.ULL: 'UInt32Array',
         itk.US: 'UInt16Array',
+}
+
+# map from itk ctype to numpy dtype
+itkCTypeToDType = {
+        itk.B: 1,
+        itk.D: 8,
+        itk.F: 4,
+        itk.LD: 8,
+        itk.SC: 1,
+        itk.SI: 4,
+        itk.SL: 4,
+        itk.SLL: 4,
+        itk.SS: 2,
+        itk.UC: 1,
+        itk.UI: 4,
+        itk.UL: 4,
+        itk.ULL: 4,
+        itk.US: 2,
 }
 
 # =============================================================================
@@ -197,7 +217,10 @@ class ItkTubeProtocol(LinkProtocol):
         pointer = long(self.itkImage.GetBufferPointer())
         imageBuffer = ctypes.cast(pointer, ctypes.POINTER(itkCTypeToCtype[self.itkPixelType]))
         size = self.itkImage.GetLargestPossibleRegion().GetSize()
-        itkBinaryImageContent = imageBuffer[:size[0]*size[1]*size[2]]
+
+        buf = imageBuffer[:size[0]*size[1]*size[2]]
+        pixelSize = itkCTypeToDType[self.itkPixelType]
+        itkBinaryImageContent = np.array(buf, dtype=np.dtype('<i' + str(pixelSize))).tobytes()
 
         # Send data to client
         return {
@@ -205,7 +228,7 @@ class ItkTubeProtocol(LinkProtocol):
             "origin": list(self.itkImage.GetOrigin()),
             "spacing": list(self.itkImage.GetSpacing()),
             "typedArray": itkCTypeToJsArray[self.itkPixelType],
-            "scalars": itkBinaryImageContent
+            "scalars": self.addAttachment(itkBinaryImageContent)
         }
 
     @register('itk.tube.generate')

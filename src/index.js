@@ -52,20 +52,19 @@ class App extends React.Component {
     this.dataManager = dataManager;
     // We are ready to talk to the server...
     dataManager.ITKTube.getVolumeData().then((dataDescription) => {
-      const values = new window[dataDescription.typedArray](dataDescription.scalars);
-      const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
-      delete dataDescription.scalars;
-      delete dataDescription.typedArray;
-      const imageData = vtkImageData.newInstance(dataDescription);
-      imageData.getPointData().setScalars(dataArray);
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(dataDescription.scalars);
 
-      const resizeHandler = macro.debounce(() => {
-        [this.sliceViewer, this.volumeViewer, this.tubeController].forEach(e => e.resize());
-      }, 50);
-      // Register window resize handler so workbench redraws when browser is resized
-      window.onresize = resizeHandler;
+      reader.addEventListener('loadend', () => {
+        const values = new window[dataDescription.typedArray](reader.result);
+        const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
+        delete dataDescription.scalars;
+        delete dataDescription.typedArray;
+        const imageData = vtkImageData.newInstance(dataDescription);
+        imageData.getPointData().setScalars(dataArray);
 
-      this.setState((prevState, props) => ({ imageData }));
+        this.setState((prevState, props) => ({ imageData }));
+      });
     });
 
     this.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
@@ -82,6 +81,12 @@ class App extends React.Component {
         this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
       }
     });
+
+    const resizeHandler = macro.debounce(() => {
+      [this.sliceViewer, this.volumeViewer, this.tubeController].forEach(e => e.resize());
+    }, 50);
+    // Register window resize handler so workbench redraws when browser is resized
+    window.onresize = resizeHandler;
   }
 
   stopApplication() {
