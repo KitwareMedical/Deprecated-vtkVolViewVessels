@@ -23,6 +23,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       imageData: null,
+      tubes: [],
     };
   }
 
@@ -59,7 +60,6 @@ class App extends React.Component {
       */
     });
 
-    /*
     this.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
       // TODO figure out why remote sends as array
       let tubeItem = tubeItem_;
@@ -68,21 +68,29 @@ class App extends React.Component {
       }
 
       if (tubeItem.mesh) {
-        tubeController.updateTubeItem(tubeItem);
-        volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
+        this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
+        // this.tubeController.updateTubeItem(tubeItem);
+        // this.volumeViewer.addGeometry(tubeItem.id, toPipeline(tubeItem.mesh));
       }
     });
-    */
+  }
+
+  segmentTube(i, j, k) {
+    this.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale);
   }
 
   render() {
     return (
       <div>
         <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
-          <SliceViewer ref={(r) => { this.sliceViewer = r; }} imageData={this.state.imageData} />
+          <SliceViewer
+            ref={(r) => { this.sliceViewer = r; }}
+            imageData={this.state.imageData}
+            onPickIJK={(i, j, k) => this.segmentTube(i, j, k)}
+          />
           <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} />
         </div>
-        <TubeController ref={(r) => { this.tubeController = r; }} />
+        <TubeController ref={(r) => { this.tubeController = r; }} tubes={this.state.tubes} />
       </div>
     );
   }

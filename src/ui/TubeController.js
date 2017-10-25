@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import style from '../Tube.mcss';
 
@@ -19,6 +20,8 @@ export default class TubeController extends React.Component {
   }
 
   render() {
+    const tubeRows = this.props.tubes.map(t => <tr key={t.id}><td>{t.position}</td><td>{t.mesh.length}</td><td>{t.status}</td></tr>);
+
     return (
       <div className={['js-controller', style.horizontalContainer, style.controller].join(' ')}>
         <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
@@ -34,7 +37,17 @@ export default class TubeController extends React.Component {
               onInput={ev => this.updateScale()}
             />
           </div>
-          <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')} />
+          <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')}>
+            <table className={style.table}>
+              <thead>
+                <tr><th>Position</th><th># of points</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {tubeRows}
+              </tbody>
+            </table>
+          </div>
+
         </div>
         <div
           ref={(r) => { this.volumeController = r; }}
@@ -44,6 +57,10 @@ export default class TubeController extends React.Component {
     );
   }
 }
+
+TubeController.propTypes = {
+  tubes: PropTypes.array.isRequired,
+};
 
 /*
 export default class TubeController {
