@@ -12,18 +12,16 @@ import { Slider } from 'antd';
  * The `label` prop has the signature `label(value, pos)`, where `value` is the value of the slider
  * and `pos` is the position of the label ('left', 'right').
  */
-export default class LabeledSlider extends Slider {
-  render() {
-    // TODO support vertical slider label
-    const label = pos => <span style={{ padding: '0 5px' }}>{this.props.label(this.props.value, pos)}</span>;
-    return (
-      <span style={{ display: 'flex', width: '100%' }}>
-        { this.props.left || !this.props.right ? label('left') : null }
-        <Slider {...this.props} />
-        { this.props.right ? label('right') : null }
-      </span>
-    );
-  }
+export default function LabeledSlider(props) {
+  // TODO support vertical slider label
+  const label = pos => <span style={{ padding: '0 5px' }}>{props.label(props.value, pos)}</span>;
+  return (
+    <span style={{ display: 'flex', width: '100%' }}>
+      { props.left || !props.right ? label('left') : null }
+      <Slider {...props} />
+      { props.right ? label('right') : null }
+    </span>
+  );
 }
 
 LabeledSlider.propTypes = {
