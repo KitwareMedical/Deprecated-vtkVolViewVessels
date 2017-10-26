@@ -15,7 +15,7 @@ import { Slider } from 'antd';
 export default class LabeledSlider extends Slider {
   render() {
     // TODO support vertical slider label
-    const label = pos => <span>{this.props.label(this.props.value, pos)}</span>;
+    const label = pos => <span style={{ padding: '0 5px' }}>{this.props.label(this.props.value, pos)}</span>;
     return (
       <span style={{ display: 'flex', width: '100%' }}>
         { this.props.left || !this.props.right ? label('left') : null }
