@@ -14,6 +14,7 @@ import vtkRenderWindowInteractor      from 'vtk.js/Sources/Rendering/Core/Render
 
 import vtkTubePickerInteractorStyle   from '../util/TubePickerInteractorStyle';
 
+import LabeledSlider from './components/LabeledSlider';
 import style from '../Tube.mcss';
 
 export default class SliceViewer extends React.Component {
@@ -210,8 +211,8 @@ export default class SliceViewer extends React.Component {
           <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(0)}>X</Button>
           <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(1)}>Y</Button>
           <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(2)}>Z</Button>
-          <Slider
-            className={['js-slider-slice', style.slider].join(' ')}
+          <LabeledSlider
+            className={style.slider}
             min={0}
             value={this.state.slice}
             max={this.state.sliceMax}
