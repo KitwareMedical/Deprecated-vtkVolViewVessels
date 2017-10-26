@@ -10,7 +10,7 @@ import style from './Tube.mcss';
 
 import mode from './mode';
 
-import SliceViewer from './ui/SliceViewer';
+import ControllableSliceView from './ui/ControllableSliceView';
 import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
 
@@ -83,7 +83,7 @@ class App extends React.Component {
     });
 
     const resizeHandler = macro.debounce(() => {
-      [this.sliceViewer, this.volumeViewer, this.tubeController].forEach(e => e.resize());
+      [this.volumeViewer, this.tubeController].forEach(e => e.resize());
     }, 50);
     // Register window resize handler so workbench redraws when browser is resized
     window.onresize = resizeHandler;
@@ -105,8 +105,7 @@ class App extends React.Component {
     return (
       <div className={style.reactRoot}>
         <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
-          <SliceViewer
-            ref={(r) => { this.sliceViewer = r; }}
+          <ControllableSliceView
             imageData={this.state.imageData}
             onPickIJK={(i, j, k) => this.segmentTube(i, j, k)}
           />
