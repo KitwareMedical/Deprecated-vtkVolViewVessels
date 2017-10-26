@@ -21,6 +21,9 @@ export default class TubeController extends React.Component {
     return this.volumeController;
   }
 
+  get scale() {
+    return this.state.scale;
+  }
 
   resize() {
     // empty for now
