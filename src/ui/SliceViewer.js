@@ -186,7 +186,7 @@ export default class SliceViewer extends React.Component {
 
   render() {
     return (
-      <div className={['js-left-pane', style.itemStretch].join(' ')}>
+      <div className={['js-left-pane', style.verticalContainer, style.itemStretch].join(' ')}>
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <label className={style.label}>Window</label>

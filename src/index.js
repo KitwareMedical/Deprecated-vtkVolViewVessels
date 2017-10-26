@@ -103,8 +103,8 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-        <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
+      <div className={style.reactRoot}>
+        <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
           <SliceViewer
             ref={(r) => { this.sliceViewer = r; }}
             imageData={this.state.imageData}

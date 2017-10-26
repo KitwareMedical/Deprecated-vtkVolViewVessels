@@ -292,7 +292,7 @@ export default class VolumeViewer extends React.Component {
     const presetElms = presets.map(p => <Option key={p.Name} value={p.Name}>{p.Name}</Option>);
 
     return (
-      <div className={['js-right-pane', style.itemStretch].join(' ')}>
+      <div className={['js-right-pane', style.verticalContainer, style.itemStretch].join(' ')}>
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <div className={[style.horizontalContainer, style.controlLine, style.itemStretch].join(' ')}>
