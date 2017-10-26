@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Button, Slider } from 'antd';
+
 import vtkPicker                      from 'vtk.js/Sources/Rendering/Core/CellPicker';
 import vtkImageMapper                 from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageSlice                  from 'vtk.js/Sources/Rendering/Core/ImageSlice';
@@ -146,16 +148,16 @@ export default class SliceViewer extends React.Component {
     }
   }
 
-  onLevelChanged(value) {
-    this.setState((prevState, props) => ({ levelValue: Number(value) }));
+  onLevelChanged(levelValue) {
+    this.setState((prevState, props) => ({ levelValue }));
   }
 
-  onWindowChanged(value) {
-    this.setState((prevState, props) => ({ windowValue: Number(value) }));
+  onWindowChanged(windowValue) {
+    this.setState((prevState, props) => ({ windowValue }));
   }
 
-  onSliceChanged(value) {
-    this.setState((prevState, props) => ({ slice: value }));
+  onSliceChanged(slice) {
+    this.setState((prevState, props) => ({ slice }));
   }
 
   onSliceNormalChanged(sliceMode) {
@@ -188,35 +190,32 @@ export default class SliceViewer extends React.Component {
         <div ref={(r) => { this.renderWindowContainer = r; }} className={['js-renderer', style.itemStretch, style.overflowHidder].join(' ')} />
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <label className={style.label}>Window</label>
-          <input
+          <Slider
             className={['js-slider-window', style.slider].join(' ')}
-            type="range"
             min={this.state.windowMin}
             value={this.state.windowValue}
             max={this.state.windowMax}
-            onInput={ev => this.onWindowChanged(ev.target.value)}
+            onChange={value => this.onWindowChanged(value)}
           />
           <label className={style.label}>Level</label>
-          <input
+          <Slider
             className={['js-slider-level', style.slider].join(' ')}
-            type="range"
             min={this.state.levelMin}
             value={this.state.levelValue}
             max={this.state.levelMax}
-            onInput={ev => this.onLevelChanged(ev.target.value)}
+            onChange={value => this.onLevelChanged(value)}
           />
         </div>
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
-          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(0)}>X</button>
-          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(1)}>Y</button>
-          <button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(2)}>Z</button>
-          <input
+          <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(0)}>X</Button>
+          <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(1)}>Y</Button>
+          <Button className={['js-slice-normal-button', style.button].join(' ')} onClick={ev => this.onSliceNormalChanged(2)}>Z</Button>
+          <Slider
             className={['js-slider-slice', style.slider].join(' ')}
-            type="range"
-            min="0"
+            min={0}
             value={this.state.slice}
             max={this.state.sliceMax}
-            onInput={ev => this.onSliceChanged(Number(ev.target.value))}
+            onChange={value => this.onSliceChanged(value)}
           />
         </div>
       </div>

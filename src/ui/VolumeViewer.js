@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Select, Slider } from 'antd';
+
 import vtkBoundingBox             from 'vtk.js/Sources/Common/DataModel/BoundingBox';
 import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
@@ -18,6 +20,8 @@ import vtkMapper                  from 'vtk.js/Sources/Rendering/Core/Mapper';
 import ColorMaps                  from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps.json';
 
 import style from '../Tube.mcss';
+
+const Option = Select.Option;
 
 const presets = ColorMaps
   .filter(p => p.RGBPoints)
@@ -182,10 +186,6 @@ export default class VolumeViewer extends React.Component {
     }
   }
 
-  onColorMapChange() {
-    this.setState((prevState, props) => ({ colorMap: this.presetSelector.value }));
-  }
-
   setPiecewiseWidgetContainer(container) {
     this.transferFunctionWidget.setContainer(container);
   }
@@ -289,7 +289,7 @@ export default class VolumeViewer extends React.Component {
   }
 
   render() {
-    const presetElms = presets.map(p => <option key={p.Name} value={p.Name}>{p.Name}</option>);
+    const presetElms = presets.map(p => <Option key={p.Name} value={p.Name}>{p.Name}</Option>);
 
     return (
       <div className={['js-right-pane', style.itemStretch].join(' ')}>
@@ -297,23 +297,22 @@ export default class VolumeViewer extends React.Component {
         <div className={[style.horizontalContainer, style.controlLine].join(' ')}>
           <div className={[style.horizontalContainer, style.controlLine, style.itemStretch].join(' ')}>
             <label className={style.label}>Sampling</label>
-            <input
+            <Slider
               className={['js-slider-opacity', style.slider].join(' ')}
-              type="range"
-              min="1"
+              min={1}
               value={this.state.opacityValue}
-              max="100"
-              onInput={ev => this.setState({ opacityValue: ev.target.value })}
+              max={100}
+              onChange={opacityValue => this.setState({ opacityValue })}
             />
           </div>
           <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
-            <select
-              ref={(r) => { this.presetSelector = r; }}
+            <Select
+              defaultValue={this.state.colorMap}
               className={['js-preset', style.itemStretch].join(' ')}
-              onChange={ev => this.onColorMapChange()}
+              onChange={colorMap => this.setState({ colorMap })}
             >
               {presetElms}
-            </select>
+            </Select>
           </div>
         </div>
       </div>

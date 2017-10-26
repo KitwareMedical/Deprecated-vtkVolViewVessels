@@ -90,11 +90,6 @@ body {
   width: 100%;
 }
 
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-
 .table td {
   text-align: center;
 }
