@@ -41,6 +41,7 @@ export default class ControllableVolumeView extends React.Component {
           imageData={this.props.imageData}
           scalarOpacity={this.state.scalarOpacity}
           colorMap={this.state.colorMap}
+          tubes={this.props.tubes}
         />
         <VolumeQuickControls
           scalarOpacity={this.state.scalarOpacity}
@@ -56,8 +57,10 @@ export default class ControllableVolumeView extends React.Component {
 
 ControllableVolumeView.propTypes = {
   imageData: PropTypes.object,
+  tubes: PropTypes.array,
 };
 
 ControllableVolumeView.defaultProps = {
   imageData: null,
+  tubes: [],
 };

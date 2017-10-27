@@ -43,14 +43,13 @@ class App extends React.Component {
       }
       return tube;
     });
-    this.volumeViewer.setTubeVisibility(id, visible);
-    this.setState((prevState, props) => ({ tubes }));
+    this.setState(({ tubes }));
   }
 
   deleteTube(tubeId) {
     this.dataManager.ITKTube.deleteTube(tubeId).then(() => {
       const tubes = this.state.tubes.filter(tube => tube.id !== tubeId);
-      this.setState((prevState, props) => ({ tubes }));
+      this.setState(({ tubes }));
     });
   }
 
@@ -83,8 +82,7 @@ class App extends React.Component {
       if (tubeItem.mesh) {
         // set tube visibility to on by default
         tubeItem.visible = true;
-
-        this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
+        this.setState({ tubes: [...this.state.tubes, tubeItem] });
       }
     });
   }
