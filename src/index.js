@@ -2,6 +2,8 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Tabs } from 'antd';
+
 import macro from 'vtk.js/Sources/macro';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
@@ -11,8 +13,12 @@ import style from './Tube.mcss';
 import mode from './mode';
 
 import ControllableSliceView from './ui/ControllableSliceView';
-import VolumeViewer from './ui/VolumeViewer';
+import ControllableVolumeView from './ui/ControllableVolumeView';
+//  import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
+import PiecewiseGaussianWidget from './ui/PiecewiseGaussianWidget';
+
+const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
   constructor(props) {
@@ -26,7 +32,8 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
+    // this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
+    this.controllableVolumeView.volumeView.setTransferFunctionWidget(this.volumeTransferWidget.vtkWidget);
     this.props.mode.run(this.startApplication.bind(this), this.stopApplication.bind(this));
   }
 
@@ -83,7 +90,7 @@ class App extends React.Component {
     });
 
     const resizeHandler = macro.debounce(() => {
-      [this.volumeViewer, this.tubeController].forEach(e => e.resize());
+      [this.tubeController].forEach(e => e.resize());
     }, 50);
     // Register window resize handler so workbench redraws when browser is resized
     window.onresize = resizeHandler;
@@ -109,14 +116,25 @@ class App extends React.Component {
             imageData={this.state.imageData}
             onPickIJK={(i, j, k) => this.segmentTube(i, j, k)}
           />
-          <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} tubes={this.state.tubes} />
+          <ControllableVolumeView
+            ref={(r) => { this.controllableVolumeView = r; }}
+            imageData={this.state.imageData}
+            tubes={this.state.tubes}
+          />
         </div>
-        <TubeController
-          ref={(r) => { this.tubeController = r; }}
-          tubes={this.state.tubes}
-          onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
-          onDeleteTube={id => this.deleteTube(id)}
-        />
+        <Tabs type="card">
+          <TabPane forceRender key="tubes" tab="Tubes">
+            <TubeController
+              ref={(r) => { this.tubeController = r; }}
+              tubes={this.state.tubes}
+              onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
+              onDeleteTube={id => this.deleteTube(id)}
+            />
+          </TabPane>
+          <TabPane forceRender key="volume" tab="Volume">
+            <PiecewiseGaussianWidget ref={(r) => { this.volumeTransferWidget = r; }} />
+          </TabPane>
+        </Tabs>
       </div>
     );
   }
