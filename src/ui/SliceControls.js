@@ -17,7 +17,6 @@ export default function SliceControls(props) {
         onChange={value => props.onSliceChange(value)}
       />
     </div>
-
   );
 }
 
