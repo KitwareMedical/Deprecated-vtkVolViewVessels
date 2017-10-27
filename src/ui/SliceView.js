@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import macro from 'vtk.js/Sources/macro';
 import vtkPicker                      from 'vtk.js/Sources/Rendering/Core/CellPicker';
 import vtkImageMapper                 from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageSlice                  from 'vtk.js/Sources/Rendering/Core/ImageSlice';
@@ -57,7 +58,7 @@ export default class SliceView extends React.Component {
       this.props.onWindowLevelChange(colorWindow, colorLevel);
     });
 
-    window.addEventListener('resize', this.resize.bind(this));
+    window.addEventListener('resize', macro.debounce(() => this.resize(), 50));
   }
 
   componentDidMount() {

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import macro from 'vtk.js/Sources/macro';
 import vtkBoundingBox             from 'vtk.js/Sources/Common/DataModel/BoundingBox';
 import vtkOpenGLRenderWindow      from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkRenderer                from 'vtk.js/Sources/Rendering/Core/Renderer';
@@ -46,7 +47,7 @@ export default class VolumeView extends React.Component {
     this.actor.getProperty().setScalarOpacity(0, this.piecewiseFunction);
     this.actor.getProperty().setInterpolationTypeToFastLinear();
 
-    window.addEventListener('resize', this.resize.bind(this));
+    window.addEventListener('resize', macro.debounce(() => this.resize(), 50));
   }
 
   componentDidMount() {

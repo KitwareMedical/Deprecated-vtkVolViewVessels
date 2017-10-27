@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 import { Tabs } from 'antd';
 
-import macro from 'vtk.js/Sources/macro';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
@@ -88,12 +87,6 @@ class App extends React.Component {
         this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
       }
     });
-
-    const resizeHandler = macro.debounce(() => {
-      [this.tubeController].forEach(e => e.resize());
-    }, 50);
-    // Register window resize handler so workbench redraws when browser is resized
-    window.onresize = resizeHandler;
   }
 
   stopApplication() {
