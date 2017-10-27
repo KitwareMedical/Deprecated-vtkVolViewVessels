@@ -17,9 +17,11 @@ export default class ControllableSliceView extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    const sliceMax = props.imageData.getDimensions()[this.state.sliceMode] - 1;
-    const slice = Math.ceil(sliceMax / 2);
-    this.setState(({ sliceMax, slice }));
+    if (this.props.imageData !== props.imageData) {
+      const sliceMax = props.imageData.getDimensions()[this.state.sliceMode] - 1;
+      const slice = Math.ceil(sliceMax / 2);
+      this.setState(({ sliceMax, slice }));
+    }
   }
 
   render() {
