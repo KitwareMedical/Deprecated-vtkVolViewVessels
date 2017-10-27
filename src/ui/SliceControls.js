@@ -5,27 +5,20 @@ import LabeledSlider from './components/LabeledSlider';
 
 import style from '../Tube.mcss';
 
-export default class SliceControls extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+export default function SliceControls(props) {
+  return (
+    <div>
+      <LabeledSlider
+        className={style.slider}
+        label={(value, pos) => <span style={{ lineHeight: 2.5 }}><label className={style.label}>Slice: </label>{value}</span>}
+        min={0}
+        value={props.slice}
+        max={props.sliceMax}
+        onChange={value => props.onSliceChange(value)}
+      />
+    </div>
 
-  render() {
-    return (
-      <div>
-        <LabeledSlider
-          className={style.slider}
-          label={(value, pos) => <span style={{ lineHeight: 2.5 }}><label className={style.label}>Slice: </label>{value}</span>}
-          min={0}
-          value={this.props.slice}
-          max={this.props.sliceMax}
-          onChange={value => this.props.onSliceChange(value)}
-        />
-      </div>
-
-    );
-  }
+  );
 }
 
 SliceControls.propTypes = {
