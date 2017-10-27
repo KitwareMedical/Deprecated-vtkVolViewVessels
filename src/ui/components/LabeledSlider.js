@@ -16,7 +16,7 @@ export default function LabeledSlider(props) {
   // TODO support vertical slider label
   const label = content => <span style={{ padding: '0 5px' }}>{content}</span>;
   return (
-    <span style={{ display: 'flex', width: '100%' }}>
+    <span style={{ display: 'flex' }}>
       { props.left || !props.right ? label(props.label(props.value, 'left')) : null }
       <Slider {...props} />
       { props.right ? label(props.label(props.value, 'right')) : null }
