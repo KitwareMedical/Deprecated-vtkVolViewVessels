@@ -1,6 +1,13 @@
-body {
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+}
+
+.reactRoot {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .rootContainer {
@@ -32,8 +39,17 @@ body {
   min-width: 1px;
 }
 
+.vtkViewer {
+  flex: 2;
+}
+
+.js-renderer {
+  flex: 2;
+}
+
 .controller {
-  height: 200px;
+  height: 300px;
+  margin-top: 10px;
 }
 
 .button {
@@ -88,11 +104,6 @@ body {
 
 .table {
   width: 100%;
-}
-
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
 }
 
 .table td {

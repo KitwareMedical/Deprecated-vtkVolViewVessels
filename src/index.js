@@ -2,7 +2,9 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import macro from 'vtk.js/Sources/macro';
+import { LocaleProvider, Tabs } from 'antd';
+import enUS from 'antd/lib/locale-provider/en_US';
+
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
@@ -10,9 +12,13 @@ import style from './Tube.mcss';
 
 import mode from './mode';
 
-import SliceViewer from './ui/SliceViewer';
-import VolumeViewer from './ui/VolumeViewer';
+import ControllableSliceView from './ui/ControllableSliceView';
+import ControllableVolumeView from './ui/ControllableVolumeView';
+//  import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
+import PiecewiseGaussianWidget from './ui/PiecewiseGaussianWidget';
+
+const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
   constructor(props) {
@@ -26,7 +32,8 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
+    // this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
+    this.controllableVolumeView.volumeView.setTransferFunctionWidget(this.volumeTransferWidget.vtkWidget);
     this.props.mode.run(this.startApplication.bind(this), this.stopApplication.bind(this));
   }
 
@@ -37,14 +44,13 @@ class App extends React.Component {
       }
       return tube;
     });
-    this.volumeViewer.setTubeVisibility(id, visible);
-    this.setState((prevState, props) => ({ tubes }));
+    this.setState(({ tubes }));
   }
 
   deleteTube(tubeId) {
     this.dataManager.ITKTube.deleteTube(tubeId).then(() => {
       const tubes = this.state.tubes.filter(tube => tube.id !== tubeId);
-      this.setState((prevState, props) => ({ tubes }));
+      this.setState(({ tubes }));
     });
   }
 
@@ -77,16 +83,9 @@ class App extends React.Component {
       if (tubeItem.mesh) {
         // set tube visibility to on by default
         tubeItem.visible = true;
-
-        this.setState((prevState, props) => ({ tubes: [...this.state.tubes, tubeItem] }));
+        this.setState({ tubes: [...this.state.tubes, tubeItem] });
       }
     });
-
-    const resizeHandler = macro.debounce(() => {
-      [this.sliceViewer, this.volumeViewer, this.tubeController].forEach(e => e.resize());
-    }, 50);
-    // Register window resize handler so workbench redraws when browser is resized
-    window.onresize = resizeHandler;
   }
 
   stopApplication() {
@@ -103,21 +102,31 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-        <div className={[style.horizontalContainer, style.itemStretch].join(' ')}>
-          <SliceViewer
-            ref={(r) => { this.sliceViewer = r; }}
+      <div className={style.reactRoot}>
+        <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
+          <ControllableSliceView
             imageData={this.state.imageData}
             onPickIJK={(i, j, k) => this.segmentTube(i, j, k)}
           />
-          <VolumeViewer ref={(r) => { this.volumeViewer = r; }} imageData={this.state.imageData} tubes={this.state.tubes} />
+          <ControllableVolumeView
+            ref={(r) => { this.controllableVolumeView = r; }}
+            imageData={this.state.imageData}
+            tubes={this.state.tubes}
+          />
         </div>
-        <TubeController
-          ref={(r) => { this.tubeController = r; }}
-          tubes={this.state.tubes}
-          onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
-          onDeleteTube={id => this.deleteTube(id)}
-        />
+        <Tabs type="card">
+          <TabPane forceRender key="tubes" tab="Tubes">
+            <TubeController
+              ref={(r) => { this.tubeController = r; }}
+              tubes={this.state.tubes}
+              onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
+              onDeleteTube={id => this.deleteTube(id)}
+            />
+          </TabPane>
+          <TabPane forceRender key="volume" tab="Volume">
+            <PiecewiseGaussianWidget ref={(r) => { this.volumeTransferWidget = r; }} />
+          </TabPane>
+        </Tabs>
       </div>
     );
   }
@@ -127,5 +136,10 @@ App.propTypes = {
   mode: PropTypes.object.isRequired,
 };
 
-render(<App mode={mode.local} />, document.querySelector('.content'));
-// render(<App modeInit={mode.remote} />, document.querySelector('.content'));
+//  <App mode={mode.local} />
+render(
+  <LocaleProvider locale={enUS}>
+    <App mode={mode.remote} />
+  </LocaleProvider>,
+  document.querySelector('.content'),
+);

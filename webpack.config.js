@@ -32,9 +32,13 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        use: [
-          { loader: 'babel-loader', options: { presets: ['es2015', 'react'] } },
-        ],
+        loader: 'babel-loader',
+        options: {
+          presets: ['es2015', 'react'],
+          plugins: [
+            ['import', { libraryName: 'antd', style: true }]
+          ],
+        },
       },
       {
         test: /\.js$/,
@@ -62,6 +66,14 @@ module.exports = {
         include: /fonts/,
       },
       { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre', options: { configFile: eslintrcPath } },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'less-loader',
+        ],
+      },
     ],
   },
   resolve: {

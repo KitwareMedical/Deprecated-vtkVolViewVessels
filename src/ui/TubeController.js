@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Button, Table } from 'antd';
+
+import LabeledSlider from './components/LabeledSlider';
 import style from '../Tube.mcss';
 
 export default class TubeController extends React.Component {
@@ -11,76 +14,71 @@ export default class TubeController extends React.Component {
     };
   }
 
-  get piecewiseEditorContainer() {
-    return this.volumeController;
-  }
-
-  updateScale() {
-    this.setState((prevState, props) => ({ scale: Number(this.scaleSlider.value) / 10 }));
-  }
-
-  resize() {
-    // empty for now
+  get scale() {
+    return this.state.scale;
   }
 
   render() {
-    const tubeRows = this.props.tubes.map(t =>
-      (
-        <tr key={t.id}>
-          <td>{t.position}</td>
-          <td>{t.mesh.length}</td>
-          <td>{t.status}</td>
-          <td>
-            <button onClick={ev => this.props.onSetTubeVisibility(t.id, !t.visible)}>
-              <i className={t.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
-            </button>
-          </td>
-          <td>
-            <button onClick={ev => this.props.onDeleteTube(t.id)}>
+    const columns = [
+      {
+        title: 'Position',
+        dataIndex: 'position',
+        key: 'position',
+        render: pos => pos.join(', '),
+      },
+      {
+        title: 'Number of points',
+        dataIndex: 'mesh',
+        key: 'mesh',
+        render: mesh => mesh.length,
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+      },
+      {
+        title: '',
+        dataIndex: '',
+        key: '',
+        render: (_, tube) => (
+          <span>
+            <Button onClick={() => this.props.onSetTubeVisibility(tube.id, !tube.visible)}>
+              <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
+            </Button>
+            <span className="ant-divider" />
+            <Button onClick={() => this.props.onDeleteTube(tube.id)}>
               <i className="fa fa-trash" />
-            </button>
-          </td>
-        </tr>
-      ),
+            </Button>
+          </span>
+        ),
+      },
+    ];
+
+    const sliderLabel = (value, pos) => (
+      <span style={{ lineHeight: 2.5 }}><label className={style.label}>Scale: </label>{value.toFixed(2)}</span>
     );
 
     return (
-      <div className={['js-controller', style.horizontalContainer, style.controller].join(' ')}>
-        <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
-          <div className={style.horizontalContainer}>
-            <label className={style.label}>Scale</label>
-            <input
-              ref={(r) => { this.scaleSlider = r; }}
-              className={['js-scale', style.slider].join(' ')}
-              type="range"
-              min="0"
-              value={this.state.scale * 10}
-              max="100"
-              onInput={ev => this.updateScale()}
+      <div className={[style.horizontalContainer, style.controller].join(' ')}>
+        <div className={[style.itemStretch, style.border].join(' ')}>
+          <div>
+            <LabeledSlider
+              label={sliderLabel}
+              className={style.slider}
+              step={0.05}
+              min={0}
+              value={this.state.scale}
+              max={20}
+              onChange={scale => this.setState({ scale })}
             />
           </div>
-          <div className={['js-tubes', style.itemStretch, style.overflowScroll].join(' ')}>
-            <table className={style.table}>
-              <thead>
-                <tr>
-                  <th>Position</th>
-                  <th># of points</th>
-                  <th>Status</th>
-                  <th><i className="fa fa-eye" /></th>
-                  <th><i className="fa fa-trash" /></th>
-                </tr>
-              </thead>
-              <tbody>
-                {tubeRows}
-              </tbody>
-            </table>
-          </div>
-
         </div>
-        <div
-          ref={(r) => { this.volumeController = r; }}
-          className={['js-volume-controller', style.verticalContainer, style.itemStretch, style.border].join(' ')}
-        />
+        <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
+          <div className={[style.itemStretch, style.overflowScroll].join(' ')}>
+            <Table pagination={false} columns={columns} dataSource={this.props.tubes} />
+          </div>
+        </div>
       </div>
     );
   }
