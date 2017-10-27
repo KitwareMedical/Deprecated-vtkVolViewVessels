@@ -88,19 +88,19 @@ export default class SliceView extends React.Component {
 
     // update slice mode
     if (props.sliceMode !== this.props.sliceMode || updateSliceMode) {
-      this.mapper.setCurrentSlicingMode(this.props.sliceMode);
+      this.mapper.setCurrentSlicingMode(props.sliceMode);
       // this.mapper[`set${'XYZ'[this.props.sliceMode]}Slice`](0); // FIXME force change to render (bug in imageMapper)
       // this.mapper.setZSlice(0);
-      const position = this.camera.getFocalPoint().map((v, idx) => (idx === this.props.sliceMode ? (v + 1) : v));
+      const position = this.camera.getFocalPoint().map((v, idx) => (idx === props.sliceMode ? (v + 1) : v));
       const viewUp = [0, 0, 0];
-      viewUp[(this.props.sliceMode + 2) % 3] = 1;
+      viewUp[(props.sliceMode + 2) % 3] = 1;
       this.camera.set({ position, viewUp });
       this.renderer.resetCamera();
       this.renderer.resetCameraClippingRange();
     }
 
     // update slice
-    this.mapper[`set${'XYZ'[this.props.sliceMode]}Slice`](this.props.slice);
+    this.mapper[`set${'XYZ'[this.props.sliceMode]}Slice`](props.slice);
 
     // render
     this.renderWindow.render();
