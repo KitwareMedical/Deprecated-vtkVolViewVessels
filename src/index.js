@@ -2,7 +2,8 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Tabs } from 'antd';
+import { LocaleProvider, Tabs } from 'antd';
+import enUS from 'antd/lib/locale-provider/en_US';
 
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
@@ -135,5 +136,10 @@ App.propTypes = {
   mode: PropTypes.object.isRequired,
 };
 
-render(<App mode={mode.local} />, document.querySelector('.content'));
-// render(<App modeInit={mode.remote} />, document.querySelector('.content'));
+//  <App mode={mode.local} />
+render(
+  <LocaleProvider locale={enUS}>
+    <App mode={mode.remote} />
+  </LocaleProvider>,
+  document.querySelector('.content'),
+);
