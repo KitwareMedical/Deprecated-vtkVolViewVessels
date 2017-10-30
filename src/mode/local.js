@@ -95,6 +95,7 @@ function buildDataProvider() {
               break;
             }
           }
+          resolve();
         });
       },
       unsubscribe() {
