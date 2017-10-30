@@ -73,6 +73,11 @@ class App extends React.Component {
       });
     });
 
+    dataManager.ITKTube.getTubes().then((tubes) => {
+      tubes.forEach((tube, index) => { tubes[index].visible = true; });
+      this.setState({ tubes });
+    });
+
     this.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
       // TODO figure out why remote sends as array
       let tubeItem = tubeItem_;

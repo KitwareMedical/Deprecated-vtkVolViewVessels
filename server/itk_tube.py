@@ -107,6 +107,9 @@ class ItkTubeProtocol(LinkProtocol):
     def __init__(self):
         self.tubeProcessingQueue = list()
         self.idToSpatialObject = dict()
+        # NOTE maybe not the most memory-efficient cache since we store points
+        # in array form here?
+        self.tubeCache = []
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -188,6 +191,8 @@ class ItkTubeProtocol(LinkProtocol):
             itemToProcess['mesh'] = None
 
         itemToProcess['status'] = 'done'
+        self.tubeCache.append(itemToProcess)
+
         # Publish any update
         self.publish('itk.tube.mesh', itemToProcess)
 
@@ -231,6 +236,10 @@ class ItkTubeProtocol(LinkProtocol):
             "scalars": self.addAttachment(itkBinaryImageContent)
         }
 
+    @register('itk.tube.get')
+    def getTubes(self):
+        return self.tubeCache
+
     @register('itk.tube.generate')
     def generateTube(self, i, j, k, scale=2.0):
         coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
@@ -245,3 +254,7 @@ class ItkTubeProtocol(LinkProtocol):
         tube = self.idToSpatialObject[tubeId]
         self.segmentTubes.DeleteTube(tube)
         del self.idToSpatialObject[tubeId]
+        for index, item in enumerate(self.tubeCache):
+            if item['id'] == tubeId:
+                del self.tubeCache[index]
+                break

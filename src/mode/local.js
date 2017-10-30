@@ -77,6 +77,9 @@ function buildDataProvider() {
           resolve(response);
         });
       },
+      getTubes() {
+        return new Promise((resolve, reject) => resolve([]));
+      },
       generateTube(i, j, k, scale) {
         return new Promise((resolve, reject) => {
           const tube = { id: tubes.length, position: [i, j, k], scale, status: 'queued' };
