@@ -243,5 +243,5 @@ class ItkTubeProtocol(LinkProtocol):
     @register('itk.tube.delete')
     def deleteTube(self, tubeId):
         tube = self.idToSpatialObject[tubeId]
-        tube.GetParent().RemoveSpatialObject(tube)
+        self.segmentTubes.DeleteTube(tube)
         del self.idToSpatialObject[tubeId]
