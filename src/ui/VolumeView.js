@@ -78,6 +78,8 @@ export default class VolumeView extends React.Component {
       }
 
       this.renderer.resetCamera();
+      // update the transfer function widget
+      this.resize();
     }
 
     if (this.props.tubes !== props.tubes) {
