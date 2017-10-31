@@ -31,7 +31,7 @@ export default class TubeController extends React.Component {
         title: 'Number of points',
         dataIndex: 'mesh',
         key: 'mesh',
-        render: mesh => mesh.length,
+        render: (mesh, tube) => (tube.status === 'done' ? mesh.length : '-'),
       },
       {
         title: 'Status',
@@ -43,20 +43,23 @@ export default class TubeController extends React.Component {
         dataIndex: '',
         key: '',
         render: (_, tube) => (
-          <span>
-            <PopupColorPicker
-              color={tube.color.map(c => c * 255)}
-              onChange={rgb => this.props.onTubeColorChange(tube.id, rgb)}
-            />
-            <span className="ant-divider" />
-            <Button onClick={() => this.props.onSetTubeVisibility(tube.id, !tube.visible)}>
-              <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
-            </Button>
-            <span className="ant-divider" />
-            <Button onClick={() => this.props.onDeleteTube(tube.id)}>
-              <i className="fa fa-trash" />
-            </Button>
-          </span>
+          tube.status === 'done' ?
+            <span>
+              <PopupColorPicker
+                color={tube.color.map(c => c * 255)}
+                onChange={rgb => this.props.onTubeColorChange(tube.id, rgb)}
+              />
+              <span className="ant-divider" />
+              <Button onClick={() => this.props.onSetTubeVisibility(tube.id, !tube.visible)}>
+                <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
+              </Button>
+              <span className="ant-divider" />
+              <Button onClick={() => this.props.onDeleteTube(tube.id)}>
+                <i className="fa fa-trash" />
+              </Button>
+            </span>
+            :
+            ''
         ),
       },
     ];

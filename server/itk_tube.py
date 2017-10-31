@@ -105,11 +105,11 @@ class ItkTubeProtocol(LinkProtocol):
     processingLoad = 0
 
     def __init__(self):
-        self.tubeProcessingQueue = list()
         self.idToSpatialObject = dict()
         # NOTE maybe not the most memory-efficient cache since we store points
         # in array form here?
         self.tubeCache = []
+        self.curIndex = 0
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -130,7 +130,7 @@ class ItkTubeProtocol(LinkProtocol):
         self.segmentTubes = itk.SegmentTubes[imgType].New()
         self.segmentTubes.SetInputImage(self.itkImage)
         self.segmentTubes.SetDebug(True)
-        self.curTubeIndex = 0
+        self.curTubeId = 0
 
         scaleVector = self.itkImage.GetSpacing()
         offsetVector = self.itkImage.GetOrigin()
@@ -150,13 +150,12 @@ class ItkTubeProtocol(LinkProtocol):
 
     def processQueue(self):
         self.processingLoad -= 1
-        if len(self.tubeProcessingQueue) == 0:
+
+        if self.curIndex >= len(self.tubeCache):
             return
 
         # Find anything in the queue that need processing
-        itemToProcess = self.tubeProcessingQueue.pop(0)
-        itemToProcess['status'] = 'computing'
-        self.publish('itk.tube.mesh', itemToProcess)
+        itemToProcess = self.tubeCache[self.curIndex]
 
         # extract tube
         seed = itk.Point[itk.D, self.dimensions](itemToProcess['position'])
@@ -187,9 +186,11 @@ class ItkTubeProtocol(LinkProtocol):
                 points[i] = (pt, radius*scale)
 
             itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
-            self.tubeCache.append(itemToProcess)
+            self.curIndex += 1
         else:
             itemToProcess['mesh'] = None
+            # don't increment curIndex, since we are deleting array elms
+            del self.tubeCache[self.curIndex]
 
         itemToProcess['status'] = 'done'
 
@@ -244,14 +245,14 @@ class ItkTubeProtocol(LinkProtocol):
     def generateTube(self, i, j, k, scale=2.0):
         coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
         itemToProcess = {
-            'id': self.curTubeIndex,
+            'id': self.curTubeId,
             'position': coords,
             'scale': scale,
-            'status': 'queued',
+            'status': 'pending',
             'color': [1, 0, 0], # default to red
         }
-        self.curTubeIndex += 1
-        self.tubeProcessingQueue.append(itemToProcess)
+        self.curTubeId += 1
+        self.tubeCache.append(itemToProcess)
         self.scheduleQueueProcessing()
         return itemToProcess
 

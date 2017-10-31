@@ -98,10 +98,24 @@ class App extends React.Component {
         tubeItem = tubeItem[0];
       }
 
-      if (tubeItem.mesh) {
-        // set tube visibility to on by default
-        tubeItem.visible = true;
-        this.setState({ tubes: [...this.state.tubes, tubeItem] });
+      for (let i = 0; i < this.state.tubes.length; ++i) {
+        if (tubeItem.id === this.state.tubes[i].id) {
+          let tubes = [];
+          if (tubeItem.mesh) {
+            tubes = this.state.tubes.map((tube) => {
+              if (tube.id === tubeItem.id) {
+                Object.assign(tube, tubeItem);
+              }
+              return tube;
+            });
+          } else {
+            // delete the non-productive tube
+            tubes = this.state.tubes.filter(tube => tube.id !== tubeItem.id);
+          }
+
+          this.setState({ tubes });
+          break;
+        }
       }
     });
   }
@@ -115,7 +129,10 @@ class App extends React.Component {
   }
 
   segmentTube(i, j, k) {
-    this.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale);
+    this.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale).then((item) => {
+      item.visible = true;
+      this.setState({ tubes: [...this.state.tubes, item] });
+    });
   }
 
   render() {
@@ -129,7 +146,7 @@ class App extends React.Component {
           <ControllableVolumeView
             ref={(r) => { this.controllableVolumeView = r; }}
             imageData={this.state.imageData}
-            tubes={this.state.tubes}
+            tubes={this.state.tubes.filter(tube => tube.mesh)}
           />
         </div>
         <Tabs type="card">
