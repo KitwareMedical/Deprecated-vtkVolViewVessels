@@ -243,7 +243,13 @@ class ItkTubeProtocol(LinkProtocol):
     @register('itk.tube.generate')
     def generateTube(self, i, j, k, scale=2.0):
         coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
-        itemToProcess = { 'id': self.curTubeIndex, 'position': coords, 'scale': scale, 'status': 'queued' }
+        itemToProcess = {
+            'id': self.curTubeIndex,
+            'position': coords,
+            'scale': scale,
+            'status': 'queued',
+            'color': [1, 0, 0], # default to red
+        }
         self.curTubeIndex += 1
         self.tubeProcessingQueue.append(itemToProcess)
         self.scheduleQueueProcessing()
@@ -257,4 +263,11 @@ class ItkTubeProtocol(LinkProtocol):
         for index, item in enumerate(self.tubeCache):
             if item['id'] == tubeId:
                 del self.tubeCache[index]
+                break
+
+    @register('itk.tube.setcolor')
+    def setTubeColor(self, tubeId, color):
+        for item in self.tubeCache:
+            if item['id'] == tubeId:
+                item['color'] = color
                 break

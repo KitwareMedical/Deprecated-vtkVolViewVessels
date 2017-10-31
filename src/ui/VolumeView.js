@@ -15,6 +15,17 @@ import vtkPiecewiseFunction       from 'vtk.js/Sources/Common/DataModel/Piecewis
 import createTubeGeometry from '../util/TubeGeometry';
 import style from '../Tube.mcss';
 
+// TODO remove this whenever you figure out how to set rgb color on polydata
+function rgbToFloat(rgb) {
+  const [r, g, b] = rgb;
+  if (!b) {
+    return 0.25 * (1 - r + g);
+  } else if (!r) {
+    return 0.5 + (0.25 * (1 - g + b));
+  }
+  return 1.0;
+}
+
 export default class VolumeView extends React.Component {
   constructor(props) {
     super(props);
@@ -105,10 +116,17 @@ export default class VolumeView extends React.Component {
         this.renderer.addActor(newCache[id].actor);
       });
 
-      // set actor visibility
+      // set actor visibility and color
       for (let i = 0; i < props.tubes.length; ++i) {
         const tube = props.tubes[i];
         newCache[tube.id].actor.setVisibility(tube.visible);
+
+        const colors = newCache[tube.id].source.getCellData().getScalars();
+        const color = rgbToFloat(tube.color);
+        colors.setData(Array.from({ length: colors.getNumberOfTuples() }, () => color));
+        colors.modified();
+        newCache[tube.id].source.modified();
+        newCache[tube.id].mapper.update();
       }
 
       this.tubePipelineCache = newCache;

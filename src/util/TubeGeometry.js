@@ -1,4 +1,5 @@
 import vtkMath                    from 'vtk.js/Sources/Common/Core/Math';
+import vtkDataArray                from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkPolyData                from 'vtk.js/Sources/Common/DataModel/PolyData';
 import vtkActor                   from 'vtk.js/Sources/Rendering/Core/Actor';
 import vtkMapper                  from 'vtk.js/Sources/Rendering/Core/Mapper';
@@ -61,6 +62,11 @@ export default function createTubeGeometry(mesh) {
 
   source.getPoints().setData(points, 3);
   source.getPolys().setData(polys);
+
+  // set color array
+  const colors = vtkDataArray.newInstance({ size: source.getNumberOfCells() });
+  colors.setName('Colors');
+  source.getCellData().setScalars(colors);
 
   actor.setMapper(mapper);
   mapper.setInputData(source);

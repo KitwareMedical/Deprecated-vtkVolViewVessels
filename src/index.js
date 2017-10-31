@@ -54,6 +54,19 @@ class App extends React.Component {
     });
   }
 
+  changeTubeColor(tubeId, color) {
+    const normColor = [color.r / 255, color.g / 255, color.b / 255];
+    this.dataManager.ITKTube.setTubeColor(tubeId, normColor).then(() => {
+      const tubes = this.state.tubes.map((tube) => {
+        if (tube.id === tubeId) {
+          tube.color = normColor;
+        }
+        return tube;
+      });
+      this.setState({ tubes });
+    });
+  }
+
   startApplication(dataManager) {
     this.dataManager = dataManager;
     // We are ready to talk to the server...
@@ -126,6 +139,7 @@ class App extends React.Component {
               tubes={this.state.tubes}
               onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
               onDeleteTube={id => this.deleteTube(id)}
+              onTubeColorChange={(id, color) => this.changeTubeColor(id, color)}
             />
           </TabPane>
           <TabPane forceRender key="volume" tab="Volume">

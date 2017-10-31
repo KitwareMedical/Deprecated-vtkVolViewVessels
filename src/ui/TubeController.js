@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Button, Table } from 'antd';
 
 import LabeledSlider from './components/LabeledSlider';
+import PopupColorPicker from './PopupColorPicker';
 import style from '../Tube.mcss';
 
 export default class TubeController extends React.Component {
@@ -43,6 +44,11 @@ export default class TubeController extends React.Component {
         key: '',
         render: (_, tube) => (
           <span>
+            <PopupColorPicker
+              color={tube.color.map(c => c * 255)}
+              onChange={rgb => this.props.onTubeColorChange(tube.id, rgb)}
+            />
+            <span className="ant-divider" />
             <Button onClick={() => this.props.onSetTubeVisibility(tube.id, !tube.visible)}>
               <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
             </Button>
@@ -88,9 +94,11 @@ TubeController.propTypes = {
   tubes: PropTypes.array.isRequired,
   onSetTubeVisibility: PropTypes.func,
   onDeleteTube: PropTypes.func,
+  onTubeColorChange: PropTypes.func,
 };
 
 TubeController.defaultProps = {
   onSetTubeVisibility: () => {},
   onDeleteTube: () => {},
+  onTubeColorChange: () => {},
 };

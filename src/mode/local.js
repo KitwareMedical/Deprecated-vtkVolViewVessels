@@ -101,6 +101,17 @@ function buildDataProvider() {
           resolve();
         });
       },
+      setTubeColor(tubeId, color) {
+        return new Promise((resolve, reject) => {
+          for (let i = 0; i < tubes.length; ++i) {
+            if (tubes[i].id === tubeId) {
+              tubes[i].color = color;
+              break;
+            }
+          }
+          resolve();
+        });
+      },
       unsubscribe() {
       },
     },

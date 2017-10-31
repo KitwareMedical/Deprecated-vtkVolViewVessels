@@ -13,6 +13,7 @@ const customProtocols = {
     generateTube: (i, j, k, scale) => session.call('itk.tube.generate', [i, j, k, scale]),
     onTubeGeneratorChange: callback => session.subscribe('itk.tube.mesh', callback),
     deleteTube: tubeId => session.call('itk.tube.delete', [tubeId]),
+    setTubeColor: (tubeId, color) => session.call('itk.tube.setcolor', [tubeId, color]),
     unsubscribe: subscription => session.unsubscribe(subscription),
   }),
 };
