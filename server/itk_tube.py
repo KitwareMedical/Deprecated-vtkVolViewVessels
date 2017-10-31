@@ -187,11 +187,11 @@ class ItkTubeProtocol(LinkProtocol):
                 points[i] = (pt, radius*scale)
 
             itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
+            self.tubeCache.append(itemToProcess)
         else:
             itemToProcess['mesh'] = None
 
         itemToProcess['status'] = 'done'
-        self.tubeCache.append(itemToProcess)
 
         # Publish any update
         self.publish('itk.tube.mesh', itemToProcess)
