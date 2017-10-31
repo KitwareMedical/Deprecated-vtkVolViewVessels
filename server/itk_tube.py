@@ -264,6 +264,7 @@ class ItkTubeProtocol(LinkProtocol):
         for index, item in enumerate(self.tubeCache):
             if item['id'] == tubeId:
                 del self.tubeCache[index]
+                self.curIndex -= 1
                 break
 
     @register('itk.tube.setcolor')
