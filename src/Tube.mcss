@@ -109,3 +109,12 @@ html, body {
 .table td {
   text-align: center;
 }
+
+.fsrow {
+  user-select: none;
+  cursor: pointer;
+}
+
+.fsrowSelect {
+  background-color: #eeddff;
+}

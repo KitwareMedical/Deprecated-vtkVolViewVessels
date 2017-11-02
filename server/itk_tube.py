@@ -95,6 +95,12 @@ itkCTypeToDType = {
         itk.US: 2,
 }
 
+def okay(payload=None):
+    return { 'status': 'ok', 'result': payload }
+
+def error(reason=None):
+    return { 'status': 'error', 'reason': reason }
+
 # =============================================================================
 # Create Web Server to handle requests
 # =============================================================================
@@ -110,6 +116,7 @@ class ItkTubeProtocol(LinkProtocol):
         # in array form here?
         self.tubeCache = []
         self.curIndex = 0
+        self.fsRoot = os.path.abspath(os.path.realpath('.'))
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -273,3 +280,47 @@ class ItkTubeProtocol(LinkProtocol):
             if item['id'] == tubeId:
                 item['color'] = color
                 break
+
+    # Remote Filesystem API
+    def setFilesystemRoot(self, path):
+        if path is None:
+            return
+
+        path = os.path.abspath(os.path.realpath(path))
+
+        if not os.path.exists(path):
+            raise Exception('Fs root %s does not exist!' % path)
+        if not os.path.isdir(path):
+            raise Exception('Fs root %s is not a directory!' % path)
+
+        self.fsRoot = path
+
+    @register('fs.listdir')
+    def listdir(self, path):
+        path = os.path.abspath(path)
+        path = os.path.join(self.fsRoot, *path.split('/'))
+        listing = []
+        try:
+            for name in os.listdir(path):
+                entry = { 'name': name }
+                if os.path.isdir(name):
+                    entry['type'] = 'directory'
+                else:
+                    entry['type'] = 'file'
+                listing.append(entry)
+            return okay(listing)
+        except OSError as e:
+            return error('Bad listing')
+
+    @register('itk.open')
+    def openFile(self, filename):
+        filename = os.path.abspath(os.path.join(self.fsRoot, *filename.split('/')))
+        if self.fsRoot != os.path.commonprefix((filename, self.fsRoot)):
+            return error('Bad filename')
+
+        try:
+            self.loadDataFile(str(filename))
+            return okay()
+        except Exception as e:
+            print e
+            return error('Could not read file')

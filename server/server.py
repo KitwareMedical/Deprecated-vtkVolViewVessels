@@ -45,21 +45,25 @@ from itk_tube import ItkTubeProtocol
 class _ItkTubeServer(ServerProtocol):
 
     dataFile = ''
+    fsRoot = ''
     authKey = 'wslink-secret'
 
     @staticmethod
     def add_arguments(parser):
         parser.add_argument("--data", default=None, help="path to data file to load", dest="dataFile")
+        parser.add_argument("--fsroot", default=None, help="root path for remote filesystem", dest="fsRoot")
 
     @staticmethod
     def configure(args):
         _ItkTubeServer.authKey  = args.authKey
         _ItkTubeServer.dataFile = args.dataFile
+        _ItkTubeServer.fsRoot = args.fsRoot
 
     def initialize(self):
         # register custom protocol
         protocol = ItkTubeProtocol()
         protocol.loadDataFile(self.dataFile)
+        protocol.setFilesystemRoot(self.fsRoot)
         self.registerLinkProtocol(protocol)
 
         # Update authentication key to use

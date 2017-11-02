@@ -2,7 +2,7 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { LocaleProvider, Tabs } from 'antd';
+import { LocaleProvider, Tabs, Button, Modal } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
@@ -17,6 +17,7 @@ import ControllableVolumeView from './ui/ControllableVolumeView';
 //  import VolumeViewer from './ui/VolumeViewer';
 import TubeController from './ui/TubeController';
 import PiecewiseGaussianWidget from './ui/PiecewiseGaussianWidget';
+import RemoteFsExplorer from './ui/RemoteFsExplorer';
 
 const TabPane = Tabs.TabPane;
 
@@ -26,6 +27,9 @@ class App extends React.Component {
     this.state = {
       imageData: null,
       tubes: [],
+
+      // ui
+      fsExplorerOpen: false,
     };
 
     this.subscription = null;
@@ -34,7 +38,16 @@ class App extends React.Component {
   componentDidMount() {
     // this.volumeViewer.setPiecewiseWidgetContainer(this.tubeController.piecewiseEditorContainer);
     this.controllableVolumeView.volumeView.setTransferFunctionWidget(this.volumeTransferWidget.vtkWidget);
-    this.props.mode.run(this.startApplication.bind(this), this.stopApplication.bind(this));
+    this.subscribeToServer();
+    this.loadData();
+  }
+
+  componentWillUnmount() {
+    if (this.subscription) {
+      this.props.dataManager.ITKTube.unsubscribe();
+    }
+    //
+    this.props.dataManager.exit(10);
   }
 
   setTubeVisibility(id, visible) {
@@ -48,7 +61,7 @@ class App extends React.Component {
   }
 
   deleteTube(tubeId) {
-    this.dataManager.ITKTube.deleteTube(tubeId).then(() => {
+    this.props.dataManager.ITKTube.deleteTube(tubeId).then(() => {
       const tubes = this.state.tubes.filter(tube => tube.id !== tubeId);
       this.setState(({ tubes }));
     });
@@ -56,7 +69,7 @@ class App extends React.Component {
 
   changeTubeColor(tubeId, color) {
     const normColor = [color.r / 255, color.g / 255, color.b / 255];
-    this.dataManager.ITKTube.setTubeColor(tubeId, normColor).then(() => {
+    this.props.dataManager.ITKTube.setTubeColor(tubeId, normColor).then(() => {
       const tubes = this.state.tubes.map((tube) => {
         if (tube.id === tubeId) {
           tube.color = normColor;
@@ -67,31 +80,8 @@ class App extends React.Component {
     });
   }
 
-  startApplication(dataManager) {
-    this.dataManager = dataManager;
-    // We are ready to talk to the server...
-    dataManager.ITKTube.getVolumeData().then((dataDescription) => {
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(dataDescription.scalars);
-
-      reader.addEventListener('loadend', () => {
-        const values = new window[dataDescription.typedArray](reader.result);
-        const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
-        delete dataDescription.scalars;
-        delete dataDescription.typedArray;
-        const imageData = vtkImageData.newInstance(dataDescription);
-        imageData.getPointData().setScalars(dataArray);
-
-        this.setState((prevState, props) => ({ imageData }));
-      });
-    });
-
-    dataManager.ITKTube.getTubes().then((tubes) => {
-      tubes.forEach((tube, index) => { tubes[index].visible = true; });
-      this.setState({ tubes });
-    });
-
-    this.subscription = dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
+  subscribeToServer() {
+    this.subscription = this.props.dataManager.ITKTube.onTubeGeneratorChange((tubeItem_) => {
       // TODO figure out why remote sends as array
       let tubeItem = tubeItem_;
       if (tubeItem instanceof Array) {
@@ -120,18 +110,45 @@ class App extends React.Component {
     });
   }
 
-  stopApplication() {
-    if (this.subscription) {
-      this.dataManager.ITKTube.unsubscribe();
-    }
-    //
-    this.dataManager.exit(10);
+  loadData() {
+    // We are ready to talk to the server...
+    this.props.dataManager.ITKTube.getVolumeData().then((dataDescription) => {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(dataDescription.scalars);
+
+      reader.addEventListener('loadend', () => {
+        const values = new window[dataDescription.typedArray](reader.result);
+        const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
+        delete dataDescription.scalars;
+        delete dataDescription.typedArray;
+        const imageData = vtkImageData.newInstance(dataDescription);
+        imageData.getPointData().setScalars(dataArray);
+
+        this.setState((prevState, props) => ({ imageData }));
+      });
+    });
+
+    this.props.dataManager.ITKTube.getTubes().then((tubes) => {
+      tubes.forEach((tube, index) => { tubes[index].visible = true; });
+      this.setState({ tubes });
+    });
   }
 
   segmentTube(i, j, k) {
-    this.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale).then((item) => {
+    this.props.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale).then((item) => {
       item.visible = true;
       this.setState({ tubes: [...this.state.tubes, item] });
+    });
+  }
+
+  openFile(filename) {
+    this.props.dataManager.ITKTube.open(filename).then((resp) => {
+      if (resp.status === 'ok') {
+        this.loadData();
+        this.setState({ fsExplorerOpen: false });
+      } else {
+        Modal.error({ content: resp.reason });
+      }
     });
   }
 
@@ -163,19 +180,29 @@ class App extends React.Component {
             <PiecewiseGaussianWidget ref={(r) => { this.volumeTransferWidget = r; }} />
           </TabPane>
         </Tabs>
+        <RemoteFsExplorer
+          dataManager={this.props.dataManager}
+          visible={this.state.fsExplorerOpen}
+          onFileSelect={filename => this.openFile(filename)}
+          onCancel={() => this.setState({ fsExplorerOpen: false })}
+        />
       </div>
     );
   }
 }
 
 App.propTypes = {
-  mode: PropTypes.object.isRequired,
+  dataManager: PropTypes.object.isRequired,
 };
 
-//  <App mode={mode.local} />
-render(
-  <LocaleProvider locale={enUS}>
-    <App mode={mode.remote} />
-  </LocaleProvider>,
-  document.querySelector('.content'),
-);
+function main(dataManager) {
+  render(
+    <LocaleProvider locale={enUS}>
+      <App dataManager={dataManager} />
+    </LocaleProvider>,
+    document.querySelector('.content'),
+  );
+}
+
+// mode.local.run(main);
+mode.remote.run(main);

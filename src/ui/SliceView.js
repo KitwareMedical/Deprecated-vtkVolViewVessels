@@ -83,8 +83,8 @@ export default class SliceView extends React.Component {
 
       if (needToAddActor) {
         this.renderer.addActor(this.actor);
-        updateSliceMode = true;
       }
+      updateSliceMode = true;
     }
 
     // update slice mode

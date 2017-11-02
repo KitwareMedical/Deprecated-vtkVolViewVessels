@@ -14,7 +14,12 @@ const customProtocols = {
     onTubeGeneratorChange: callback => session.subscribe('itk.tube.mesh', callback),
     deleteTube: tubeId => session.call('itk.tube.delete', [tubeId]),
     setTubeColor: (tubeId, color) => session.call('itk.tube.setcolor', [tubeId, color]),
+    open: filename => session.call('itk.open', [filename]),
     unsubscribe: subscription => session.unsubscribe(subscription),
+  }),
+
+  fs: session => ({
+    listdir: path => session.call('fs.listdir', [path]),
   }),
 };
 
