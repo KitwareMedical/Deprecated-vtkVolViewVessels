@@ -172,11 +172,14 @@ class App extends React.Component {
               <div className={[style.itemStretch, style.border].join(' ')}>
                 <Button onClick={() => this.setState({ fsExplorerOpen: true })}>Open File...</Button>
                 {this.state.imageData ?
-                  <ul style={{ marginTop: '10px' }}>
-                    <li>Bounds: {this.state.imageData.getBounds().join(', ')}</li>
-                    <li>Origin: {this.state.imageData.getOrigin().join(', ')}</li>
-                    <li>Spacing: {this.state.imageData.getSpacing().join(', ')}</li>
-                  </ul>
+                  <div style={{ marginTop: '10px' }}>
+                    <h2>Image Info</h2>
+                    <ul>
+                      <li>Bounds: {this.state.imageData.getBounds().join(', ')}</li>
+                      <li>Origin: {this.state.imageData.getOrigin().join(', ')}</li>
+                      <li>Spacing: {this.state.imageData.getSpacing().join(', ')}</li>
+                    </ul>
+                  </div>
                   :
                   null
                 }
