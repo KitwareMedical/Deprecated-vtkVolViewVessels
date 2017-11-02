@@ -167,6 +167,13 @@ class App extends React.Component {
           />
         </div>
         <Tabs type="card">
+          <TabPane forceRender key="file" tab="File">
+            <div className={[style.horizontalContainer, style.controller].join(' ')}>
+              <div className={[style.itemStretch, style.border].join(' ')}>
+                <Button onClick={() => this.setState({ fsExplorerOpen: true })}>Open File...</Button>
+              </div>
+            </div>
+          </TabPane>
           <TabPane forceRender key="tubes" tab="Tubes">
             <TubeController
               ref={(r) => { this.tubeController = r; }}
