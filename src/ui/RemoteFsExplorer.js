@@ -43,6 +43,11 @@ export default class RemoteFsExplorer extends React.Component {
     });
   }
 
+  goUp() {
+    const updir = this.state.path.split('/').slice(0, -1).join('/');
+    this.navigate(updir === '' ? '/' : updir);
+  }
+
   render() {
     const columns = [
       {
@@ -68,7 +73,7 @@ export default class RemoteFsExplorer extends React.Component {
         <div style={{ marginBottom: '10px' }}>
           <Button shape="circle" icon="home" />
           <span className="ant-divider" />
-          <Button shape="circle" icon="up" onClick={() => this.navigate(this.state.path.split('/').slice(0, -1).join('/'))} />
+          <Button shape="circle" icon="up" onClick={() => this.goUp()} />
         </div>
         <Table
           showHeader={false}
