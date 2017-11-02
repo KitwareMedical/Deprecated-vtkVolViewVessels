@@ -2,7 +2,7 @@ import { render } from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { LocaleProvider, Tabs, Button, Modal } from 'antd';
+import { LocaleProvider, Tabs, Button, Modal, message as Message } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
@@ -111,6 +111,8 @@ class App extends React.Component {
   }
 
   loadData() {
+    const finishLoading = Message.loading('Loading image...', 0);
+
     // We are ready to talk to the server...
     this.props.dataManager.ITKTube.getVolumeData().then((dataDescription) => {
       const reader = new FileReader();
@@ -125,6 +127,7 @@ class App extends React.Component {
         imageData.getPointData().setScalars(dataArray);
 
         this.setState((prevState, props) => ({ imageData }));
+        finishLoading();
       });
     });
 
