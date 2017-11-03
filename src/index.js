@@ -175,9 +175,9 @@ class App extends React.Component {
   }
 
   reparentTubes(parent, children) {
-    return new Promise((resolve, reject) => {
-      if (children.indexOf(parent) > -1) {
-        reject('Cannot reparent tube to itself!');
+    return this.props.dataManager.ITKTube.reparentTubes(parent, children).then((resp) => {
+      if (resp.status === 'error') {
+        throw new Error('Cannot reparent tube to itself!');
       }
 
       const cache = {};
@@ -188,14 +188,13 @@ class App extends React.Component {
       });
 
       const tubes = this.state.tubes.map((tube) => {
-        if (cache[tube.id] && tube.id !== parent) {
+        if (tube.id in cache && tube.id !== parent) {
           return Object.assign(tube, { parent });
         }
         return tube;
       });
 
       this.setState({ tubes });
-      resolve();
     });
   }
 

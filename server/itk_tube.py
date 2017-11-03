@@ -282,6 +282,18 @@ class ItkTubeProtocol(LinkProtocol):
                 item['color'] = color
                 break
 
+    @register('itk.tube.reparent')
+    def reparentTubes(self, parent, children):
+        if type(parent) is not int or type(children) is not list:
+            return error('Invalid arguments')
+
+        if parent in children:
+            return error('Cannot have tube be parent of itself')
+        for tube in self.tubeCache:
+            if tube['id'] in children:
+                tube['parent'] = parent
+        return okay()
+
     # Remote Filesystem API
     def setFilesystemRoot(self, path):
         if path is None:

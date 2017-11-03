@@ -57,7 +57,7 @@ export default class TubeController extends React.Component {
     this.props.onReparentTubes(tubeId, this.state.selection.map(tube => tube.id)).then(() => {
       // clear current selection after reparenting.
       this.updateSelection([], []);
-    }).catch(reason => Notification.error({ message: reason }));
+    }).catch(reason => Notification.error({ message: reason.message }));
   }
 
   get scale() {
