@@ -22,26 +22,18 @@ export default class TubeController extends React.Component {
   render() {
     const columns = [
       {
-        title: 'Position',
-        dataIndex: 'position',
-        key: 'position',
-        render: pos => pos.join(', '),
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
       },
       {
-        title: 'Number of points',
+        title: '# of points',
         dataIndex: 'mesh',
-        key: 'mesh',
         render: (mesh, tube) => (tube.status === 'done' ? mesh.length : '-'),
-      },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
       },
       {
         title: '',
         dataIndex: '',
-        key: '',
         render: (_, tube) => (
           tube.status === 'done' ?
             <span>
@@ -59,7 +51,7 @@ export default class TubeController extends React.Component {
               </Button>
             </span>
             :
-            ''
+            <Spin />
         ),
       },
     ];
