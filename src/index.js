@@ -60,9 +60,29 @@ class App extends React.Component {
     this.setState(({ tubes }));
   }
 
+  prepareNewTubes(tubes) {
+    return tubes.map(tube => Object.assign({ visible: true, key: tube.id }, tube));
+  }
+
   deleteTube(tubeId) {
     this.props.dataManager.ITKTube.deleteTube(tubeId).then(() => {
-      const tubes = this.state.tubes.filter(tube => tube.id !== tubeId);
+      let newParent = -1;
+      const tubes = [];
+      this.state.tubes.forEach((tube) => {
+        if (tube.id === tubeId) {
+          newParent = tube.parent;
+        } else {
+          tubes.push(tube);
+        }
+      });
+
+      // reparent any children to the deleted tube's parent
+      tubes.forEach((tube) => {
+        if (tube.parent === tubeId) {
+          tube.parent = newParent;
+        }
+      });
+
       this.setState(({ tubes }));
     });
   }
@@ -132,15 +152,14 @@ class App extends React.Component {
     });
 
     this.props.dataManager.ITKTube.getTubes().then((tubes) => {
-      tubes.forEach((tube, index) => { tubes[index].visible = true; });
-      this.setState({ tubes });
+      this.setState({ tubes: this.prepareNewTubes(tubes) });
     });
   }
 
   segmentTube(i, j, k) {
-    this.props.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale).then((item) => {
-      item.visible = true;
-      this.setState({ tubes: [...this.state.tubes, item] });
+    this.props.dataManager.ITKTube.generateTube(i, j, k, this.tubeController.scale).then((tube) => {
+      // returns tube metadata, but not segmented result
+      this.setState({ tubes: [...this.state.tubes, ...this.prepareNewTubes([tube])] });
     });
   }
 
@@ -152,6 +171,31 @@ class App extends React.Component {
       } else {
         Modal.error({ content: resp.reason });
       }
+    });
+  }
+
+  reparentTubes(parent, children) {
+    return new Promise((resolve, reject) => {
+      if (children.indexOf(parent) > -1) {
+        reject('Cannot reparent tube to itself!');
+      }
+
+      const cache = {};
+      this.state.tubes.forEach((tube) => {
+        if (tube.id === parent || children.indexOf(tube.id) !== -1) {
+          cache[tube.id] = tube;
+        }
+      });
+
+      const tubes = this.state.tubes.map((tube) => {
+        if (cache[tube.id] && tube.id !== parent) {
+          return Object.assign(tube, { parent });
+        }
+        return tube;
+      });
+
+      this.setState({ tubes });
+      resolve();
     });
   }
 
@@ -196,6 +240,7 @@ class App extends React.Component {
               onSetTubeVisibility={(id, visible) => this.setTubeVisibility(id, visible)}
               onDeleteTube={id => this.deleteTube(id)}
               onTubeColorChange={(id, color) => this.changeTubeColor(id, color)}
+              onReparentTubes={(parent, children) => this.reparentTubes(parent, children)}
             />
           </TabPane>
           <TabPane forceRender key="volume" tab="Volume">

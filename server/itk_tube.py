@@ -253,6 +253,7 @@ class ItkTubeProtocol(LinkProtocol):
         coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
         itemToProcess = {
             'id': self.curTubeId,
+            'parent': -1, # denotes this tube's parent as not a tube
             'position': coords,
             'scale': scale,
             'status': 'pending',
