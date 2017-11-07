@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
@@ -10,7 +11,7 @@ module.exports = {
   entry,
   output: {
     path: outputPath,
-    filename: 'tube.js',
+    filename: '[name].js',
   },
   module: {
     rules: [
@@ -97,4 +98,13 @@ module.exports = {
       colors: true,
     },
   },
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks(module, count) {
+        const context = module.context;
+        return context && context.indexOf('node_modules') >= 0;
+      },
+    }),
+  ],
 };
