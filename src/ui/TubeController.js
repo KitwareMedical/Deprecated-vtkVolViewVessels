@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { notification as Notification, Spin, Button, Table } from 'antd';
 
-import LabeledSlider from './components/LabeledSlider';
+import LabeledSlider from './LabeledSlider';
 import PopupColorPicker from './PopupColorPicker';
 import style from '../Tube.mcss';
 

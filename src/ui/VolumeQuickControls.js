@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { Select } from 'antd';
 
-import LabeledSlider from './components/LabeledSlider';
+import LabeledSlider from './LabeledSlider';
 import style from '../Tube.mcss';
 
 const Option = Select.Option;
