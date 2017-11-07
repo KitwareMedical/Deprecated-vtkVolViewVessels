@@ -54,54 +54,13 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
-function createWindow(portToUse = 8080) {
-  if (!mainWindow) {
-    mainWindow = new BrowserWindow({ fullscreen: false, icon: `${__dirname}/src/icon.png` });
-    mainWindow.loadURL(`http://localhost:${portToUse}`);
-    mainWindow.on('closed', () => {
-      mainWindow = null;
-    });
-  }
-}
-
 function startServer(fileToLoad) {
-  if (fileToLoad) {
-    getPort().then((port) => {
-      const cmd = [
-        'cd',
-        `${__dirname}/web/www`,
-        '&&',
-        'python',
-        '-m SimpleHTTPServer',
-        `${port}`,
-      ].join(' ');
-      server = shelljs.exec(cmd, { async: true });
-
-      if (mainWindow) {
-        mainWindow.loadURL(`http://localhost:${port}`);
-      } else {
-        createWindow(port);
-      }
-
-
-      // server.stdout.on('data', (data) => {
-      //   if (data.indexOf('Starting factory') !== -1) {
-      //     createWindow(port);
-      //   }
-      // });
-      // server.stderr.on('data', (data) => {
-      //   if (data.indexOf('Starting factory') !== -1) {
-      //     createWindow(port);
-      //   }
-      // });
-    });
-  } else {
-    mainWindow = new BrowserWindow({ fullscreen: false, icon: `${__dirname}/src/icon.png` });
-    mainWindow.loadURL(`file://${__dirname}/offline.html`);
-    mainWindow.on('closed', () => {
-      mainWindow = null;
-    });
-  }
+  mainWindow = new BrowserWindow({ fullscreen: false, icon: `${__dirname}/src/icon.png` });
+  mainWindow.loadURL(`file://${__dirname}/../dist/index.html`);
+  mainWindow.openDevTools();
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
 app.on('ready', () => {
