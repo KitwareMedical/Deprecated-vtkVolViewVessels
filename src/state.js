@@ -7,8 +7,8 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
     names = [names];
   }
 
-  const storeMapper = mapStoreToProps || (() => {});
-  const actionMapper = mapActionsToProps || (() => {});
+  const storeMapper = mapStoreToProps || (() => ({}));
+  const actionMapper = mapActionsToProps || (() => ({}));
 
   class ConnectedComponent extends React.Component {
     constructor(props) {
