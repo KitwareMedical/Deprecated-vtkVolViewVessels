@@ -9,8 +9,11 @@ import style from '../Tube.mcss';
 
 // TODO move ColorPresets to some constants module
 import { ColorPresets } from '../stores/VolumeRenderStore';
+import * as VolumeActions from '../actions/VolumeActions';
 
 function ControllableVolumeView({
+  actions,
+  dispatch,
   image,
   scalarOpacity,
   colorMap,
@@ -26,8 +29,8 @@ function ControllableVolumeView({
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
         presets={ColorPresets}
-        onScalarOpacityChange={sc => this.setState({ sc })}
-        onColorMapChange={colorMapName => this.setState({ colorMap: ColorPresets.find(p => (p.Name === colorMapName)) })}
+        onScalarOpacityChange={value => dispatch(actions.setScalarOpacity, value)}
+        onColorMapChange={name => dispatch(actions.setColorMap, name)}
       />
     </div>
   );
@@ -38,6 +41,9 @@ ControllableVolumeView.propTypes = {
   scalarOpacity: PropTypes.number,
   colorMap: PropTypes.object.isRequired,
   // tubes: PropTypes.array,
+
+  dispatch: PropTypes.func.isRequired,
+  actions: PropTypes.object.isRequired,
 };
 
 ControllableVolumeView.defaultProps = {
@@ -50,4 +56,6 @@ export default connect(ControllableVolumeView, ['image', 'volumeRender'],
     image: stores.image.data.image,
     scalarOpacity: stores.volumeRender.data.scalarOpacity,
     colorMap: stores.volumeRender.data.colorMap,
-  }));
+  }),
+  () => VolumeActions,
+);

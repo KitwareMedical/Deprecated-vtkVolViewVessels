@@ -22,4 +22,14 @@ export default class VolumeRenderStore extends Store {
   get data() {
     return this.privateData;
   }
+
+  set scalarOpacity(value) {
+    this.privateData.scalarOpacity = value;
+    this.update();
+  }
+
+  set colorMap(map) {
+    this.privateData.colorMap = map;
+    this.update();
+  }
 }
