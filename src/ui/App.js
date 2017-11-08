@@ -10,6 +10,7 @@ import connect from '../state';
 import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
+import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
 // import ControllableVolumeView from './ControllableVolumeView';
 // import TubeController from './TubeController';
@@ -242,6 +243,7 @@ class App extends React.Component {
         <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
           <ControllableSliceView stores={stores} />
         </div>
+        <Messages stores={stores} />
       </div>
     );
   }
