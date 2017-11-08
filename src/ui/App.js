@@ -12,10 +12,10 @@ import style from '../Tube.mcss';
 import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
 import Info from './Info';
+import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
 // import TubeController from './TubeController';
-// import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
 const TabPane = Tabs.TabPane;
@@ -248,6 +248,9 @@ class App extends React.Component {
         <Tabs type="card">
           <TabPane forceRender key="info" tab="Info">
             <Info stores={stores} />
+          </TabPane>
+          <TabPane forceRender key="volume" tab="Volume">
+            <PiecewiseGaussianWidget stores={stores} />
           </TabPane>
         </Tabs>
         <Messages stores={stores} />

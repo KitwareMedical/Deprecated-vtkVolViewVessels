@@ -8,3 +8,7 @@ export function setScalarOpacity(stores, scalarOpacity) {
 export function setColorMap(stores, name) {
   stores.volumeRender.colorMap = ColorPresets.find(p => (p.Name === name));
 }
+
+export function setTransferFunctionWidget(stores, widget) {
+  stores.volumeRender.transferFunctionWidget = widget;
+}

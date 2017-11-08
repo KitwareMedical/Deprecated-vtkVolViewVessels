@@ -16,6 +16,7 @@ export default class VolumeRenderStore extends Store {
     this.privateData = {
       scalarOpacity: DEFAULT_SCALAR_OPACITY,
       colorMap: ColorPresets[0],
+      transferFunctionWidget: null,
     };
   }
 
@@ -30,6 +31,11 @@ export default class VolumeRenderStore extends Store {
 
   set colorMap(map) {
     this.privateData.colorMap = map;
+    this.update();
+  }
+
+  set transferFunctionWidget(widget) {
+    this.privateData.transferFunctionWidget = widget;
     this.update();
   }
 }

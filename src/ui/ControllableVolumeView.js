@@ -17,6 +17,7 @@ function ControllableVolumeView({
   image,
   scalarOpacity,
   colorMap,
+  transferFunctionWidget,
 }) {
   return (
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
@@ -24,6 +25,7 @@ function ControllableVolumeView({
         imageData={image}
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
+        transferFunctionWidget={transferFunctionWidget}
       />
       <VolumeQuickControls
         scalarOpacity={scalarOpacity}
@@ -39,6 +41,7 @@ function ControllableVolumeView({
 ControllableVolumeView.propTypes = {
   image: PropTypes.object,
   scalarOpacity: PropTypes.number,
+  transferFunctionWidget: PropTypes.object,
   colorMap: PropTypes.object.isRequired,
   // tubes: PropTypes.array,
 
@@ -49,6 +52,7 @@ ControllableVolumeView.propTypes = {
 ControllableVolumeView.defaultProps = {
   image: null,
   scalarOpacity: 0,
+  transferFunctionWidget: null,
 };
 
 export default connect(ControllableVolumeView, ['image', 'volumeRender'],
@@ -56,6 +60,7 @@ export default connect(ControllableVolumeView, ['image', 'volumeRender'],
     image: stores.image.data.image,
     scalarOpacity: stores.volumeRender.data.scalarOpacity,
     colorMap: stores.volumeRender.data.colorMap,
+    transferFunctionWidget: stores.volumeRender.data.transferFunctionWidget,
   }),
   () => VolumeActions,
 );
