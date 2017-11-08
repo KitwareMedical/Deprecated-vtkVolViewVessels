@@ -10,9 +10,9 @@ import connect from '../state';
 import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
+import ControllableVolumeView from './ControllableVolumeView';
 import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
-// import ControllableVolumeView from './ControllableVolumeView';
 // import TubeController from './TubeController';
 // import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import RemoteFsExplorer from './RemoteFsExplorer';
@@ -242,12 +242,12 @@ class App extends React.Component {
       <div className={style.reactRoot}>
         <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
           <ControllableSliceView stores={stores} />
+          <ControllableVolumeView stores={this.props.stores} />
         </div>
         <Messages stores={stores} />
       </div>
     );
   }
-//           <ControllableVolumeView stores={this.props.stores} />
 }
 
 App.propTypes = {
