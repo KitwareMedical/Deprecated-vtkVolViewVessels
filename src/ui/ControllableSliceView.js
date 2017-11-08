@@ -15,12 +15,13 @@ function ControllableSliceView({
   image,
   slicePosition,
   sliceMaximum,
+  sliceMode,
 }) {
   return (
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <SliceView
         imageData={image}
-        sliceMode={2} // Z axis
+        sliceMode={sliceMode}
         slice={slicePosition}
       />
       <SliceControls
@@ -36,6 +37,7 @@ ControllableSliceView.propTypes = {
   image: PropTypes.object,
   slicePosition: PropTypes.number,
   sliceMaximum: PropTypes.number,
+  sliceMode: PropTypes.number,
 
   actions: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
@@ -45,6 +47,7 @@ ControllableSliceView.defaultProps = {
   image: null,
   slicePosition: 0,
   sliceMaximum: 1,
+  sliceMode: 2,
 };
 
 export default connect(ControllableSliceView, 'image',
@@ -52,6 +55,7 @@ export default connect(ControllableSliceView, 'image',
     image: stores.image.data.image,
     slicePosition: stores.image.data.slicePosition,
     sliceMaximum: stores.image.data.sliceMaximum,
+    sliceMode: stores.image.data.sliceMode,
   }),
   () => ImageActions,
 );
