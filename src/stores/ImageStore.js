@@ -32,4 +32,11 @@ export default class ImageStore extends Store {
     });
     this.update();
   }
+
+  set slicePosition(slice) {
+    Object.assign(this.privateData, {
+      slicePosition: slice,
+    });
+    this.update();
+  }
 }

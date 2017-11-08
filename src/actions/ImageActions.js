@@ -18,4 +18,5 @@ export function loadImage(stores, filename) {
 }
 
 export function setSlice(stores, slice) {
+  stores.image.slicePosition = slice;
 }
