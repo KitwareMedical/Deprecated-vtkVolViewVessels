@@ -7,6 +7,8 @@ import enUS from 'antd/lib/locale-provider/en_US';
 import App from './ui/App';
 import ApiStore from './stores/ApiStore';
 import ImageStore from './stores/ImageStore';
+import SegmentStore from './stores/SegmentStore';
+import TubeStore from './stores/TubeStore';
 import VolumeRenderStore from './stores/VolumeRenderStore';
 
 import mode from './mode';
@@ -20,6 +22,8 @@ function main(dataManager) {
     api: new ApiStore(dataManager),
     image: new ImageStore(),
     volumeRender: new VolumeRenderStore(),
+    segment: new SegmentStore(),
+    tubes: new TubeStore(),
   };
 
   render(
