@@ -13,10 +13,6 @@ import VolumeRenderStore from './stores/VolumeRenderStore';
 
 import mode from './mode';
 
-// const App2 = connect(App, ['tubes'], (stores, props) => {});
-
-//      <App dataManager={dataManager} />
-
 function main(dataManager) {
   const stores = {
     api: new ApiStore(dataManager),
