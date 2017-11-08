@@ -38,7 +38,9 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
     }
 
     onStoreChanged() {
-      this.setState(storeMapper(this.stores, this.props));
+      const subset = {};
+      names.forEach((name) => { subset[name] = this.stores[name]; });
+      this.setState(storeMapper(subset, this.props));
     }
 
     dispatch(action, ...args) {
