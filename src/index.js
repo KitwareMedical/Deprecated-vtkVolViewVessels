@@ -5,13 +5,24 @@ import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import App from './ui/App';
+import ApiStore from './stores/ApiStore';
+import ImageStore from './stores/ImageStore';
 
 import mode from './mode';
 
+// const App2 = connect(App, ['tubes'], (stores, props) => {});
+
+//      <App dataManager={dataManager} />
+
 function main(dataManager) {
+  const stores = {
+    api: new ApiStore(dataManager),
+    image: new ImageStore(),
+  };
+
   render(
     <LocaleProvider locale={enUS}>
-      <App dataManager={dataManager} />
+      <App stores={stores} />
     </LocaleProvider>,
     document.querySelector('.content'),
   );

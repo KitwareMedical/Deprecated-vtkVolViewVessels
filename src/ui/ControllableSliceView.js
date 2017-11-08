@@ -1,41 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import connect from '../state';
+
 import SliceView from './SliceView';
 import SliceControls from './SliceControls';
 
 import style from '../Tube.mcss';
 
-export default class ControllableSliceView extends React.Component {
+class ControllableSliceView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      sliceMode: 2, // Z axis
-      slice: 0,
-      sliceMax: 1,
     };
   }
 
-  componentWillReceiveProps(props) {
-    if (this.props.imageData !== props.imageData) {
-      const sliceMax = props.imageData.getDimensions()[this.state.sliceMode] - 1;
-      const slice = Math.ceil(sliceMax / 2);
-      this.setState(({ sliceMax, slice }));
-    }
-  }
-
   render() {
+    const { image, slicePosition, sliceMaximum } = this.props;
     return (
       <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
         <SliceView
-          imageData={this.props.imageData}
-          sliceMode={this.state.sliceMode}
-          slice={this.state.slice}
+          imageData={image}
+          sliceMode={2} // Z axis
+          slice={slicePosition}
           onPickIJK={this.props.onPickIJK}
         />
         <SliceControls
-          slice={this.state.slice}
-          sliceMax={this.state.sliceMax}
+          slice={slicePosition}
+          sliceMax={sliceMaximum}
           onSliceChange={slice => this.setState({ slice })}
         />
       </div>
@@ -44,11 +36,24 @@ export default class ControllableSliceView extends React.Component {
 }
 
 ControllableSliceView.propTypes = {
+  image: PropTypes.object,
+  slicePosition: PropTypes.number,
+  sliceMaximum: PropTypes.number,
   onPickIJK: PropTypes.func,
-  imageData: PropTypes.object,
+
+  // stores: PropTypes.object.isRequired,
+  // actions: PropTypes.object.isRequired,
 };
 
 ControllableSliceView.defaultProps = {
+  image: null,
+  slicePosition: 0,
+  sliceMaximum: 1,
   onPickIJK: null,
-  imageData: null,
 };
+
+export default connect(ControllableSliceView, 'image', (stores, props) => ({
+  image: stores.image.data.image,
+  slicePosition: stores.image.data.slicePosition,
+  sliceMaximum: stores.image.data.sliceMaximum,
+}));

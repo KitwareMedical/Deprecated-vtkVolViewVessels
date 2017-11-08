@@ -56,6 +56,7 @@ export default class ControllableVolumeView extends React.Component {
 }
 
 ControllableVolumeView.propTypes = {
+  stores: PropTypes.object.isRequired,
   imageData: PropTypes.object,
   tubes: PropTypes.array,
 };
