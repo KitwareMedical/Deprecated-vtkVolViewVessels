@@ -8,7 +8,7 @@ import connect from '../state';
 import style from '../Tube.mcss';
 
 // TODO move ColorPresets to some constants module
-import { ColorPresets } from '../stores/ImageStore';
+import { ColorPresets } from '../stores/VolumeRenderStore';
 
 function ControllableVolumeView({
   image,
@@ -45,9 +45,9 @@ ControllableVolumeView.defaultProps = {
   scalarOpacity: 0,
 };
 
-export default connect(ControllableVolumeView, ['image'],
+export default connect(ControllableVolumeView, ['image', 'volumeRender'],
   (stores, props) => ({
     image: stores.image.data.image,
-    scalarOpacity: stores.image.data.scalarOpacity,
-    colorMap: stores.image.data.colorMap,
+    scalarOpacity: stores.volumeRender.data.scalarOpacity,
+    colorMap: stores.volumeRender.data.colorMap,
   }));

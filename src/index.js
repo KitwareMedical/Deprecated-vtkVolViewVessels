@@ -7,6 +7,7 @@ import enUS from 'antd/lib/locale-provider/en_US';
 import App from './ui/App';
 import ApiStore from './stores/ApiStore';
 import ImageStore from './stores/ImageStore';
+import VolumeRenderStore from './stores/VolumeRenderStore';
 
 import mode from './mode';
 
@@ -18,6 +19,7 @@ function main(dataManager) {
   const stores = {
     api: new ApiStore(dataManager),
     image: new ImageStore(),
+    volumeRender: new VolumeRenderStore(),
   };
 
   render(
