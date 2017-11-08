@@ -96,11 +96,11 @@ function TubeTreeView({
     onChange: (keys, rows) => dispatch(actions.setSelection, keys, rows),
   };
 
-//          rowKey="id"
   return (
     <div className={[style.verticalContainer, style.itemStretch, style.border].join(' ')}>
       <div className={[style.itemStretch, style.overflowScroll].join(' ')}>
         <Table
+          rowKey="id"
           pagination={false}
           columns={columns}
           dataSource={tubeTree}
