@@ -14,6 +14,7 @@ class Messages extends React.Component {
   componentWillReceiveProps(props) {
     const { loading: prevLoading } = this.props;
     const { loading: curLoading } = props;
+
     if (prevLoading !== curLoading) {
       if (curLoading) {
         this.closeHandler = message.loading('Loading...', 0);

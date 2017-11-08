@@ -242,7 +242,7 @@ class App extends React.Component {
       <div className={style.reactRoot}>
         <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
           <ControllableSliceView stores={stores} />
-          <ControllableVolumeView stores={this.props.stores} />
+          <ControllableVolumeView stores={stores} />
         </div>
         <Messages stores={stores} />
       </div>

@@ -12,7 +12,7 @@ export function loadImage(stores, filename) {
     })
     .catch((err) => {
       // TODO move this to a console logging component
-      // console.error(err);
+      console.error(err);
       stores.image.error = err;
     });
 }

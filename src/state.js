@@ -20,6 +20,8 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
       }
 
       this.stores = stores;
+
+      // TODO make errors in the mappers less nebulous
       this.state = storeMapper(stores, props);
       this.actions = actionMapper(props);
 
