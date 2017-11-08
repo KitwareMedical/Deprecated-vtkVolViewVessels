@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-// import { Tabs, Button, Modal, message as Message } from 'antd';
+import { Tabs } from 'antd';
 
 // import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 // import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
@@ -11,13 +11,14 @@ import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
+import Info from './Info';
 import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
 // import TubeController from './TubeController';
 // import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import RemoteFsExplorer from './RemoteFsExplorer';
-//
-// const TabPane = Tabs.TabPane;
+
+const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
 //  constructor(props) {
@@ -244,6 +245,11 @@ class App extends React.Component {
           <ControllableSliceView stores={stores} />
           <ControllableVolumeView stores={stores} />
         </div>
+        <Tabs type="card">
+          <TabPane forceRender key="info" tab="Info">
+            <Info stores={stores} />
+          </TabPane>
+        </Tabs>
         <Messages stores={stores} />
       </div>
     );
