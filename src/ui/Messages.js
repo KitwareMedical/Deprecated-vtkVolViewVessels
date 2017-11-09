@@ -40,8 +40,8 @@ Messages.defaultProps = {
   loading: false,
 };
 
-export default connect(Messages, ['image'],
+export default connect(Messages, ['image', 'tubes'],
   // stores to props
   (stores, props) => ({
-    loading: stores.image.data.loading,
+    loading: stores.image.data.loading || stores.tubes.data.loading,
   }));

@@ -17,7 +17,7 @@ import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
-import { updateTube } from '../actions/TubeActions';
+import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
 const TabPane = Tabs.TabPane;
@@ -42,6 +42,7 @@ class App extends React.Component {
 //    this.loadData();
     const { dispatch } = this.props;
     dispatch(loadImage);
+    dispatch(loadTubes);
   }
 
   componentWillReceiveProps(props) {

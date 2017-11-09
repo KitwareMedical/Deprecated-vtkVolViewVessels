@@ -52,6 +52,10 @@ export default class ApiStore extends Store {
     });
   }
 
+  loadTubes() {
+    return this.dataManager.ITKTube.getTubes();
+  }
+
   segmentTube(coords, scale) {
     return this.dataManager.ITKTube.generateTube(...coords, scale);
   }

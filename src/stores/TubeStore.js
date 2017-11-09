@@ -9,6 +9,8 @@ export default class TubeStore extends Store {
         keys: [],
         values: [],
       },
+
+      loading: false,
     };
   }
 
@@ -16,8 +18,13 @@ export default class TubeStore extends Store {
     return this.privateData;
   }
 
-  addTube(tube) {
-    this.privateData.tubes.push(tube);
+  set loading(state) {
+    this.privateData.loading = state;
+    this.update();
+  }
+
+  addTubes(tubes) {
+    this.privateData.tubes = this.privateData.tubes.concat(tubes);
     this.update();
   }
 

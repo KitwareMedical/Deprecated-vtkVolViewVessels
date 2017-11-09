@@ -2,17 +2,23 @@ export function setSegmentScale(stores, scale) {
   stores.segment.scale = scale;
 }
 
+export function setLoading(stores, state) {
+  stores.tubes.loading = state;
+}
+
 export function changeJobCount(stores, delta) {
   // prevent jobs from ever entering the negative world
   stores.segment.jobs = Math.max(0, stores.segment.data.jobs + delta);
 }
 
-export function addTube(stores, tube) {
-  Object.assign(tube, {
-    visible: true,
-    key: tube.id,
+export function addTubes(stores, tubes) {
+  tubes.forEach((tube) => {
+    Object.assign(tube, {
+      visible: true,
+      key: tube.id,
+    });
   });
-  stores.tubes.addTube(tube);
+  stores.tubes.addTubes(tubes);
 }
 
 export function updateTube(stores, tube) {
@@ -20,15 +26,24 @@ export function updateTube(stores, tube) {
     changeJobCount(stores, -1);
     stores.tubes.updateTube(tube);
   } else {
-    addTube(stores, tube);
+    addTubes(stores, [tube]);
   }
+}
+
+export function loadTubes(stores) {
+  setLoading(stores, true);
+  stores.api.loadTubes()
+    .then((tubes) => {
+      setLoading(stores, false);
+      addTubes(stores, tubes);
+    });
 }
 
 export function segmentTube(stores, coord) {
   changeJobCount(stores, 1);
   stores.api.segmentTube(coord, stores.segment.data.scale)
     .then((tube) => {
-      addTube(stores, tube);
+      addTubes(stores, [tube]);
     });
 }
 
