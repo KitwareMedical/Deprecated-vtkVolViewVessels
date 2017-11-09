@@ -6,6 +6,7 @@ import connect from '../state';
 import SliceView from './SliceView';
 import SliceControls from './SliceControls';
 import * as ImageActions from '../actions/ImageActions';
+import * as TubeActions from '../actions/TubeActions';
 
 import style from '../Tube.mcss';
 
@@ -23,6 +24,7 @@ function ControllableSliceView({
         imageData={image}
         sliceMode={sliceMode}
         slice={slicePosition}
+        onPickIJK={coords => dispatch(actions.segmentTube, coords)}
       />
       <SliceControls
         slice={slicePosition}
@@ -57,5 +59,8 @@ export default connect(ControllableSliceView, 'image',
     sliceMaximum: stores.image.data.sliceMaximum,
     sliceMode: stores.image.data.sliceMode,
   }),
-  () => ImageActions,
+  () => ({
+    setSlice: ImageActions.setSlice,
+    segmentTube: TubeActions.segmentTube,
+  }),
 );

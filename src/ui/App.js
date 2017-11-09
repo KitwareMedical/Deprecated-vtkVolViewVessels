@@ -17,6 +17,7 @@ import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 import Messages from './Messages';
 import { loadImage } from '../actions/ImageActions';
+import { updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
 const TabPane = Tabs.TabPane;
@@ -41,6 +42,15 @@ class App extends React.Component {
 //    this.loadData();
     const { dispatch } = this.props;
     dispatch(loadImage);
+  }
+
+  componentWillReceiveProps(props) {
+    const { actions, dispatch, tubeResult } = props;
+    const { tubeResult: prevTubeResult } = this.props;
+
+    if (prevTubeResult !== tubeResult) {
+      dispatch(actions.updateTube, tubeResult);
+    }
   }
 
   componentWillUnmount() {
@@ -267,10 +277,22 @@ class App extends React.Component {
 }
 
 App.propTypes = {
+  tubeResult: PropTypes.object,
+
   dispatch: PropTypes.func.isRequired,
   stores: PropTypes.object.isRequired,
+  actions: PropTypes.object.isRequired,
 };
 
-// TODO remove this when opening files is possible
-// App doesn't connect to any stores, but needs to be able to dispatch the initial load image
-export default connect(App);
+App.defaultProps = {
+  tubeResult: null,
+};
+
+// App listens to published messages from the API
+export default connect(App, 'api',
+  (stores, props) => ({
+    tubeResult: stores.api.data.tubeResult,
+  }),
+  () => ({
+    updateTube,
+  }));

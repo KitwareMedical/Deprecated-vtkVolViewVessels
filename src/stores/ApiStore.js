@@ -7,7 +7,23 @@ export default class ApiStore extends Store {
   constructor(dataManager) {
     super();
     this.dataManager = dataManager;
-    this.privateData = {};
+    this.privateData = {
+      // NOTE can one result get overwritten by another before callbacks
+      // are handled?
+      tubeResult: null,
+    };
+
+    // subscribe to server events
+    this.subscription = this.dataManager.ITKTube.onTubeGeneratorChange((item) => {
+      // TODO figure out why remote sends as array
+      let tubeItem = item;
+      if (tubeItem instanceof Array) {
+        tubeItem = tubeItem[0];
+      }
+
+      this.privateData.tubeResult = tubeItem;
+      this.update();
+    });
   }
 
   get data() {
@@ -34,5 +50,9 @@ export default class ApiStore extends Store {
         })
         .catch(e => reject(e));
     });
+  }
+
+  segmentTube(coords, scale) {
+    return this.dataManager.ITKTube.generateTube(...coords, scale);
   }
 }
