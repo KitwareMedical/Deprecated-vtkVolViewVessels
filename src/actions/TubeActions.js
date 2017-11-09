@@ -48,7 +48,11 @@ export function segmentTube(stores, coord) {
 }
 
 export function setTubeVisibility(stores, id, visibility) {
-  console.log('setTubeVisibility');
+  const tube = stores.tubes.data.tubes.find(t => t.id === id);
+  if (tube) {
+    tube.visible = visibility;
+    stores.tubes.updateTube(tube);
+  }
 }
 
 export function setTubeColor(stores, id, color) {
