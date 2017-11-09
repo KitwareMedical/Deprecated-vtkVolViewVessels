@@ -1,6 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+function partial(func, ...args) {
+  return (...moreArgs) => {
+    func(...args, ...moreArgs);
+  };
+}
+
 export default function connect(Component, storeNames, mapStoreToProps, mapActionsToProps) {
   let names = storeNames || [];
   if (typeof names === 'string') {
@@ -31,18 +37,18 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
 
     componentDidMount() {
       names.forEach(name =>
-          this.stores[name].addChangeListener(this.onStoreChanged));
+          this.stores[name].addChangeListener(partial(this.onStoreChanged, name)));
     }
 
     componentWillUnmount() {
       names.forEach(name =>
-          this.stores[name].removeChangeListener(this.onStoreChanged));
+          this.stores[name].removeChangeListener(partial(this.onStoreChanged, name)));
     }
 
-    onStoreChanged() {
+    onStoreChanged(storeName) {
       const subset = {};
       names.forEach((name) => { subset[name] = this.stores[name]; });
-      this.setState(storeMapper(subset, this.props));
+      this.setState(storeMapper(subset, this.props, storeName));
     }
 
     dispatch(action, ...args) {

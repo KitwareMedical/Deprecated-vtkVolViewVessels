@@ -59,13 +59,22 @@ ControllableVolumeView.defaultProps = {
 };
 
 export default connect(ControllableVolumeView, ['image', 'tubes', 'volumeRender'],
-  (stores, props) => ({
-    image: stores.image.data.image,
-    // only allow tubes with a mesh
-    tubes: stores.tubes.data.tubes.filter(tube => tube.mesh),
-    scalarOpacity: stores.volumeRender.data.scalarOpacity,
-    colorMap: stores.volumeRender.data.colorMap,
-    transferFunctionWidget: stores.volumeRender.data.transferFunctionWidget,
-  }),
+  (stores, props, updated) => {
+    switch (updated) {
+      case 'image':
+        return { image: stores.image.data.image };
+      case 'tubes':
+        return { tubes: stores.tubes.data.tubes.filter(tube => tube.mesh) };
+      case 'volumeRender':
+        return {
+          scalarOpacity: stores.volumeRender.data.scalarOpacity,
+          colorMap: stores.volumeRender.data.colorMap,
+          transferFunctionWidget: stores.volumeRender.data.transferFunctionWidget,
+        };
+      default:
+        // return the defaults, with the colorMap coming from the volumeRender store
+        return Object.assign({ colorMap: stores.volumeRender.data.colorMap }, ControllableVolumeView.defaultProps);
+    }
+  },
   () => VolumeActions,
 );
