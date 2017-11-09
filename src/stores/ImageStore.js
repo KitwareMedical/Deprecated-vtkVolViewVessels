@@ -8,6 +8,8 @@ export default class ImageStore extends Store {
       sliceMode: 2, // Z axis
       slicePosition: 0,
       sliceMaximum: 1,
+
+      loading: false,
     };
   }
 
