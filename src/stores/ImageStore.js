@@ -17,7 +17,7 @@ export const setImage = image => (data, setData) => {
   });
 };
 
-export const setSlicePos = slicePos => (data) => ({ ...data, slicePos });
+export const setSlicePos = slicePos => data => ({ ...data, slicePos });
 
 // export default
 export const data = () => ({
