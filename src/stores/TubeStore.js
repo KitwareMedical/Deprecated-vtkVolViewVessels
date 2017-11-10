@@ -23,6 +23,11 @@ export default class TubeStore extends Store {
     this.update();
   }
 
+  set tubes(tubes) {
+    this.privateData.tubes = tubes;
+    this.update();
+  }
+
   addTubes(tubes) {
     this.privateData.tubes = this.privateData.tubes.concat(tubes);
     this.update();

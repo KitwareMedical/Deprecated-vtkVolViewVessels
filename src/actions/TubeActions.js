@@ -64,6 +64,13 @@ export function reparentSelectedTubes(stores, parentId) {
 }
 
 export function deleteTube(stores, id) {
+  stores.api.deleteTube(id)
+    .then((resp) => {
+      if (resp.status === 'ok') {
+        // delete tube
+        stores.tubes.tubes = stores.tubes.data.tubes.filter(tube => tube.id !== id);
+      }
+    });
   console.log('deleteTube');
 }
 

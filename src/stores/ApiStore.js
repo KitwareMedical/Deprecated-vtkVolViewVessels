@@ -59,4 +59,8 @@ export default class ApiStore extends Store {
   segmentTube(coords, scale) {
     return this.dataManager.ITKTube.generateTube(...coords, scale);
   }
+
+  deleteTube(id) {
+    return this.dataManager.ITKTube.deleteTube(id);
+  }
 }

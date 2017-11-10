@@ -274,6 +274,7 @@ class ItkTubeProtocol(LinkProtocol):
                 del self.tubeCache[index]
                 self.curIndex -= 1
                 break
+        return okay()
 
     @register('itk.tube.setcolor')
     def setTubeColor(self, tubeId, color):
