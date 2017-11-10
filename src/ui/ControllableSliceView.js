@@ -7,16 +7,17 @@ import SliceView from './SliceView';
 import SliceControls from './SliceControls';
 // import * as ImageActions from '../actions/ImageActions';
 // import * as TubeActions from '../actions/TubeActions';
+import { setSlicePos } from '../stores/ImageStore';
 
 import style from '../Tube.mcss';
 
 function ControllableSliceView({
+  stores: { imageStore },
   image,
   slicePosition,
   sliceMaximum,
   sliceMode,
 }) {
-  console.log('controllable', image);
   return (
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <SliceView
@@ -28,8 +29,8 @@ function ControllableSliceView({
       <SliceControls
         slice={slicePosition}
         sliceMax={sliceMaximum}
+        onSliceChange={slice => imageStore.dispatch(setSlicePos(slice))}
       />
-      { /* onSliceChange={slice => dispatch(actions.setSlice, slice)} */ }
     </div>
   );
 }

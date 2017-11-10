@@ -20,7 +20,11 @@ class Store2 {
   }
 
   dispatch(action) {
-    action(this.privateData, this.setData, ...this.privateActionArgs);
+    const result = action(this.privateData, this.setData, ...this.privateActionArgs);
+    if (action.length === 1 && typeof result === 'object') {
+      // this is a simple case, so we just call setData automatically
+      this.setData(result);
+    }
   }
 
   setData(newData) {
