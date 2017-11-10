@@ -56,6 +56,24 @@ export function setTubeVisibility(stores, id, visibility) {
 }
 
 export function setTubeColor(stores, id, color) {
+  const normColor = [color.r / 255, color.g / 255, color.b / 255];
+  stores.api.setTubeColor(id, normColor)
+    .then((resp) => {
+      if (resp.status === 'ok') {
+        const tubes = stores.tubes.data.tubes;
+        const idx = tubes.findIndex(tube => tube.id === id);
+        if (idx > -1) {
+          tubes[idx].color = normColor;
+          stores.tubes.tubes = tubes;
+        } else {
+          // set error
+          console.error(`Could not find tube ${id} to set color`);
+        }
+      } else {
+        // set error
+        console.error(`Could not set tube ${id} color`);
+      }
+    });
   console.log('setTubeColor');
 }
 

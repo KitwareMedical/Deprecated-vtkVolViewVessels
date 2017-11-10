@@ -282,6 +282,7 @@ class ItkTubeProtocol(LinkProtocol):
             if item['id'] == tubeId:
                 item['color'] = color
                 break
+        return okay()
 
     @register('itk.tube.reparent')
     def reparentTubes(self, parent, children):

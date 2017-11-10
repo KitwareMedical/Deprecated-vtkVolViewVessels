@@ -60,6 +60,10 @@ export default class ApiStore extends Store {
     return this.dataManager.ITKTube.generateTube(...coords, scale);
   }
 
+  setTubeColor(id, color) {
+    return this.dataManager.ITKTube.setTubeColor(id, color);
+  }
+
   deleteTube(id) {
     return this.dataManager.ITKTube.deleteTube(id);
   }
