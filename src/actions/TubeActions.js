@@ -93,5 +93,6 @@ export function deleteTube(stores, id) {
 }
 
 export function setSelection(stores, keys, records) {
+  stores.tubes.setSelection(keys, records);
   console.log('setSelection');
 }

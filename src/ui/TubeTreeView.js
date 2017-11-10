@@ -133,6 +133,7 @@ TubeTreeView.defaultProps = {
 export default connect(TubeTreeView, 'tubes',
   (stores, props) => ({
     tubes: stores.tubes.data.tubes,
+    selection: stores.tubes.data.selection,
   }),
   () => TubeActions,
 );

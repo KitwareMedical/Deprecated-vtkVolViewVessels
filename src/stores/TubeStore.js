@@ -51,4 +51,10 @@ export default class TubeStore extends Store {
       this.privateData.tubes.splice(tubeIndex, 1);
     }
   }
+
+  setSelection(keys, values) {
+    this.privateData.selection.keys = keys;
+    this.privateData.selection.values = values;
+    this.update();
+  }
 }
