@@ -78,7 +78,7 @@ function TubeTreeView({
             </Button>
             <span className="ant-divider" />
             { selection.keys.length > 0 ?
-              <a href="#!" onClick={(ev) => { dispatch(actions.reparentSelectedTubes, tube.id); ev.preventDefault(); }}>
+              <a href="#!" onClick={(ev) => { dispatch(actions.reparentTubes, tube.id); ev.preventDefault(); }}>
                 Make parent
               </a>
               :

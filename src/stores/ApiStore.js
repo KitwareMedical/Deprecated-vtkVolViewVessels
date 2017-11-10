@@ -64,6 +64,10 @@ export default class ApiStore extends Store {
     return this.dataManager.ITKTube.setTubeColor(id, color);
   }
 
+  reparentTubes(parent, children) {
+    return this.dataManager.ITKTube.reparentTubes(parent, children);
+  }
+
   deleteTube(id) {
     return this.dataManager.ITKTube.deleteTube(id);
   }

@@ -77,7 +77,27 @@ export function setTubeColor(stores, id, color) {
   console.log('setTubeColor');
 }
 
-export function reparentSelectedTubes(stores, parentId) {
+export function setSelection(stores, keys, records) {
+  stores.tubes.setSelection(keys, records);
+  console.log('setSelection');
+}
+
+export function reparentTubes(stores, parentId) {
+  const children = stores.tubes.data.selection.values.map(tube => tube.id);
+  stores.api.reparentTubes(parentId, children)
+    .then((resp) => {
+      if (resp.status === 'ok') {
+        const tubes = stores.tubes.data.tubes;
+        tubes.forEach((tube) => {
+          if (children.indexOf(tube.id) > -1) {
+            tube.parent = parentId;
+          }
+        });
+        stores.tubes.tubes = tubes;
+        // clear tube tree selection
+        setSelection(stores, [], []);
+      }
+    });
   console.log('reparentSelectedTubes');
 }
 
@@ -90,9 +110,4 @@ export function deleteTube(stores, id) {
       }
     });
   console.log('deleteTube');
-}
-
-export function setSelection(stores, keys, records) {
-  stores.tubes.setSelection(keys, records);
-  console.log('setSelection');
 }
