@@ -7,14 +7,26 @@ function partial(func, ...args) {
   };
 }
 
-export default function connect(Component, storeNames, mapStoreToProps, mapActionsToProps) {
+export function connectAction(srcStore, watchedKey, dstStore, action) {
+  const listenForChanges = (changedKeys) => {
+    if (changedKeys.includes(watchedKey)) {
+      console.log('connectAction', watchedKey, srcStore[watchedKey]);
+      dstStore.dispatch(action(srcStore[watchedKey]));
+    }
+  };
+  srcStore.addChangeListener(listenForChanges);
+
+  const disconnect = () => srcStore.removeChangeListener(listenForChanges);
+  return disconnect;
+}
+
+export function connectComponent(Component, storeNames, mapStoreToProps, actions) {
   let names = storeNames || [];
   if (typeof names === 'string') {
     names = [names];
   }
 
   const storeMapper = mapStoreToProps || (() => ({}));
-  const actionMapper = mapActionsToProps || (() => ({}));
 
   class ConnectedComponent extends React.Component {
     constructor(props) {
@@ -29,10 +41,9 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
 
       // TODO make errors in the mappers less nebulous
       this.state = storeMapper(stores, props);
-      this.actions = actionMapper(props);
+      this.actions = actions;
 
       this.onStoreChanged = this.onStoreChanged.bind(this);
-      this.dispatch = this.dispatch.bind(this);
     }
 
     componentDidMount() {
@@ -45,18 +56,16 @@ export default function connect(Component, storeNames, mapStoreToProps, mapActio
           this.stores[name].removeChangeListener(partial(this.onStoreChanged, name)));
     }
 
-    onStoreChanged(storeName) {
+    onStoreChanged(storeName, changedKeys) {
       const subset = {};
       names.forEach((name) => { subset[name] = this.stores[name]; });
+
+      console.log(storeName, changedKeys);
       this.setState(storeMapper(subset, this.props, storeName));
     }
 
-    dispatch(action, ...args) {
-      action(this.stores, ...args);
-    }
-
     render() {
-      return <Component dispatch={this.dispatch} {...this.state} actions={this.actions} {...this.props} />;
+      return <Component {...this.state} {...this.props} />;
     }
   }
 

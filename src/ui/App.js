@@ -1,28 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Tabs } from 'antd';
+// import { Tabs } from 'antd';
 
 // import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 // import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
-import connect from '../state';
+import { connectAction, connectComponent } from '../state';
 import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
-import ControllableVolumeView from './ControllableVolumeView';
-import Info from './Info';
-import SegmentControls from './SegmentControls';
-import TubeTreeView from './TubeTreeView';
-import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
-import Messages from './Messages';
-import { loadImage } from '../actions/ImageActions';
-import { loadTubes, updateTube } from '../actions/TubeActions';
+// import ControllableVolumeView from './ControllableVolumeView';
+// import Info from './Info';
+// import SegmentControls from './SegmentControls';
+// import TubeTreeView from './TubeTreeView';
+// import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
+// import Messages from './Messages';
+// import { loadImage } from '../actions/ImageActions';
+import { loadImage } from '../stores/ApiStore';
+import { setImage } from '../stores/ImageStore';
+// import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
-const TabPane = Tabs.TabPane;
+// const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.disconnects = [];
+  }
 //  constructor(props) {
 //    super(props);
 //    this.state = {
@@ -40,18 +46,27 @@ class App extends React.Component {
 //    this.controllableVolumeView.volumeView.setTransferFunctionWidget(this.volumeTransferWidget.vtkWidget);
 //    this.subscribeToServer();
 //    this.loadData();
-    const { dispatch } = this.props;
-    dispatch(loadImage);
-    dispatch(loadTubes);
+//    const { dispatch } = this.props;
+    // dispatch(loadImage);
+    // dispatch(loadTubes);
+    const { stores: { apiStore, imageStore } } = this.props;
+
+    this.disconnects = [
+      // runs imageStore.dispatch(setImage(fetchedImage)) when fetchedImage changes in apiStore
+      connectAction(apiStore, 'fetchedImage', imageStore, setImage),
+    ];
+
+    apiStore.dispatch(loadImage);
   }
 
   componentWillReceiveProps(props) {
+    /*
     const { actions, dispatch, tubeResult } = props;
     const { tubeResult: prevTubeResult } = this.props;
 
     if (prevTubeResult !== tubeResult) {
       dispatch(actions.updateTube, tubeResult);
-    }
+    } */
   }
 
   componentWillUnmount() {
@@ -255,8 +270,9 @@ class App extends React.Component {
       <div className={style.reactRoot}>
         <div className={[style.vtkViewer, style.horizontalContainer, style.itemStretch].join(' ')}>
           <ControllableSliceView stores={stores} />
-          <ControllableVolumeView stores={stores} />
+          { /* <ControllableVolumeView stores={stores} /> */ }
         </div>
+        { /*
         <Tabs type="card">
           <TabPane forceRender key="info" tab="Info">
             <Info stores={stores} />
@@ -271,29 +287,15 @@ class App extends React.Component {
             <PiecewiseGaussianWidget stores={stores} />
           </TabPane>
         </Tabs>
-        <Messages stores={stores} />
+        <Messages stores={stores} /> */ }
       </div>
     );
   }
 }
 
 App.propTypes = {
-  tubeResult: PropTypes.object,
-
-  dispatch: PropTypes.func.isRequired,
   stores: PropTypes.object.isRequired,
-  actions: PropTypes.object.isRequired,
-};
-
-App.defaultProps = {
-  tubeResult: null,
 };
 
 // App listens to published messages from the API
-export default connect(App, 'api',
-  (stores, props) => ({
-    tubeResult: stores.api.data.tubeResult,
-  }),
-  () => ({
-    updateTube,
-  }));
+export default connectComponent(App, 'apiStore');

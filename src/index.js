@@ -5,21 +5,27 @@ import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import App from './ui/App';
-import ApiStore from './stores/ApiStore';
-import ImageStore from './stores/ImageStore';
-import SegmentStore from './stores/SegmentStore';
-import TubeStore from './stores/TubeStore';
-import VolumeRenderStore from './stores/VolumeRenderStore';
+import Api from './api';
+
+import { data as imageData } from './stores/ImageStore';
+import { data as apiData } from './stores/ApiStore';
+
+import { createStore } from './stores/stores';
+// import ApiStore from './stores/ApiStore';
+// import ImageStore from './stores/ImageStore';
+// import SegmentStore from './stores/SegmentStore';
+// import TubeStore from './stores/TubeStore';
+// import VolumeRenderStore from './stores/VolumeRenderStore';
 
 import mode from './mode';
 
 function main(dataManager) {
   const stores = {
-    api: new ApiStore(dataManager),
-    image: new ImageStore(),
-    volumeRender: new VolumeRenderStore(),
-    segment: new SegmentStore(),
-    tubes: new TubeStore(),
+    apiStore: createStore(apiData(), new Api(dataManager)),
+    imageStore: createStore(imageData()),
+    // volumeRender: new VolumeRenderStore(),
+    // segment: new SegmentStore(),
+    // tubes: new TubeStore(),
   };
 
   render(

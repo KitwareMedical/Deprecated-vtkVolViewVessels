@@ -3,6 +3,16 @@ import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
 import Store from './stores';
 
+export const loadImage = (data, setData, api) => {
+  console.log('loadImage');
+  api.loadImage()
+    .then(fetchedImage => setData({ ...data, fetchedImage }));
+};
+
+export const data = () => ({
+  fetchedImage: null,
+});
+
 export default class ApiStore extends Store {
   constructor(dataManager) {
     super();

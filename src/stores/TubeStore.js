@@ -1,5 +1,11 @@
 import Store from './stores';
 
+// export default
+export const data = () => ({
+  tubeOrder: [],
+  tubes: {},
+});
+
 export default class TubeStore extends Store {
   constructor() {
     super();
