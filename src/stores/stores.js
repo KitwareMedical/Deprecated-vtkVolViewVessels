@@ -1,4 +1,10 @@
-class Store2 {
+/**
+ * Creates a new store.
+ *
+ * A list of side effects can be given as a sequence of Functions.
+ * Each side effect will be called with (store, action).
+ */
+export default class Store {
   constructor(data, ...sideEffects) {
     this.privateData = data;
     this.privateListeners = [];
@@ -60,29 +66,4 @@ class Store2 {
     this.privateListeners.splice(this.privateListeners.indexOf(func), 1);
   }
 
-}
-
-export const createStore = (data, ...args) => new Store2(data, ...args);
-
-export default class Store {
-  constructor() {
-    this.privateData = null;
-    this.privateListeners = [];
-  }
-
-  get data() {
-    throw new Error('.data() not implemented');
-  }
-
-  update() {
-    this.privateListeners.forEach(func => func());
-  }
-
-  addChangeListener(func) {
-    this.privateListeners.push(func);
-  }
-
-  removeChangeListener(func) {
-    this.privateListeners.splice(this.privateListeners.indexOf(func), 1);
-  }
 }

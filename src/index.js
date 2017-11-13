@@ -12,7 +12,7 @@ import { data as tubeData } from './stores/TubeStore';
 import volumeData from './stores/VolumeStore';
 import segmentData from './stores/SegmentStore';
 
-import { createStore } from './stores/stores';
+import Store from './stores/stores';
 // import ApiStore from './stores/ApiStore';
 // import ImageStore from './stores/ImageStore';
 // import SegmentStore from './stores/SegmentStore';
@@ -24,10 +24,10 @@ import mode from './mode';
 function main(dataManager) {
   const api = new Api(dataManager);
   const stores = {
-    imageStore: createStore(imageData(), imageLoader(api)),
-    tubeStore: createStore(tubeData()),
-    volumeStore: createStore(volumeData()),
-    segmentStore: createStore(segmentData()),
+    imageStore: new Store(imageData(), imageLoader(api)),
+    tubeStore: new Store(tubeData()),
+    volumeStore: new Store(volumeData()),
+    segmentStore: new Store(segmentData()),
     // volumeRender: new VolumeRenderStore(),
     // segment: new SegmentStore(),
     // tubes: new TubeStore(),
