@@ -57,6 +57,4 @@ export default connectComponent(ControllableSliceView, 'imageStore',
     sliceMaximum: imageStore.sliceMax,
     sliceMode: imageStore.sliceMode,
   }),
-  {
-  },
 );

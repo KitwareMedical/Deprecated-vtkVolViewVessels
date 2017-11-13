@@ -20,7 +20,7 @@ export function connectAction(srcStore, watchedKey, dstStore, action) {
   return disconnect;
 }
 
-export function connectComponent(Component, storeNames, mapStoreToProps, actions) {
+export function connectComponent(Component, storeNames, mapStoreToProps) {
   let names = storeNames || [];
   if (typeof names === 'string') {
     names = [names];
@@ -41,7 +41,6 @@ export function connectComponent(Component, storeNames, mapStoreToProps, actions
 
       // TODO make errors in the mappers less nebulous
       this.state = storeMapper(stores, props);
-      this.actions = actions;
 
       this.onStoreChanged = this.onStoreChanged.bind(this);
     }
