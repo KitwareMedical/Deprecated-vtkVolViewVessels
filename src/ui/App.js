@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-// import { Tabs } from 'antd';
+import { Tabs } from 'antd';
 
 // import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 // import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
@@ -11,7 +11,7 @@ import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
-// import Info from './Info';
+import Info from './Info';
 // import SegmentControls from './SegmentControls';
 // import TubeTreeView from './TubeTreeView';
 // import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
@@ -23,7 +23,7 @@ import { updateTube } from '../stores/TubeStore';
 // import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
-// const TabPane = Tabs.TabPane;
+const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
   constructor(props) {
@@ -275,6 +275,11 @@ class App extends React.Component {
           <ControllableSliceView stores={stores} />
           <ControllableVolumeView stores={stores} />
         </div>
+        <Tabs type="card">
+          <TabPane forceRender key="info" tab="Info">
+            <Info stores={stores} />
+          </TabPane>
+        </Tabs>
         { /*
         <Tabs type="card">
           <TabPane forceRender key="info" tab="Info">

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import connect from '../state';
+import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
 function Info({ image }) {
@@ -34,6 +34,6 @@ Info.defaultProps = {
   image: null,
 };
 
-export default connect(Info, 'image', (stores, props) => ({
-  image: stores.image.data.image,
+export default connectComponent(Info, 'imageStore', ({ imageStore }, props) => ({
+  image: imageStore.image,
 }));
