@@ -3,16 +3,16 @@ import PropTypes from 'prop-types';
 
 import vtkPiecewiseGaussianWidget from 'vtk.js/Sources/Interaction/Widgets/PiecewiseGaussianWidget';
 
-import connect from '../state';
+import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
-import * as VolumeActions from '../actions/VolumeActions';
+import { setTransferFunctionWidget } from '../stores/VolumeStore';
 
 class PiecewiseGaussianWidget extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO transfer ownership of this widget to the VolumeRenderStore?
+    // TODO transfer creation of this widget to the VolumeStore?
     this.transferFunctionWidget = vtkPiecewiseGaussianWidget.newInstance({ numberOfBins: 256, size: [400, 168] });
     this.transferFunctionWidget.updateStyle({
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
@@ -37,10 +37,9 @@ class PiecewiseGaussianWidget extends React.Component {
   }
 
   componentDidMount() {
+    const { stores: { volumeStore } } = this.props;
     this.transferFunctionWidget.setContainer(this.container);
-
-    const { actions, dispatch } = this.props;
-    dispatch(actions.setTransferFunctionWidget, this.transferFunctionWidget);
+    volumeStore.dispatch(setTransferFunctionWidget(this.transferFunctionWidget));
   }
 
   render() {
@@ -53,8 +52,7 @@ class PiecewiseGaussianWidget extends React.Component {
 }
 
 PiecewiseGaussianWidget.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  actions: PropTypes.object.isRequired,
+  stores: PropTypes.object.isRequired,
 };
 
-export default connect(PiecewiseGaussianWidget, 'volumeRender', undefined, () => VolumeActions);
+export default connectComponent(PiecewiseGaussianWidget, 'volumeStore');

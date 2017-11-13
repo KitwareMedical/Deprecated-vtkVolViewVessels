@@ -14,7 +14,7 @@ import ControllableVolumeView from './ControllableVolumeView';
 import Info from './Info';
 // import SegmentControls from './SegmentControls';
 // import TubeTreeView from './TubeTreeView';
-// import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
+import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import Messages from './Messages';
 // import { loadImage } from '../actions/ImageActions';
 import { loadImage } from '../stores/ApiStore';
@@ -278,6 +278,9 @@ class App extends React.Component {
         <Tabs type="card">
           <TabPane forceRender key="info" tab="Info">
             <Info stores={stores} />
+          </TabPane>
+          <TabPane forceRender key="volume" tab="Volume">
+            <PiecewiseGaussianWidget stores={stores} />
           </TabPane>
         </Tabs>
         { /*

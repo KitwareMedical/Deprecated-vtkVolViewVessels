@@ -8,6 +8,11 @@ export const ColorPresets = ColorMaps
   .sort((a, b) => a.Name.localeCompare(b.Name))
   .filter((p, i, arr) => !i || p.Name !== arr[i - 1].Name);
 
+export const setTransferFunctionWidget = transferFunctionWidget => data => ({
+  ...data,
+  transferFunctionWidget,
+});
+
 const data = () => ({
   colorMap: ColorPresets[0],
   scalarOpacity: DEFAULT_SCALAR_OPACITY,
