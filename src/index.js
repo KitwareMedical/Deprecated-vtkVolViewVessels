@@ -11,6 +11,7 @@ import { data as imageData } from './stores/ImageStore';
 import { data as apiData } from './stores/ApiStore';
 import { data as tubeData } from './stores/TubeStore';
 import volumeData from './stores/VolumeStore';
+import segmentData from './stores/SegmentStore';
 
 import { createStore } from './stores/stores';
 // import ApiStore from './stores/ApiStore';
@@ -28,6 +29,7 @@ function main(dataManager) {
     imageStore: createStore(imageData()),
     tubeStore: createStore(tubeData()),
     volumeStore: createStore(volumeData()),
+    segmentStore: createStore(segmentData()),
     // volumeRender: new VolumeRenderStore(),
     // segment: new SegmentStore(),
     // tubes: new TubeStore(),
