@@ -8,7 +8,7 @@ import App from './ui/App';
 import Api from './api';
 
 import imageData, { imageLoader } from './stores/ImageStore';
-import { data as tubeData } from './stores/TubeStore';
+import { data as tubeData, tubeSideEffects } from './stores/TubeStore';
 import volumeData from './stores/VolumeStore';
 import segmentData from './stores/SegmentStore';
 
@@ -25,7 +25,7 @@ function main(dataManager) {
   const api = new Api(dataManager);
   const stores = {
     imageStore: new Store(imageData(), imageLoader(api)),
-    tubeStore: new Store(tubeData()),
+    tubeStore: new Store(tubeData(), tubeSideEffects(api)),
     volumeStore: new Store(volumeData()),
     segmentStore: new Store(segmentData()),
     // volumeRender: new VolumeRenderStore(),

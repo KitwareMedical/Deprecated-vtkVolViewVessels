@@ -12,12 +12,12 @@ import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
 import Info from './Info';
 import SegmentControls from './SegmentControls';
-// import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import Messages from './Messages';
 // import { loadImage } from '../actions/ImageActions';
-import { loadImage, setImage } from '../stores/ImageStore';
-import { updateTube } from '../stores/TubeStore';
+import { loadImage } from '../stores/ImageStore';
+import { loadTubes } from '../stores/TubeStore';
+// import { updateTube } from '../stores/TubeStore';
 // import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
@@ -51,6 +51,7 @@ class App extends React.Component {
     const { stores: { imageStore, tubeStore } } = this.props;
 
     imageStore.dispatch(loadImage());
+    tubeStore.dispatch(loadTubes());
   }
 
   componentWillReceiveProps(props) {

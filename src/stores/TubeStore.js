@@ -1,4 +1,7 @@
 import Store from './stores';
+import { Action } from '../state';
+
+export const loadTubes = Action('loadTubes', () => () => { /* noop */ });
 
 export const addTube = tube => (data) => {
   const newTube = Object.assign({
@@ -11,12 +14,42 @@ export const addTube = tube => (data) => {
   };
 };
 
+export const addTubeBulk = tubes => (data) => {
+  const tubeIds = tubes.map(tube => tube.id);
+  const newTubes = [];
+  tubes.forEach((tube) => {
+    newTubes[tube.id] = Object.assign({
+      visible: true,
+    });
+  });
+  return {
+    ...data,
+    tubeOrder: [
+      ...data.tubeOrder,
+      ...tubeIds,
+    ],
+    tubes: {
+      ...data.tubes,
+      ...newTubes,
+    },
+  };
+};
+
 export const updateTube = tube => (data) => {
   if (tube.id in data.tubes) {
     return { ...data, tubes: { [tube.id]: tube } };
   }
   // we haven't seen this tube, so add it
   return addTube(tube)(data);
+};
+
+export const tubeSideEffects = api => (store, action) => {
+  if (action.name === 'listenForTubes') {
+    api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));
+  } else if (action.name === 'loadTubes') {
+    api.loadTubes()
+      .then(tubes => store.dispatch(addTubeBulk(tubes)));
+  }
 };
 
 // export default
