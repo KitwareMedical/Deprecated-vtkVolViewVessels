@@ -1,9 +1,8 @@
-import Store from './stores';
+import { Action } from '../state';
 
-export function loadImage() {
-}
+export const loadImage = Action('loadImage', () => () => { /* noop */ });
 
-export const setImage = image => (data, setData) => {
+export const setImage = Action('setImage', image => (data, setData) => {
   const { sliceMode } = data;
   const sliceMax = image.getDimensions()[sliceMode] - 1;
   const slicePos = Math.ceil(sliceMax / 2);
@@ -15,12 +14,18 @@ export const setImage = image => (data, setData) => {
     slicePos,
     sliceMax,
   });
-};
+});
 
 export const setSlicePos = slicePos => data => ({ ...data, slicePos });
 
-// export default
-export const data = () => ({
+export const imageLoader = api => (store, action) => {
+  if (action.name === 'loadImage') {
+    api.loadImage()
+      .then(image => store.dispatch(setImage(image)));
+  }
+};
+
+const data = () => ({
   image: null,
 
   // NOTE this is UI state, but is here because setting
@@ -30,46 +35,4 @@ export const data = () => ({
   slicePos: 0,
   sliceMax: 1,
 });
-
-export default class ImageStore extends Store {
-  constructor() {
-    super();
-    this.privateData = {
-      image: null,
-      sliceMode: 2, // Z axis
-      slicePosition: 0,
-      sliceMaximum: 1,
-
-      loading: false,
-    };
-  }
-
-  get data() {
-    return this.privateData;
-  }
-
-  set loading(state) {
-    this.privateData.loading = state;
-    this.update();
-  }
-
-  set data(image) {
-    const { sliceMode } = this.privateData;
-    const sliceMax = image.getDimensions()[sliceMode] - 1;
-    const slice = Math.ceil(sliceMax / 2);
-
-    Object.assign(this.privateData, {
-      image,
-      slicePosition: slice,
-      sliceMaximum: sliceMax,
-    });
-    this.update();
-  }
-
-  set slicePosition(slice) {
-    Object.assign(this.privateData, {
-      slicePosition: slice,
-    });
-    this.update();
-  }
-}
+export default data;

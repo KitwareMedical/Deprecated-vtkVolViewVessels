@@ -1,8 +1,8 @@
 class Store2 {
-  constructor(data, ...actionArgs) {
+  constructor(data, ...sideEffects) {
     this.privateData = data;
     this.privateListeners = [];
-    this.privateActionArgs = actionArgs;
+    this.privateSideEffects = sideEffects;
 
     this.setData = this.setData.bind(this);
 
@@ -20,7 +20,8 @@ class Store2 {
   }
 
   dispatch(action) {
-    const result = action(this.privateData, this.setData, ...this.privateActionArgs);
+    this.privateSideEffects.forEach(sideEffect => sideEffect(this, action));
+    const result = action(this.privateData, this.setData);
     if (action.length === 1 && typeof result === 'object') {
       // this is a simple case, so we just call setData automatically
       this.setData(result);

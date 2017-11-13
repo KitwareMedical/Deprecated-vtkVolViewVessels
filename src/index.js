@@ -7,8 +7,7 @@ import enUS from 'antd/lib/locale-provider/en_US';
 import App from './ui/App';
 import Api from './api';
 
-import { data as imageData } from './stores/ImageStore';
-import { data as apiData } from './stores/ApiStore';
+import imageData, { imageLoader } from './stores/ImageStore';
 import { data as tubeData } from './stores/TubeStore';
 import volumeData from './stores/VolumeStore';
 import segmentData from './stores/SegmentStore';
@@ -25,8 +24,7 @@ import mode from './mode';
 function main(dataManager) {
   const api = new Api(dataManager);
   const stores = {
-    apiStore: createStore(apiData(), api),
-    imageStore: createStore(imageData()),
+    imageStore: createStore(imageData(), imageLoader(api)),
     tubeStore: createStore(tubeData()),
     volumeStore: createStore(volumeData()),
     segmentStore: createStore(segmentData()),

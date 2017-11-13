@@ -7,6 +7,20 @@ function partial(func, ...args) {
   };
 }
 
+export const Action = (name, func) => {
+  const wrapper = (...args) => {
+    const innerFunc = func(...args);
+    // set name
+    Object.defineProperty(innerFunc, 'name', { writable: true });
+    innerFunc.name = name;
+    // set args
+    innerFunc.args = args;
+
+    return innerFunc;
+  };
+  return wrapper;
+};
+
 export function connectAction(srcStore, watchedKey, dstStore, action) {
   const listenForChanges = (changedKeys) => {
     if (changedKeys.includes(watchedKey)) {
