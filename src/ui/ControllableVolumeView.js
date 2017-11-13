@@ -4,16 +4,13 @@ import PropTypes from 'prop-types';
 import VolumeView from './VolumeView';
 import VolumeQuickControls from './VolumeQuickControls';
 
-import connect from '../state';
+import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
 // TODO move ColorPresets to some constants module
-import { ColorPresets } from '../stores/VolumeRenderStore';
-import * as VolumeActions from '../actions/VolumeActions';
+import { ColorPresets } from '../stores/VolumeStore';
 
 function ControllableVolumeView({
-  actions,
-  dispatch,
   image,
   tubes,
   scalarOpacity,
@@ -33,9 +30,9 @@ function ControllableVolumeView({
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
         presets={ColorPresets}
-        onScalarOpacityChange={value => dispatch(actions.setScalarOpacity, value)}
-        onColorMapChange={name => dispatch(actions.setColorMap, name)}
       />
+      { /* onScalarOpacityChange={value => dispatch(actions.setScalarOpacity, value)} */ }
+      { /* onColorMapChange={name => dispatch(actions.setColorMap, name)} */ }
     </div>
   );
 }
@@ -46,9 +43,6 @@ ControllableVolumeView.propTypes = {
   scalarOpacity: PropTypes.number,
   transferFunctionWidget: PropTypes.object,
   colorMap: PropTypes.object.isRequired,
-
-  dispatch: PropTypes.func.isRequired,
-  actions: PropTypes.object.isRequired,
 };
 
 ControllableVolumeView.defaultProps = {
@@ -58,23 +52,22 @@ ControllableVolumeView.defaultProps = {
   transferFunctionWidget: null,
 };
 
-export default connect(ControllableVolumeView, ['image', 'tubes', 'volumeRender'],
-  (stores, props, updated) => {
+export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStore', 'volumeStore'],
+  ({ imageStore, tubeStore, volumeStore }, props, updated) => {
     switch (updated) {
-      case 'image':
-        return { image: stores.image.data.image };
-      case 'tubes':
-        return { tubes: stores.tubes.data.tubes.filter(tube => tube.mesh) };
-      case 'volumeRender':
+      case 'imageStore':
+        return { image: imageStore.image };
+      case 'tubeStore':
+        return { tubes: tubeStore.tubeOrder.map(id => tubeStore.tubes[id]).filter(tube => tube.mesh) };
+      case 'volumeStore':
         return {
-          scalarOpacity: stores.volumeRender.data.scalarOpacity,
-          colorMap: stores.volumeRender.data.colorMap,
-          transferFunctionWidget: stores.volumeRender.data.transferFunctionWidget,
+          scalarOpacity: volumeStore.scalarOpacity,
+          colorMap: volumeStore.colorMap,
+          transferFunctionWidget: volumeStore.transferFunctionWidget,
         };
       default:
         // return the defaults, with the colorMap coming from the volumeRender store
-        return Object.assign({ colorMap: stores.volumeRender.data.colorMap }, ControllableVolumeView.defaultProps);
+        return { colorMap: volumeStore.colorMap, ...ControllableVolumeView.defaultProps };
     }
   },
-  () => VolumeActions,
 );
