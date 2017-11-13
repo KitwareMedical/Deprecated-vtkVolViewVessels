@@ -8,9 +8,12 @@ import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
 // TODO move ColorPresets to some constants module
-import { ColorPresets } from '../stores/VolumeStore';
+import { ColorPresets, setScalarOpacity, setColorMap } from '../stores/VolumeStore';
 
+// TODO move scalarOpacity and colorMap to internal state, since nothing else
+// uses that state.
 function ControllableVolumeView({
+  stores: { volumeStore },
   image,
   tubes,
   scalarOpacity,
@@ -30,9 +33,9 @@ function ControllableVolumeView({
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
         presets={ColorPresets}
+        onScalarOpacityChange={value => volumeStore.dispatch(setScalarOpacity(value))}
+        onColorMapChange={name => volumeStore.dispatch(setColorMap(name))}
       />
-      { /* onScalarOpacityChange={value => dispatch(actions.setScalarOpacity, value)} */ }
-      { /* onColorMapChange={name => dispatch(actions.setColorMap, name)} */ }
     </div>
   );
 }
@@ -43,6 +46,8 @@ ControllableVolumeView.propTypes = {
   scalarOpacity: PropTypes.number,
   transferFunctionWidget: PropTypes.object,
   colorMap: PropTypes.object.isRequired,
+
+  stores: PropTypes.object.isRequired,
 };
 
 ControllableVolumeView.defaultProps = {
