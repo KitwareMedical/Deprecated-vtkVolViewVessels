@@ -9,6 +9,7 @@ import Api from './api';
 
 import { data as imageData } from './stores/ImageStore';
 import { data as apiData } from './stores/ApiStore';
+import { data as tubeData } from './stores/TubeStore';
 
 import { createStore } from './stores/stores';
 // import ApiStore from './stores/ApiStore';
@@ -20,9 +21,11 @@ import { createStore } from './stores/stores';
 import mode from './mode';
 
 function main(dataManager) {
+  const api = new Api(dataManager);
   const stores = {
-    apiStore: createStore(apiData(), new Api(dataManager)),
+    apiStore: createStore(apiData(), api),
     imageStore: createStore(imageData()),
+    tubeStore: createStore(tubeData()),
     // volumeRender: new VolumeRenderStore(),
     // segment: new SegmentStore(),
     // tubes: new TubeStore(),

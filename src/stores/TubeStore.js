@@ -1,5 +1,24 @@
 import Store from './stores';
 
+export const addTube = tube => (data) => {
+  const newTube = Object.assign({
+    visible: true,
+  }, tube);
+  return {
+    ...data,
+    tubeOrder: [...data.tubeOrder, tube.id],
+    tubes: { ...data.tubes, [tube.id]: newTube },
+  };
+};
+
+export const updateTube = tube => (data) => {
+  if (tube.id in data.tubes) {
+    return { ...data, tubes: { [tube.id]: tube } };
+  }
+  // we haven't seen this tube, so add it
+  return addTube(tube)(data);
+};
+
 // export default
 export const data = () => ({
   tubeOrder: [],

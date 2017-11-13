@@ -19,6 +19,7 @@ import ControllableSliceView from './ControllableSliceView';
 // import { loadImage } from '../actions/ImageActions';
 import { loadImage } from '../stores/ApiStore';
 import { setImage } from '../stores/ImageStore';
+import { updateTube } from '../stores/TubeStore';
 // import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
 
@@ -49,11 +50,13 @@ class App extends React.Component {
 //    const { dispatch } = this.props;
     // dispatch(loadImage);
     // dispatch(loadTubes);
-    const { stores: { apiStore, imageStore } } = this.props;
+    const { stores: { apiStore, imageStore, tubeStore } } = this.props;
 
     this.disconnects = [
       // runs imageStore.dispatch(setImage(fetchedImage)) when fetchedImage changes in apiStore
       connectAction(apiStore, 'fetchedImage', imageStore, setImage),
+      // listen for any segmented tubes
+      connectAction(apiStore, 'segmentedTube', tubeStore, updateTube),
     ];
 
     apiStore.dispatch(loadImage);
