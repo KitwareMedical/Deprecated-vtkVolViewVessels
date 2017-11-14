@@ -223,8 +223,10 @@ class ItkTubeProtocol(LinkProtocol):
         self.itkPixelType = itkctype
         self.dimensions = base.GetNumberOfDimensions()
 
-    @register('itk.volume.get')
-    def getVolumeData(self):
+    @register('itk.volume.open')
+    def openVolume(self, filename):
+        self.loadDataFile(str(filename))
+
         # Get ITK image data
         pointer = long(self.itkImage.GetBufferPointer())
         imageBuffer = ctypes.cast(pointer, ctypes.POINTER(itkCTypeToCtype[self.itkPixelType]))

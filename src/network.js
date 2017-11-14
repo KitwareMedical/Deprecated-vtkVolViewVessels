@@ -8,7 +8,7 @@ let readyCallback = null;
 
 const customProtocols = {
   ITKTube: session => ({
-    getVolumeData: () => session.call('itk.volume.get', []),
+    openFile: filename => session.call('itk.volume.open', [filename]),
     getTubes: () => session.call('itk.tube.get', []),
     generateTube: (i, j, k, scale) => session.call('itk.tube.generate', [i, j, k, scale]),
     onTubeGeneratorChange: callback => session.subscribe('itk.tube.mesh', callback),

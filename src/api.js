@@ -31,9 +31,9 @@ export default class Api {
     (this.listeners[name] || []).forEach(func => func(...args));
   }
 
-  loadImage() {
+  loadImage(filename) {
     return new Promise((resolve, reject) => {
-      this.dataManager.ITKTube.getVolumeData()
+      this.dataManager.ITKTube.openFile(filename)
         .then((dataDescription) => {
           const reader = new FileReader();
           reader.readAsArrayBuffer(dataDescription.scalars);

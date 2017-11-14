@@ -13,7 +13,6 @@ import SegmentControls from './SegmentControls';
 import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import Messages from './Messages';
-import { loadImage } from '../stores/ImageStore';
 import { addTube, loadTubes, listenForTubes } from '../stores/TubeStore';
 
 const TabPane = Tabs.TabPane;
@@ -25,11 +24,10 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    const { stores: { imageStore, segmentStore, tubeStore } } = this.props;
+    const { stores: { segmentStore, tubeStore } } = this.props;
 
     connectAction(segmentStore, 'segmentedTube', tubeStore, addTube);
 
-    imageStore.dispatch(loadImage());
     tubeStore.dispatch(loadTubes());
     tubeStore.dispatch(listenForTubes());
   }

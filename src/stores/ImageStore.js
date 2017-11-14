@@ -1,6 +1,6 @@
 import { Action } from '../state';
 
-export const loadImage = Action('loadImage', () => () => { /* noop */ });
+export const loadImage = Action('loadImage', filename => () => { /* noop */ });
 
 export const setImage = Action('setImage', image => (data, setData) => {
   const { sliceMode } = data;
@@ -20,7 +20,7 @@ export const setSlicePos = slicePos => data => ({ ...data, slicePos });
 
 export const imageLoader = api => (store, action) => {
   if (action.name === 'loadImage') {
-    api.loadImage()
+    api.loadImage(...action.args)
       .then(image => store.dispatch(setImage(image)));
   }
 };

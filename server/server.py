@@ -59,7 +59,7 @@ class _ItkTubeServer(ServerProtocol):
     def initialize(self):
         # register custom protocol
         protocol = ItkTubeProtocol()
-        protocol.loadDataFile(self.dataFile)
+        # protocol.loadDataFile(self.dataFile)
         self.registerLinkProtocol(protocol)
 
         # Update authentication key to use
