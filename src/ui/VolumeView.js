@@ -91,9 +91,6 @@ export default class VolumeView extends React.Component {
     }
 
     if (this.props.tubes !== props.tubes) {
-      console.log(new Date().getTime());
-
-      console.log('show', new Date());
       const newCache = {};
       const notInScene = [];
       for (let i = 0; i < props.tubes.length; ++i) {
@@ -105,7 +102,6 @@ export default class VolumeView extends React.Component {
           notInScene.push(tube.id);
         }
       }
-      console.log('show end', new Date());
 
       // remove old actors
       for (let i = 0; i < this.props.tubes.length; ++i) {
@@ -134,8 +130,6 @@ export default class VolumeView extends React.Component {
       }
 
       this.tubePipelineCache = newCache;
-      console.log(new Date().getTime());
-      console.log('');
     }
 
     if (props.imageData) {

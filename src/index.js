@@ -8,16 +8,11 @@ import App from './ui/App';
 import Api from './api';
 
 import imageData, { imageLoader } from './stores/ImageStore';
-import { data as tubeData, tubeSideEffects } from './stores/TubeStore';
+import tubeData, { tubeSideEffects } from './stores/TubeStore';
 import volumeData from './stores/VolumeStore';
 import segmentData, { segmenter } from './stores/SegmentStore';
 
 import Store from './stores/stores';
-// import ApiStore from './stores/ApiStore';
-// import ImageStore from './stores/ImageStore';
-// import SegmentStore from './stores/SegmentStore';
-// import TubeStore from './stores/TubeStore';
-// import VolumeRenderStore from './stores/VolumeRenderStore';
 
 import mode from './mode';
 
@@ -28,9 +23,6 @@ function main(dataManager) {
     tubeStore: new Store(tubeData(), tubeSideEffects(api)),
     volumeStore: new Store(volumeData()),
     segmentStore: new Store(segmentData(), segmenter(api)),
-    // volumeRender: new VolumeRenderStore(),
-    // segment: new SegmentStore(),
-    // tubes: new TubeStore(),
   };
 
   render(
