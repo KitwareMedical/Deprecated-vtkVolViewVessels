@@ -30,7 +30,7 @@ export const setError = (errorMsg, description = '') => data => ({
   ...data,
   error: {
     message: errorMsg,
-    description: description,
+    description,
   },
   loading: false,
 });
