@@ -21,8 +21,9 @@ export const addTubeBulk = tubes => (data) => {
   tubes.forEach((tube) => {
     newTubes[tube.id] = Object.assign({
       visible: true,
-    });
+    }, tube);
   });
+
   return {
     ...data,
     tubeOrder: [
