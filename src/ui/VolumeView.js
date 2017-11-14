@@ -150,7 +150,7 @@ export default class VolumeView extends React.Component {
       }
     }
 
-    if (props.transferFunctionWidget) {
+    if (props.transferFunctionWidget !== this.props.transferFunctionWidget) {
       this.setTransferFunctionWidget(props.transferFunctionWidget);
     }
 
