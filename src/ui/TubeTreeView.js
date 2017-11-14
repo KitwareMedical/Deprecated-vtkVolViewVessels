@@ -6,7 +6,7 @@ import { Spin, Button, Table } from 'antd';
 import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
-import { setTubeVisibility, setTubeColor, deleteTube } from '../stores/TubeStore';
+import { setTubeVisibility, setTubeColor, deleteTube, reparentTubes, setSelection } from '../stores/TubeStore';
 
 import PopupColorPicker from './PopupColorPicker';
 

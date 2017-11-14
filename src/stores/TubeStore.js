@@ -94,6 +94,30 @@ export const setTubeColor = (id, color) => data => ({
   },
 });
 
+export const reparentTubes = newParentId => (data) => {
+  const tubes = Object.assign({}, data.tubes);
+  data.selection.rows.forEach((tube) => {
+    tubes[tube.id].parent = newParentId;
+  });
+
+  return {
+    ...data,
+    tubes,
+    selection: {
+      keys: [],
+      rows: [],
+    },
+  };
+};
+
+export const setSelection = (keys, rows) => data => ({
+  ...data,
+  selection: {
+    keys,
+    rows,
+  },
+});
+
 export const tubeSideEffects = api => (store, action) => {
   if (action.name === 'listenForTubes') {
     api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));
@@ -107,6 +131,10 @@ export const tubeSideEffects = api => (store, action) => {
 export const data = () => ({
   tubeOrder: [],
   tubes: {},
+  selection: {
+    keys: [],
+    rows: [],
+  },
 });
 
 export default class TubeStore extends Store {
