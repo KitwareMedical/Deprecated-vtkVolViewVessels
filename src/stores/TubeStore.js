@@ -72,6 +72,28 @@ export const updateTube = tube => (data) => {
   return addTube(tube)(data);
 };
 
+export const setTubeVisibility = (id, visible) => data => ({
+  ...data,
+  tubes: {
+    ...data.tubes,
+    [id]: {
+      ...data.tubes[id],
+      visible,
+    },
+  },
+});
+
+export const setTubeColor = (id, color) => data => ({
+  ...data,
+  tubes: {
+    ...data.tubes,
+    [id]: {
+      ...data.tubes[id],
+      color: [color.r / 255, color.g / 255, color.b / 255],
+    },
+  },
+});
+
 export const tubeSideEffects = api => (store, action) => {
   if (action.name === 'listenForTubes') {
     api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));

@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 
 import { Spin, Button, Table } from 'antd';
 
-import connect from '../state';
+import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
+import { setTubeVisibility, setTubeColor, deleteTube } from '../stores/TubeStore';
+
 import PopupColorPicker from './PopupColorPicker';
-import * as TubeActions from '../actions/TubeActions';
 
 function convertToTree(tubes) {
   // NOTE: maybe don't recreate this every update.
@@ -41,8 +42,7 @@ function convertToTree(tubes) {
 }
 
 function TubeTreeView({
-  actions,
-  dispatch,
+  stores: { tubeStore },
   tubes,
   selection,
 }) {
@@ -56,7 +56,7 @@ function TubeTreeView({
     {
       title: '# of points',
       dataIndex: 'mesh',
-      render: (mesh, tube) => (tube.status === 'done' ? mesh.length : '-'),
+      render: (mesh, tube) => (tube.status === 'done' && mesh ? mesh.length : '-'),
     },
     {
       title: '',
@@ -66,19 +66,19 @@ function TubeTreeView({
           <span>
             <PopupColorPicker
               color={tube.color.map(c => c * 255)}
-              onChange={rgb => dispatch(actions.setTubeColor, tube.id, rgb)}
+              onChange={rgb => tubeStore.dispatch(setTubeColor(tube.id, rgb))}
             />
             <span className="ant-divider" />
-            <Button onClick={() => dispatch(actions.setTubeVisibility, tube.id, !tube.visible)}>
+            <Button onClick={() => tubeStore.dispatch(setTubeVisibility(tube.id, !tube.visible))}>
               <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
             </Button>
             <span className="ant-divider" />
-            <Button onClick={() => dispatch(actions.deleteTube, tube.id)}>
+            <Button onClick={() => tubeStore.dispatch(deleteTube(tube.id))}>
               <i className="fa fa-trash" />
             </Button>
             <span className="ant-divider" />
             { selection.keys.length > 0 ?
-              <a href="#!" onClick={(ev) => { dispatch(actions.reparentTubes, tube.id); ev.preventDefault(); }}>
+              <a href="#!" onClick={(ev) => { tubeStore.dispatch(reparentTubes(tube.id)); ev.preventDefault(); }}>
                 Make parent
               </a>
               :
@@ -93,7 +93,7 @@ function TubeTreeView({
 
   const rowSelection = {
     selectedRowKeys: selection.keys,
-    onChange: (keys, rows) => dispatch(actions.setSelection, keys, rows),
+    onChange: (keys, rows) => tubeStore.dispatch(setSelection(keys, rows)),
   };
 
   return (
@@ -115,25 +115,21 @@ TubeTreeView.propTypes = {
   tubes: PropTypes.array,
   selection: PropTypes.shape({
     keys: PropTypes.array,
-    values: PropTypes.array,
+    rows: PropTypes.array,
   }),
 
-  actions: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired,
+  stores: PropTypes.object.isRequired,
 };
 
 TubeTreeView.defaultProps = {
   tubes: [],
   selection: {
     keys: [],
-    values: [],
+    rows: [],
   },
 };
 
-export default connect(TubeTreeView, 'tubes',
-  (stores, props) => ({
-    tubes: stores.tubes.data.tubes,
-    selection: stores.tubes.data.selection,
-  }),
-  () => TubeActions,
-);
+export default connectComponent(TubeTreeView, 'tubeStore', ({ tubeStore }, props) => ({
+  tubes: tubeStore.tubeOrder.map(id => tubeStore.tubes[id]),
+  selection: tubeStore.selection,
+}));
