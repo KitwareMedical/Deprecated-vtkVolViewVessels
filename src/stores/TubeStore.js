@@ -8,11 +8,17 @@ export const addTube = tube => (data) => {
   const newTube = Object.assign({
     visible: true,
   }, tube);
-  return {
-    ...data,
-    tubeOrder: [...data.tubeOrder, tube.id],
-    tubes: { ...data.tubes, [tube.id]: newTube },
-  };
+
+  // only add tube if pending or is a successful tube segmentation
+  if (tube.status === 'pending' || (tube.status === 'done' && tube.mesh)) {
+    return {
+      ...data,
+      tubeOrder: [...data.tubeOrder, tube.id],
+      tubes: { ...data.tubes, [tube.id]: newTube },
+    };
+  }
+  // return without modification
+  return data;
 };
 
 export const addTubeBulk = tubes => (data) => {
@@ -37,16 +43,30 @@ export const addTubeBulk = tubes => (data) => {
   };
 };
 
+export const deleteTube = id => (data) => {
+  const tubeOrder = data.tubeOrder.filter(i => i !== id);
+  const tubes = Object.assign({}, data.tubes);
+  delete tubes[id];
+  return {
+    ...data,
+    tubeOrder,
+    tubes,
+  };
+};
+
 export const updateTube = tube => (data) => {
   if (tube.id in data.tubes) {
-    // TODO will this work
-    return {
-      ...data,
-      tubes: {
-        ...data.tubes,
-        [tube.id]: tube,
-      },
-    };
+    if (tube.status === 'pending' || (tube.status === 'done' && tube.mesh)) {
+      return {
+        ...data,
+        tubes: {
+          ...data.tubes,
+          [tube.id]: Object.assign(data.tubes[tube.id], tube),
+        },
+      };
+    }
+    // tube should be tossed out
+    return deleteTube(tube.id)(data);
   }
   // we haven't seen this tube, so add it
   return addTube(tube)(data);

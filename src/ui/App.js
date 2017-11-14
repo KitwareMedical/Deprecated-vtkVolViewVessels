@@ -6,6 +6,7 @@ import { Tabs } from 'antd';
 // import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 // import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
+import { connectAction } from '../state';
 import style from '../Tube.mcss';
 
 import ControllableSliceView from './ControllableSliceView';
@@ -16,7 +17,7 @@ import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import Messages from './Messages';
 // import { loadImage } from '../actions/ImageActions';
 import { loadImage } from '../stores/ImageStore';
-import { loadTubes, listenForTubes } from '../stores/TubeStore';
+import { addTube, loadTubes, listenForTubes } from '../stores/TubeStore';
 // import { updateTube } from '../stores/TubeStore';
 // import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
@@ -48,7 +49,9 @@ class App extends React.Component {
 //    const { dispatch } = this.props;
     // dispatch(loadImage);
     // dispatch(loadTubes);
-    const { stores: { imageStore, tubeStore } } = this.props;
+    const { stores: { imageStore, segmentStore, tubeStore } } = this.props;
+
+    connectAction(segmentStore, 'segmentedTube', tubeStore, addTube);
 
     imageStore.dispatch(loadImage());
     tubeStore.dispatch(loadTubes());
