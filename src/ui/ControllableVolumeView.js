@@ -58,10 +58,13 @@ ControllableVolumeView.defaultProps = {
 };
 
 export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStore', 'volumeStore'],
-  ({ imageStore, tubeStore, volumeStore }, props, updated) => {
+  ({ imageStore, tubeStore, volumeStore }, props, updated, changedKeys) => {
     switch (updated) {
       case 'imageStore':
-        return { image: imageStore.image };
+        if (changedKeys.includes('image')) {
+          return { image: imageStore.image };
+        }
+        return null;
       case 'tubeStore':
         return { tubes: tubeStore.tubeOrder.map(id => tubeStore.tubes[id]).filter(tube => tube.mesh) };
       case 'volumeStore':

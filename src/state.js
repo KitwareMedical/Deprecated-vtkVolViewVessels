@@ -91,7 +91,10 @@ export function connectComponent(Component, storeNames, mapStoreToProps) {
       const subset = {};
       names.forEach((name) => { subset[name] = this.stores[name]; });
 
-      this.setState(storeMapper(subset, this.props, storeName));
+      const newState = storeMapper(subset, this.props, storeName, changedKeys);
+      if (newState) {
+        this.setState(newState);
+      }
     }
 
     render() {
