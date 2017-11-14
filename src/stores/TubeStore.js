@@ -43,7 +43,7 @@ export const addTubeBulk = tubes => (data) => {
   };
 };
 
-export const deleteTube = id => (data) => {
+export const deleteTube = Action('deleteTube', id => (data) => {
   const tubeOrder = data.tubeOrder.filter(i => i !== id);
   const tubes = Object.assign({}, data.tubes);
   delete tubes[id];
@@ -52,7 +52,7 @@ export const deleteTube = id => (data) => {
     tubeOrder,
     tubes,
   };
-};
+});
 
 export const updateTube = tube => (data) => {
   if (tube.id in data.tubes) {
@@ -83,7 +83,7 @@ export const setTubeVisibility = (id, visible) => data => ({
   },
 });
 
-export const setTubeColor = (id, color) => data => ({
+export const setTubeColor = Action('setTubeColor', (id, color) => data => ({
   ...data,
   tubes: {
     ...data.tubes,
@@ -92,9 +92,9 @@ export const setTubeColor = (id, color) => data => ({
       color: [color.r / 255, color.g / 255, color.b / 255],
     },
   },
-});
+}));
 
-export const reparentTubes = newParentId => (data) => {
+export const reparentTubes = Action('reparentTubes', newParentId => (data) => {
   const tubes = Object.assign({}, data.tubes);
   data.selection.rows.forEach((tube) => {
     tubes[tube.id].parent = newParentId;
@@ -108,7 +108,7 @@ export const reparentTubes = newParentId => (data) => {
       rows: [],
     },
   };
-};
+});
 
 export const setSelection = (keys, rows) => data => ({
   ...data,
@@ -119,11 +119,33 @@ export const setSelection = (keys, rows) => data => ({
 });
 
 export const tubeSideEffects = api => (store, action) => {
-  if (action.name === 'listenForTubes') {
-    api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));
-  } else if (action.name === 'loadTubes') {
-    api.loadTubes()
-      .then(tubes => store.dispatch(addTubeBulk(tubes)));
+  switch (action.name) {
+    case 'listenForTubes':
+      api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));
+      break;
+
+    case 'loadTubes':
+      api.loadTubes()
+        .then(tubes => store.dispatch(addTubeBulk(tubes)));
+      break;
+
+    case 'setTubeColor': {
+      const [id, color] = action.args;
+      const normColor = [color.r / 255, color.g / 255, color.b / 255];
+      api.setTubeColor(id, normColor);
+      break;
+    }
+
+    case 'deleteTube':
+      api.deleteTube(...action.args);
+      break;
+
+    case 'reparentTubes':
+      api.reparentTubes(...action.args, store.selection.rows.map(tube => tube.id));
+      break;
+
+    default:
+      break;
   }
 };
 
