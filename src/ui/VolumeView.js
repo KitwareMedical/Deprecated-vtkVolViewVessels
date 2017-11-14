@@ -132,6 +132,7 @@ export default class VolumeView extends React.Component {
       this.tubePipelineCache = newCache;
     }
 
+    // Maybe don't run this every time? Only when scalar opacity changes.
     if (props.imageData) {
       const value = vtkBoundingBox.getDiagonalLength(props.imageData.getBounds()) /
         Math.max(...props.imageData.getDimensions()) * 2 * props.scalarOpacity;
