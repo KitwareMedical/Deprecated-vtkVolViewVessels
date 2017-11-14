@@ -15,6 +15,7 @@ import segmentData, { segmenter } from './stores/SegmentStore';
 import Store from './stores/stores';
 
 import mode from './mode';
+import initElectron from './electron_util';
 
 function main(dataManager) {
   const api = new Api(dataManager);
@@ -24,6 +25,9 @@ function main(dataManager) {
     volumeStore: new Store(volumeData()),
     segmentStore: new Store(segmentData(), segmenter(api)),
   };
+
+  // electron setup
+  initElectron(api, stores);
 
   render(
     <LocaleProvider locale={enUS}>
