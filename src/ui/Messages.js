@@ -25,11 +25,7 @@ class Messages extends React.Component {
     }
 
     if (error) {
-      console.error(error);
-      notification.error({
-        message: error.message,
-        description: error.data.exception,
-      });
+      notification.error(error);
     }
   }
 

@@ -26,9 +26,12 @@ export const setLoading = () => data => ({
 /**
  * This sets error state and clears loading state.
  */
-export const setError = errorMsg => data => ({
+export const setError = (errorMsg, description = '') => data => ({
   ...data,
-  error: errorMsg,
+  error: {
+    message: errorMsg,
+    description: description,
+  },
   loading: false,
 });
 
