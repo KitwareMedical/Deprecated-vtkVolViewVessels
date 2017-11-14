@@ -48,7 +48,7 @@ export default class SliceView extends React.Component {
     this.picker.onPickChange(() => {
       const { actors, cellIJK } = this.picker.get('cellIJK', 'actors');
       if (actors.length) {
-        this.props.onPickIJK(...cellIJK);
+        this.props.onPickIJK(cellIJK);
       }
     });
 

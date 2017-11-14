@@ -1,54 +1,61 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { connectComponent } from '../state';
+
 import SliceView from './SliceView';
 import SliceControls from './SliceControls';
+// import * as ImageActions from '../actions/ImageActions';
+// import * as TubeActions from '../actions/TubeActions';
+import { setSlicePos } from '../stores/ImageStore';
+import { segmentTube } from '../stores/SegmentStore';
 
 import style from '../Tube.mcss';
 
-export default class ControllableSliceView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      sliceMode: 2, // Z axis
-      slice: 0,
-      sliceMax: 1,
-    };
-  }
-
-  componentWillReceiveProps(props) {
-    if (this.props.imageData !== props.imageData) {
-      const sliceMax = props.imageData.getDimensions()[this.state.sliceMode] - 1;
-      const slice = Math.ceil(sliceMax / 2);
-      this.setState(({ sliceMax, slice }));
-    }
-  }
-
-  render() {
-    return (
-      <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
-        <SliceView
-          imageData={this.props.imageData}
-          sliceMode={this.state.sliceMode}
-          slice={this.state.slice}
-          onPickIJK={this.props.onPickIJK}
-        />
-        <SliceControls
-          slice={this.state.slice}
-          sliceMax={this.state.sliceMax}
-          onSliceChange={slice => this.setState({ slice })}
-        />
-      </div>
-    );
-  }
+function ControllableSliceView({
+  stores: { imageStore, segmentStore },
+  image,
+  slicePosition,
+  sliceMaximum,
+  sliceMode,
+}) {
+  return (
+    <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
+      <SliceView
+        imageData={image}
+        sliceMode={sliceMode}
+        slice={slicePosition}
+        onPickIJK={coords => segmentStore.dispatch(segmentTube(coords))}
+      />
+      <SliceControls
+        slice={slicePosition}
+        sliceMax={sliceMaximum}
+        onSliceChange={slice => imageStore.dispatch(setSlicePos(slice))}
+      />
+    </div>
+  );
 }
 
 ControllableSliceView.propTypes = {
-  onPickIJK: PropTypes.func,
-  imageData: PropTypes.object,
+  image: PropTypes.object,
+  slicePosition: PropTypes.number,
+  sliceMaximum: PropTypes.number,
+  sliceMode: PropTypes.number,
+  stores: PropTypes.object.isRequired,
 };
 
 ControllableSliceView.defaultProps = {
-  onPickIJK: null,
-  imageData: null,
+  image: null,
+  slicePosition: 0,
+  sliceMaximum: 1,
+  sliceMode: 2,
 };
+
+export default connectComponent(ControllableSliceView, 'imageStore',
+  ({ imageStore }, props) => ({
+    image: imageStore.image,
+    slicePosition: imageStore.slicePos,
+    sliceMaximum: imageStore.sliceMax,
+    sliceMode: imageStore.sliceMode,
+  }),
+);

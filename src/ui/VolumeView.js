@@ -150,6 +150,10 @@ export default class VolumeView extends React.Component {
       }
     }
 
+    if (props.transferFunctionWidget) {
+      this.setTransferFunctionWidget(props.transferFunctionWidget);
+    }
+
     this.renderWindow.render();
   }
 
@@ -208,11 +212,13 @@ VolumeView.propTypes = {
   colorMap: PropTypes.object.isRequired,
   scalarOpacity: PropTypes.number,
   imageData: PropTypes.object,
+  transferFunctionWidget: PropTypes.object,
   tubes: PropTypes.array,
 };
 
 VolumeView.defaultProps = {
   scalarOpacity: 0,
   imageData: null,
+  transferFunctionWidget: null,
   tubes: [],
 };

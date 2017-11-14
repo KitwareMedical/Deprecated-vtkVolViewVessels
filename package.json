@@ -25,6 +25,7 @@
     "babel-plugin-import": "^1.6.2",
     "babel-polyfill": "6.16.0",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "css-loader": "^0.28.7",
     "d3": "3.5.17",
     "font-awesome": "4.5.0",
