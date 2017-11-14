@@ -36,7 +36,6 @@ export const Action = (name, func) => {
 export function connectAction(srcStore, watchedKey, dstStore, action) {
   const listenForChanges = (changedKeys) => {
     if (changedKeys.includes(watchedKey)) {
-      console.log('connectAction', watchedKey, srcStore[watchedKey]);
       dstStore.dispatch(action(srcStore[watchedKey]));
     }
   };
@@ -92,7 +91,6 @@ export function connectComponent(Component, storeNames, mapStoreToProps) {
       const subset = {};
       names.forEach((name) => { subset[name] = this.stores[name]; });
 
-      console.log(storeName, changedKeys);
       this.setState(storeMapper(subset, this.props, storeName));
     }
 
