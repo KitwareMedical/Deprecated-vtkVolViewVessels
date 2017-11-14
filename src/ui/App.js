@@ -16,7 +16,7 @@ import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 // import Messages from './Messages';
 // import { loadImage } from '../actions/ImageActions';
 import { loadImage } from '../stores/ImageStore';
-import { loadTubes } from '../stores/TubeStore';
+import { loadTubes, listenForTubes } from '../stores/TubeStore';
 // import { updateTube } from '../stores/TubeStore';
 // import { loadTubes, updateTube } from '../actions/TubeActions';
 // import RemoteFsExplorer from './RemoteFsExplorer';
@@ -52,6 +52,7 @@ class App extends React.Component {
 
     imageStore.dispatch(loadImage());
     tubeStore.dispatch(loadTubes());
+    tubeStore.dispatch(listenForTubes());
   }
 
   componentWillReceiveProps(props) {

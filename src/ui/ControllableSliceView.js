@@ -8,11 +8,12 @@ import SliceControls from './SliceControls';
 // import * as ImageActions from '../actions/ImageActions';
 // import * as TubeActions from '../actions/TubeActions';
 import { setSlicePos } from '../stores/ImageStore';
+import { segmentTube } from '../stores/SegmentStore';
 
 import style from '../Tube.mcss';
 
 function ControllableSliceView({
-  stores: { imageStore },
+  stores: { imageStore, segmentStore },
   image,
   slicePosition,
   sliceMaximum,
@@ -24,8 +25,8 @@ function ControllableSliceView({
         imageData={image}
         sliceMode={sliceMode}
         slice={slicePosition}
+        onPickIJK={coords => segmentStore.dispatch(segmentTube(coords))}
       />
-      { /* onPickIJK={coords => dispatch(actions.segmentTube, coords)} */ }
       <SliceControls
         slice={slicePosition}
         sliceMax={sliceMaximum}

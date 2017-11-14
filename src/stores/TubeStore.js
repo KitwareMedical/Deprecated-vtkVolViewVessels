@@ -2,6 +2,7 @@ import Store from './stores';
 import { Action } from '../state';
 
 export const loadTubes = Action('loadTubes', () => () => { /* noop */ });
+export const listenForTubes = Action('listenForTubes', () => () => { /* noop */ });
 
 export const addTube = tube => (data) => {
   const newTube = Object.assign({
@@ -37,7 +38,14 @@ export const addTubeBulk = tubes => (data) => {
 
 export const updateTube = tube => (data) => {
   if (tube.id in data.tubes) {
-    return { ...data, tubes: { [tube.id]: tube } };
+    // TODO will this work
+    return {
+      ...data,
+      tubes: {
+        ...data.tubes,
+        [tube.id]: tube,
+      },
+    };
   }
   // we haven't seen this tube, so add it
   return addTube(tube)(data);
