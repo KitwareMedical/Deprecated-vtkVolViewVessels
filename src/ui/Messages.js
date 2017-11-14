@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { message } from 'antd';
+import { notification, message } from 'antd';
 
 import { connectComponent } from '../state';
 
@@ -13,7 +13,7 @@ class Messages extends React.Component {
 
   componentWillReceiveProps(props) {
     const { loading: prevLoading } = this.props;
-    const { loading: curLoading } = props;
+    const { loading: curLoading, error } = props;
 
     if (prevLoading !== curLoading) {
       if (curLoading) {
@@ -22,6 +22,14 @@ class Messages extends React.Component {
         this.closeHandler();
         this.closeHandler = null;
       }
+    }
+
+    if (error) {
+      console.error(error);
+      notification.error({
+        message: error.message,
+        description: error.data.exception,
+      });
     }
   }
 
@@ -34,14 +42,17 @@ class Messages extends React.Component {
 
 Messages.propTypes = {
   loading: PropTypes.bool,
+  error: PropTypes.object,
 };
 
 Messages.defaultProps = {
   loading: false,
+  error: null,
 };
 
 export default connectComponent(Messages, ['imageStore'],
   // stores to props
   ({ imageStore }, props) => ({
     loading: imageStore.loading,
+    error: imageStore.error,
   }));

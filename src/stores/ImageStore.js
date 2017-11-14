@@ -1,5 +1,5 @@
 import { Action } from '../state';
-import wrapLoading, { setLoading, doneLoading } from './LoadingStore';
+import wrapDataState, { setLoading, clearLoading, setError } from './DataStateStore';
 
 export const loadImage = Action('loadImage', filename => () => { /* noop */ });
 
@@ -25,13 +25,14 @@ export const imageLoader = api => (store, action) => {
 
     api.loadImage(...action.args)
       .then((image) => {
-        store.dispatch(doneLoading());
+        store.dispatch(clearLoading());
         store.dispatch(setImage(image));
-      });
+      })
+      .catch(reason => store.dispatch(setError(reason)));
   }
 };
 
-const data = () => wrapLoading({
+const data = () => wrapDataState({
   image: null,
 
   // NOTE this is UI state, but is here because setting
