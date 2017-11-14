@@ -86,6 +86,19 @@ module.exports = {
       PVWStyle: path.join(__dirname, './node_modules/paraviewweb/style'),
     },
   },
+  externals: [
+    (function() {
+      var IGNORES = [
+        'electron',
+      ];
+      return function(context, request, callback) {
+        if (IGNORES.indexOf(request) >= 0) {
+          return callback(null, `require('${request}')`);
+        }
+        return callback();
+      };
+    })()
+  ],
   devServer: {
     contentBase: path.resolve(__dirname, 'dist'),
     port: 9999,
