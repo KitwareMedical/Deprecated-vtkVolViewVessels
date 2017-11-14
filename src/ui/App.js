@@ -12,7 +12,7 @@ import Info from './Info';
 import SegmentControls from './SegmentControls';
 import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
-// import Messages from './Messages';
+import Messages from './Messages';
 import { addTube, loadTubes, listenForTubes } from '../stores/TubeStore';
 
 const TabPane = Tabs.TabPane;
@@ -55,9 +55,7 @@ class App extends React.Component {
             <PiecewiseGaussianWidget stores={stores} />
           </TabPane>
         </Tabs>
-        { /*
         <Messages stores={stores} />
-        */ }
       </div>
     );
   }

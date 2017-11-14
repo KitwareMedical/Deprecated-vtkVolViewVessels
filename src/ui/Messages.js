@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { message } from 'antd';
 
-import connect from '../state';
+import { connectComponent } from '../state';
 
 class Messages extends React.Component {
   constructor(props) {
@@ -40,8 +40,8 @@ Messages.defaultProps = {
   loading: false,
 };
 
-export default connect(Messages, ['image', 'tubes'],
+export default connectComponent(Messages, ['imageStore'],
   // stores to props
-  (stores, props) => ({
-    loading: stores.image.data.loading || stores.tubes.data.loading,
+  ({ imageStore }, props) => ({
+    loading: imageStore.loading,
   }));

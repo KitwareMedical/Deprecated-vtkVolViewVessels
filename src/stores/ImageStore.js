@@ -1,4 +1,5 @@
 import { Action } from '../state';
+import wrapLoading, { setLoading, doneLoading } from './LoadingStore';
 
 export const loadImage = Action('loadImage', filename => () => { /* noop */ });
 
@@ -20,12 +21,17 @@ export const setSlicePos = slicePos => data => ({ ...data, slicePos });
 
 export const imageLoader = api => (store, action) => {
   if (action.name === 'loadImage') {
+    store.dispatch(setLoading());
+
     api.loadImage(...action.args)
-      .then(image => store.dispatch(setImage(image)));
+      .then((image) => {
+        store.dispatch(doneLoading());
+        store.dispatch(setImage(image));
+      });
   }
 };
 
-const data = () => ({
+const data = () => wrapLoading({
   image: null,
 
   // NOTE this is UI state, but is here because setting
