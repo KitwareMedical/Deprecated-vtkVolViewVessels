@@ -23,9 +23,15 @@ export const setTransferFunctionWidget = transferFunctionWidget => data => ({
   transferFunctionWidget,
 });
 
+export const setVolumeVisibility = volumeVisible => data => ({
+  ...data,
+  volumeVisible,
+});
+
 const data = () => ({
   colorMap: ColorPresets[0],
   scalarOpacity: DEFAULT_SCALAR_OPACITY,
   transferFunctionWidget: null,
+  volumeVisible: true,
 });
 export default data;

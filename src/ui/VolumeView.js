@@ -90,6 +90,9 @@ export default class VolumeView extends React.Component {
       this.resize();
     }
 
+    // set actor visibility
+    this.actor.setVisibility(props.visible);
+
     if (this.props.tubes !== props.tubes) {
       const newCache = {};
       const notInScene = [];
@@ -215,6 +218,7 @@ VolumeView.propTypes = {
   imageData: PropTypes.object,
   transferFunctionWidget: PropTypes.object,
   tubes: PropTypes.array,
+  visible: PropTypes.bool.isRequired,
 };
 
 VolumeView.defaultProps = {

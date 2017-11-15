@@ -8,7 +8,7 @@ import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
 // TODO move ColorPresets to some constants module
-import { ColorPresets, setScalarOpacity, setColorMap } from '../stores/VolumeStore';
+import { ColorPresets, setScalarOpacity, setColorMap, setVolumeVisibility } from '../stores/VolumeStore';
 
 // TODO move scalarOpacity and colorMap to internal state, since nothing else
 // uses that state.
@@ -19,11 +19,13 @@ function ControllableVolumeView({
   scalarOpacity,
   colorMap,
   transferFunctionWidget,
+  visible,
 }) {
   return (
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <VolumeView
         imageData={image}
+        visible={visible}
         tubes={tubes}
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
@@ -33,8 +35,10 @@ function ControllableVolumeView({
         scalarOpacity={scalarOpacity}
         colorMap={colorMap}
         presets={ColorPresets}
+        visible={visible}
         onScalarOpacityChange={value => volumeStore.dispatch(setScalarOpacity(value))}
         onColorMapChange={name => volumeStore.dispatch(setColorMap(name))}
+        onVisibilityChange={v => volumeStore.dispatch(setVolumeVisibility(v))}
       />
     </div>
   );
@@ -46,6 +50,7 @@ ControllableVolumeView.propTypes = {
   scalarOpacity: PropTypes.number,
   transferFunctionWidget: PropTypes.object,
   colorMap: PropTypes.object.isRequired,
+  visible: PropTypes.bool,
 
   stores: PropTypes.object.isRequired,
 };
@@ -55,6 +60,7 @@ ControllableVolumeView.defaultProps = {
   tubes: [],
   scalarOpacity: 0,
   transferFunctionWidget: null,
+  visible: true,
 };
 
 export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStore', 'volumeStore'],
@@ -72,6 +78,7 @@ export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStor
           scalarOpacity: volumeStore.scalarOpacity,
           colorMap: volumeStore.colorMap,
           transferFunctionWidget: volumeStore.transferFunctionWidget,
+          visible: volumeStore.volumeVisible,
         };
       default:
         // return the defaults, with the colorMap coming from the volumeRender store

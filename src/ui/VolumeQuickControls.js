@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Select } from 'antd';
+import { Checkbox, Select } from 'antd';
 
 import LabeledSlider from './LabeledSlider';
 import style from '../Tube.mcss';
@@ -21,6 +21,12 @@ export default function VolumeQuickControls(props) {
         max={100}
         onChange={value => props.onScalarOpacityChange(value)}
       />
+      <Checkbox
+        onChange={e => props.onVisibilityChange(e.target.checked)}
+        checked={props.visible}
+      >
+        Visible
+      </Checkbox>
       <Select
         className={style.itemStretch}
         defaultValue={props.colorMap.Name}
@@ -28,7 +34,6 @@ export default function VolumeQuickControls(props) {
       >
         {presets}
       </Select>
-
     </div>
   );
 }
@@ -36,13 +41,16 @@ export default function VolumeQuickControls(props) {
 VolumeQuickControls.propTypes = {
   scalarOpacity: PropTypes.number.isRequired,
   colorMap: PropTypes.object.isRequired,
+  visible: PropTypes.bool.isRequired,
   presets: PropTypes.array,
   onScalarOpacityChange: PropTypes.func,
   onColorMapChange: PropTypes.func,
+  onVisibilityChange: PropTypes.func,
 };
 
 VolumeQuickControls.defaultProps = {
   presets: [],
   onScalarOpacityChange: () => {},
   onColorMapChange: () => {},
+  onVisibilityChange: () => {},
 };
