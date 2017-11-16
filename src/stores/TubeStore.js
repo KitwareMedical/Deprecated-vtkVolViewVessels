@@ -89,7 +89,7 @@ export const setTubeColor = Action('setTubeColor', (id, color) => data => ({
     ...data.tubes,
     [id]: {
       ...data.tubes[id],
-      color: [color.r / 255, color.g / 255, color.b / 255],
+      color,
     },
   },
 }));
