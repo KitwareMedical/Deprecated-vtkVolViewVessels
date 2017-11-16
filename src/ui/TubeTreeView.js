@@ -48,6 +48,29 @@ function TubeTreeView({
 }) {
   const tubeTree = convertToTree(tubes);
 
+  const makeTubeControls = (color, visible, onColorChange, onVisibilityChange, onDelete) => (
+    <span>
+      <PopupColorPicker
+        color={color}
+        onChange={rgb => onColorChange(rgb)}
+      />
+      <span className="ant-divider" />
+      <Button onClick={() => onVisibilityChange()}>
+        <i className={visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
+      </Button>
+      <span className="ant-divider" />
+      <Button onClick={() => onDelete()}>
+        <i className="fa fa-trash" />
+      </Button>
+    </span>
+  );
+
+  const makeReparentButton = onReparent => (
+    <Button onClick={() => onReparent()}>
+      Make parent
+    </Button>
+  );
+
   const columns = [
     {
       title: 'ID',
@@ -61,33 +84,30 @@ function TubeTreeView({
     {
       title: '',
       dataIndex: '',
-      render: (_, tube) => (
-        tube.status === 'done' ?
-          <span>
-            <PopupColorPicker
-              color={tube.color.map(c => c * 255)}
-              onChange={rgb => tubeStore.dispatch(setTubeColor(tube.id, rgb))}
-            />
-            <span className="ant-divider" />
-            <Button onClick={() => tubeStore.dispatch(setTubeVisibility(tube.id, !tube.visible))}>
-              <i className={tube.visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
-            </Button>
-            <span className="ant-divider" />
-            <Button onClick={() => tubeStore.dispatch(deleteTube(tube.id))}>
-              <i className="fa fa-trash" />
-            </Button>
-            <span className="ant-divider" />
-            { selection.keys.length > 0 ?
-              <a href="#!" onClick={(ev) => { tubeStore.dispatch(reparentTubes(tube.id)); ev.preventDefault(); }}>
-                Make parent
-              </a>
-              :
-              null
-            }
-          </span>
-          :
-          <Spin />
-      ),
+      render: (_, tube) => {
+        if (tube.status === 'done') {
+          // no selection, so make standard tube controls
+          if (selection.keys.length === 0) {
+            return makeTubeControls(
+              tube.color.map(c => c * 255),
+              tube.visible,
+              // onColorChange
+              rgb => tubeStore.dispatch(setTubeColor(tube.id, [rgb.r / 255, rgb.g / 255, rgb.b / 255])),
+              // onVisibilityChange
+              () => tubeStore.dispatch(setTubeVisibility(tube.id, !tube.visible)),
+              // onDelete
+              () => tubeStore.dispatch(deleteTube(tube.id)),
+            );
+          }
+
+          // selection exists, so show reparent button
+          return makeReparentButton(
+            () => tubeStore.dispatch(reparentTubes(tube.id)),
+          );
+        }
+        // tube is pending, so show spinner
+        return <Spin />;
+      },
     },
   ];
 
