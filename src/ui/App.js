@@ -40,7 +40,7 @@ class App extends React.Component {
           <ControllableSliceView stores={stores} />
           <ControllableVolumeView stores={stores} />
         </div>
-        <Tabs type="card">
+        <Tabs style={{ marginTop: '10px' }} type="card">
           <TabPane forceRender key="info" tab="Info">
             <Info stores={stores} />
           </TabPane>
