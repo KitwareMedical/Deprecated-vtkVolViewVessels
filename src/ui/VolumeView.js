@@ -66,19 +66,35 @@ export default class VolumeView extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props.imageData !== this.props.imageData) {
-      const needToAddActor = this.props.imageData == null;
-      const dataRange = props.imageData.getPointData().getScalars().getRange();
+    const {
+      imageData: prevImageData,
+      tubes: prevTubes,
+      colorMap: prevColorMap,
+      transferFunctionWidget: prevTransferFunctionWidget,
+    } = this.props;
+
+    const {
+      imageData,
+      tubes,
+      visible,
+      colorMap,
+      scalarOpacity,
+      transferFunctionWidget,
+    } = props;
+
+    if (prevImageData !== imageData) {
+      const needToAddActor = prevImageData == null;
+      const dataRange = imageData.getPointData().getScalars().getRange();
 
       this.lookupTable.setMappingRange(...dataRange);
       this.lookupTable.updateRange();
 
       if (this.transferFunctionWidget) {
-        this.transferFunctionWidget.setDataArray(props.imageData.getPointData().getScalars().getData());
+        this.transferFunctionWidget.setDataArray(imageData.getPointData().getScalars().getData());
         this.transferFunctionWidget.applyOpacity(this.piecewiseFunction);
       }
 
-      this.mapper.setInputData(props.imageData);
+      this.mapper.setInputData(imageData);
 
       if (needToAddActor) {
         this.renderer.addActor(this.actor);
@@ -91,13 +107,13 @@ export default class VolumeView extends React.Component {
     }
 
     // set actor visibility
-    this.actor.setVisibility(props.visible);
+    this.actor.setVisibility(visible);
 
-    if (this.props.tubes !== props.tubes) {
+    if (prevTubes !== tubes) {
       const newCache = {};
       const notInScene = [];
-      for (let i = 0; i < props.tubes.length; ++i) {
-        const tube = props.tubes[i];
+      for (let i = 0; i < tubes.length; ++i) {
+        const tube = tubes[i];
         if (tube.id in this.tubePipelineCache) {
           newCache[tube.id] = this.tubePipelineCache[tube.id];
         } else {
@@ -107,8 +123,8 @@ export default class VolumeView extends React.Component {
       }
 
       // remove old actors
-      for (let i = 0; i < this.props.tubes.length; ++i) {
-        const tube = this.props.tubes[i];
+      for (let i = 0; i < prevTubes.length; ++i) {
+        const tube = prevTubes[i];
         if (!(tube.id in newCache)) {
           this.renderer.removeActor(this.tubePipelineCache[tube.id].actor);
         }
@@ -120,8 +136,8 @@ export default class VolumeView extends React.Component {
       });
 
       // set actor visibility and color
-      for (let i = 0; i < props.tubes.length; ++i) {
-        const tube = props.tubes[i];
+      for (let i = 0; i < tubes.length; ++i) {
+        const tube = tubes[i];
         newCache[tube.id].actor.setVisibility(tube.visible);
 
         const colors = newCache[tube.id].source.getCellData().getScalars();
@@ -136,16 +152,16 @@ export default class VolumeView extends React.Component {
     }
 
     // Maybe don't run this every time? Only when scalar opacity changes.
-    if (props.imageData) {
-      const value = vtkBoundingBox.getDiagonalLength(props.imageData.getBounds()) /
-        Math.max(...props.imageData.getDimensions()) * 2 * props.scalarOpacity;
+    if (imageData) {
+      const value = vtkBoundingBox.getDiagonalLength(imageData.getBounds()) /
+        Math.max(...imageData.getDimensions()) * 2 * scalarOpacity;
       this.actor.getProperty().setScalarOpacityUnitDistance(0, value);
     }
 
-    if (props.colorMap !== this.props.colorMap) {
-      this.lookupTable.applyColorMap(props.colorMap);
-      if (props.imageData) {
-        const dataRange = props.imageData.getPointData().getScalars().getRange();
+    if (prevColorMap !== colorMap) {
+      this.lookupTable.applyColorMap(colorMap);
+      if (imageData) {
+        const dataRange = imageData.getPointData().getScalars().getRange();
         this.lookupTable.setMappingRange(...dataRange);
         this.lookupTable.updateRange();
       }
@@ -154,8 +170,8 @@ export default class VolumeView extends React.Component {
       }
     }
 
-    if (props.transferFunctionWidget !== this.props.transferFunctionWidget) {
-      this.setTransferFunctionWidget(props.transferFunctionWidget);
+    if (prevTransferFunctionWidget !== transferFunctionWidget) {
+      this.setTransferFunctionWidget(transferFunctionWidget);
     }
 
     this.renderWindow.render();

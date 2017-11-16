@@ -69,15 +69,26 @@ export default class SliceView extends React.Component {
   }
 
   componentWillReceiveProps(props) {
+    const {
+      imageData: prevImageData,
+      sliceMode: prevSliceMode,
+    } = this.props;
+
+    const {
+      imageData,
+      slice,
+      sliceMode,
+    } = props;
+
     // flag used to update slice mode if needed
     let updateSliceMode = false;
 
-    if (props.imageData !== this.props.imageData) {
-      const needToAddActor = this.props.imageData == null;
-      this.mapper.setInputData(props.imageData);
+    if (prevImageData !== imageData) {
+      const needToAddActor = prevImageData == null;
+      this.mapper.setInputData(imageData);
 
       // set actor properties
-      const [scalarMin, scalarMax] = props.imageData.getPointData().getScalars().getRange();
+      const [scalarMin, scalarMax] = imageData.getPointData().getScalars().getRange();
       this.actor.getProperty().setColorWindow(scalarMax - scalarMin);
       this.actor.getProperty().setColorLevel((scalarMax + scalarMin) / 2.0);
 
@@ -88,20 +99,20 @@ export default class SliceView extends React.Component {
     }
 
     // update slice mode
-    if (props.sliceMode !== this.props.sliceMode || updateSliceMode) {
-      this.mapper.setCurrentSlicingMode(props.sliceMode);
+    if (prevSliceMode !== sliceMode || updateSliceMode) {
+      this.mapper.setCurrentSlicingMode(sliceMode);
       // this.mapper[`set${'XYZ'[this.props.sliceMode]}Slice`](0); // FIXME force change to render (bug in imageMapper)
       // this.mapper.setZSlice(0);
-      const position = this.camera.getFocalPoint().map((v, idx) => (idx === props.sliceMode ? (v + 1) : v));
+      const position = this.camera.getFocalPoint().map((v, idx) => (idx === sliceMode ? (v + 1) : v));
       const viewUp = [0, 0, 0];
-      viewUp[(props.sliceMode + 2) % 3] = 1;
+      viewUp[(sliceMode + 2) % 3] = 1;
       this.camera.set({ position, viewUp });
       this.renderer.resetCamera();
       this.renderer.resetCameraClippingRange();
     }
 
     // update slice
-    this.mapper[`set${'XYZ'[this.props.sliceMode]}Slice`](props.slice);
+    this.mapper[`set${'XYZ'[sliceMode]}Slice`](slice);
 
     // render
     this.renderWindow.render();
