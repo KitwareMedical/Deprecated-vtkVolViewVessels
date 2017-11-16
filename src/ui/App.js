@@ -13,7 +13,7 @@ import SegmentControls from './SegmentControls';
 import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 import Messages from './Messages';
-import { addTube, loadTubes, listenForTubes } from '../stores/TubeStore';
+import { addTube, listenForTubes } from '../stores/TubeStore';
 
 const TabPane = Tabs.TabPane;
 
@@ -28,7 +28,6 @@ class App extends React.Component {
 
     connectAction(segmentStore, 'segmentedTube', tubeStore, addTube);
 
-    tubeStore.dispatch(loadTubes());
     tubeStore.dispatch(listenForTubes());
   }
 
