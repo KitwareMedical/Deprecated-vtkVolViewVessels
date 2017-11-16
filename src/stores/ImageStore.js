@@ -19,6 +19,8 @@ export const setImage = Action('setImage', image => (data, setData) => {
 
 export const setSlicePos = slicePos => data => ({ ...data, slicePos });
 
+export const setSliceMode = sliceMode => data => ({ ...data, sliceMode });
+
 export const imageLoader = api => (store, action) => {
   if (action.name === 'loadImage') {
     store.dispatch(setLoading());

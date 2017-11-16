@@ -7,10 +7,12 @@ import SliceView from './SliceView';
 import SliceControls from './SliceControls';
 // import * as ImageActions from '../actions/ImageActions';
 // import * as TubeActions from '../actions/TubeActions';
-import { setSlicePos } from '../stores/ImageStore';
+import { setSlicePos, setSliceMode } from '../stores/ImageStore';
 import { segmentTube } from '../stores/SegmentStore';
 
 import style from '../Tube.mcss';
+
+const SliceModeList = ['X', 'Y', 'Z'];
 
 function ControllableSliceView({
   stores: { imageStore, segmentStore },
@@ -30,7 +32,10 @@ function ControllableSliceView({
       <SliceControls
         slice={slicePosition}
         sliceMax={sliceMaximum}
+        sliceMode={SliceModeList[sliceMode]}
+        sliceModeList={SliceModeList}
         onSliceChange={slice => imageStore.dispatch(setSlicePos(slice))}
+        onSliceModeChange={name => imageStore.dispatch(setSliceMode(SliceModeList.indexOf(name)))}
       />
     </div>
   );
