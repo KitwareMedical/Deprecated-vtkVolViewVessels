@@ -7,7 +7,7 @@ export default class Api {
     this.listeners = {};
 
     // subscribe to server events
-    this.subscription = this.dataManager.ITKTube.onTubeGeneratorChange((item) => {
+    this.subscription = this.dataManager.onTubeGeneratorChange((item) => {
       // TODO figure out why remote sends as array
       let tubeItem = item;
       if (tubeItem instanceof Array) {
@@ -33,7 +33,7 @@ export default class Api {
 
   loadImage(filename) {
     return new Promise((resolve, reject) => {
-      this.dataManager.ITKTube.openFile(filename)
+      this.dataManager.openFile(filename)
         .then((dataDescription) => {
           const reader = new FileReader();
           reader.readAsArrayBuffer(dataDescription.scalars);
@@ -54,22 +54,22 @@ export default class Api {
   }
 
   loadTubes() {
-    return this.dataManager.ITKTube.getTubes();
+    return this.dataManager.getTubes();
   }
 
   segmentTube(coords, scale) {
-    return this.dataManager.ITKTube.generateTube(...coords, scale);
+    return this.dataManager.generateTube(...coords, scale);
   }
 
   setTubeColor(id, color) {
-    return this.dataManager.ITKTube.setTubeColor(id, color);
+    return this.dataManager.setTubeColor(id, color);
   }
 
   reparentTubes(parent, children) {
-    return this.dataManager.ITKTube.reparentTubes(parent, children);
+    return this.dataManager.reparentTubes(parent, children);
   }
 
   deleteTube(id) {
-    return this.dataManager.ITKTube.deleteTube(id);
+    return this.dataManager.deleteTube(id);
   }
 }

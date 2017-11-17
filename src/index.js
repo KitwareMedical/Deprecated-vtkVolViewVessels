@@ -18,7 +18,7 @@ import mode from './mode';
 import initElectron from './electron_util';
 
 function main(dataManager) {
-  const api = new Api(dataManager);
+  const api = new Api(dataManager.ITKTube);
   const stores = {
     imageStore: new Store(imageData(), imageLoader(api)),
     tubeStore: new Store(tubeData(), tubeSideEffects(api)),
