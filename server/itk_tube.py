@@ -12,58 +12,22 @@ from server import register, Protocol
 # import tube utils
 from tubeutils import GetTubePoints
 
-# map from itkCType to ctype
-itkCTypeToCtype = {
-        itk.B: ctypes.c_bool,
-        itk.D: ctypes.c_double,
-        itk.F: ctypes.c_float,
-        itk.LD: ctypes.c_longdouble,
-        itk.SC: ctypes.c_char,
-        itk.SI: ctypes.c_int,
-        itk.SL: ctypes.c_long,
-        itk.SLL: ctypes.c_longlong,
-        itk.SS: ctypes.c_short,
-        itk.UC: ctypes.c_ubyte,
-        itk.UI: ctypes.c_uint,
-        itk.UL: ctypes.c_ulong,
-        itk.ULL: ctypes.c_ulonglong,
-        itk.US: ctypes.c_ushort
-}
-
-# map from itk ctype to js array type
-itkCTypeToJsArray = {
-        itk.B: 'UInt8Array',
-        itk.D: 'Float64Array',
-        itk.F: 'Float32Array',
-        itk.LD: 'Float64Array',
-        itk.SC: 'Int8Array',
-        itk.SI: 'Int32Array',
-        itk.SL: 'Int32Array',
-        itk.SLL: 'Int32Array',
-        itk.SS: 'Int16Array',
-        itk.UC: 'UInt8Array',
-        itk.UI: 'UInt32Array',
-        itk.UL: 'UInt32Array',
-        itk.ULL: 'UInt32Array',
-        itk.US: 'UInt16Array',
-}
-
-# map from itk ctype to numpy dtype
-itkCTypeToDType = {
-        itk.B: 1,
-        itk.D: 8,
-        itk.F: 4,
-        itk.LD: 8,
-        itk.SC: 1,
-        itk.SI: 4,
-        itk.SL: 4,
-        itk.SLL: 4,
-        itk.SS: 2,
-        itk.UC: 1,
-        itk.UI: 4,
-        itk.UL: 4,
-        itk.ULL: 4,
-        itk.US: 2,
+# maps itk ctype to other types
+itkCTypeToOthers = {
+        itk.B: (ctypes.c_bool, 'UInt8Array', 1, 'i'),
+        itk.D: (ctypes.c_double, 'Float64Array', 8, 'f'),
+        itk.F: (ctypes.c_float, 'Float32Array', 4, 'f'),
+        itk.LD: (ctypes.c_longdouble, 'Float64Array', 8, 'f'),
+        itk.SC: (ctypes.c_char, 'Int8Array', 1, 'i'),
+        itk.SI: (ctypes.c_int, 'Int32Array', 4, 'i'),
+        itk.SL: (ctypes.c_long, 'Int32Array', 4, 'i'),
+        itk.SLL: (ctypes.c_longlong, 'Int32Array', 4, 'i'),
+        itk.SS: (ctypes.c_short, 'Int16Array', 2, 'i'),
+        itk.UC: (ctypes.c_ubyte, 'UInt8Array', 1, 'i'),
+        itk.UI: (ctypes.c_uint, 'UInt32Array', 4, 'i'),
+        itk.UL: (ctypes.c_ulong, 'UInt32Array', 4, 'i'),
+        itk.ULL: (ctypes.c_ulonglong, 'UInt32Array', 4, 'i'),
+        itk.US: (ctypes.c_ushort, 'UInt16Array', 2, 'i'),
 }
 
 class ITKTubeProtocol(Protocol):
@@ -132,18 +96,19 @@ class ITKTubeProtocol(Protocol):
             raise Exception('Failed to load file.')
 
         # Get ITK image data
+        imgCType, imgJsArrType, pixelSize, pixelDType = itkCTypeToOthers[self.itkPixelType]
         pointer = long(self.itkImage.GetBufferPointer())
-        imageBuffer = ctypes.cast(pointer, ctypes.POINTER(itkCTypeToCtype[self.itkPixelType]))
+        imageBuffer = ctypes.cast(pointer, ctypes.POINTER(imgCType))
         size = self.itkImage.GetLargestPossibleRegion().GetSize()
+        length = size[0]*size[1]*size[2]
 
-        buf = imageBuffer[:size[0]*size[1]*size[2]]
-        pixelSize = itkCTypeToDType[self.itkPixelType]
-        itkBinaryImageContent = np.array(buf, dtype=np.dtype('<i' + str(pixelSize))).tobytes()
+        imgArray = np.ctypeslib.as_array(
+                (imgCType * length).from_address(ctypes.addressof(imageBuffer.contents)))
 
         resp = {
             "extent": (0, size[0]-1, 0, size[1]-1, 0, size[2]-1),
             "origin": list(self.itkImage.GetOrigin()),
             "spacing": list(self.itkImage.GetSpacing()),
-            "typedArray": itkCTypeToJsArray[self.itkPixelType],
+            "typedArray": imgJsArrType,
         }
-        return self.makeResponse(resp, itkBinaryImageContent)
+        return self.makeResponse(resp, imgArray.tobytes())
