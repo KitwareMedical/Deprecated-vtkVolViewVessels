@@ -18,7 +18,7 @@ import mode from './mode';
 import initElectron from './electron_util';
 
 function main(dataManager) {
-  const api = new Api(dataManager.ITKTube);
+  const api = new Api(dataManager);
   const stores = {
     imageStore: new Store(imageData(), imageLoader(api)),
     tubeStore: new Store(tubeData(), tubeSideEffects(api)),
@@ -38,4 +38,5 @@ function main(dataManager) {
 }
 
 // mode.local.run(main);
-mode.remote.run(main);
+// mode.remote.run(main);
+mode.zmq.run('tcp://127.0.0.1:4555', main);

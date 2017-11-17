@@ -1,28 +1,4 @@
-r"""
-    This module is a ITK Web server application.
-    The following command line illustrates how to use it::
-
-        $ python .../server/itk-tube.py --data /.../path-to-your-data-file
-
-        --data
-             Path to file to load.
-
-    Any WSLink executable script comes with a set of standard arguments that can be overriden if need be::
-
-        --port 8080
-             Port number on which the HTTP server will listen.
-
-        --content /path-to-web-content/
-             Directory that you want to serve as static web content.
-             By default, this variable is empty which means that we rely on another
-             server to deliver the static content and the current process only
-             focuses on the WebSocket connectivity of clients.
-"""
-
-# import to process args
-import os
-import argparse
-
+import sys
 import numpy as np
 
 # import itk modules.
@@ -30,13 +6,8 @@ import itk
 from itkTypes import itkCType
 import ctypes
 
-# import Twisted reactor for later callback
-from twisted.internet import reactor
-
-# import Web connectivity
-from wslink import register
-from wslink import server
-from wslink.websocket import LinkProtocol
+# import client methods
+from server import register, Protocol
 
 # import tube utils
 from tubeutils import GetTubePoints
@@ -95,27 +66,9 @@ itkCTypeToDType = {
         itk.US: 2,
 }
 
-def okay(payload=None):
-    return { 'status': 'ok', 'result': payload }
-
-def error(reason=None):
-    return { 'status': 'error', 'reason': reason }
-
-# =============================================================================
-# Create Web Server to handle requests
-# =============================================================================
-
-class ItkTubeProtocol(LinkProtocol):
-
-    timelapse = 0.1 # Time in seconds
-    processingLoad = 0
-
-    def __init__(self):
-        self.idToSpatialObject = dict()
-        # NOTE maybe not the most memory-efficient cache since we store points
-        # in array form here?
-        self.tubeCache = []
-        self.curIndex = 0
+class ITKTubeProtocol(Protocol):
+    def __init__(self, *args, **kwargs):
+        super(ITKTubeProtocol, self).__init__(*args, **kwargs)
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -149,63 +102,6 @@ class ItkTubeProtocol(LinkProtocol):
                 .SetMatrix(self.itkImage.GetDirection())
         self.segmentTubes.GetTubeGroup().ComputeObjectToWorldTransform()
 
-    def scheduleQueueProcessing(self):
-        if self.processingLoad == 0:
-            self.processingLoad += 1
-            reactor.callLater(ItkTubeProtocol.timelapse, self.processQueue)
-
-    def processQueue(self):
-        self.processingLoad -= 1
-
-        if self.curIndex >= len(self.tubeCache):
-            return
-
-        # Find anything in the queue that need processing
-        itemToProcess = self.tubeCache[self.curIndex]
-
-        # extract tube
-        seed = itk.Point[itk.D, self.dimensions](itemToProcess['position'])
-        index = self.itkImage.TransformPhysicalPointToContinuousIndex(seed)
-
-        scaleNorm = self.itkImage.GetSpacing()[0]
-        if itemToProcess['scale']/scaleNorm < 0.3:
-            raise Exception('scale/scaleNorm < 0.3')
-        self.segmentTubes.SetRadius(itemToProcess['scale']/scaleNorm)
-
-        tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
-        if tube:
-            self.segmentTubes.AddTube(tube)
-            self.idToSpatialObject[itemToProcess['id']] = tube
-            tube.ComputeObjectToWorldTransform()
-
-            points = GetTubePoints(tube)
-
-            # transform tube points properly
-            tube.ComputeObjectToWorldTransform()
-            transform = tube.GetIndexToWorldTransform()
-            scaling = [transform.GetMatrix()(i,i) for i in range(3)]
-            scale = sum(scaling) / len(scaling)
-
-            for i in range(len(points)):
-                pt, radius = points[i]
-                pt = transform.TransformPoint(pt)
-                points[i] = (pt, radius*scale)
-
-            itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
-            self.curIndex += 1
-        else:
-            itemToProcess['mesh'] = None
-            # don't increment curIndex, since we are deleting array elms
-            del self.tubeCache[self.curIndex]
-
-        itemToProcess['status'] = 'done'
-
-        # Publish any update
-        self.publish('itk.tube.mesh', itemToProcess)
-
-        # Reschedule ourself
-        self.scheduleQueueProcessing()
-
     def loadItkImage(self, filename):
         base = itk.ImageIOFactory.CreateImageIO(filename, itk.ImageIOFactory.ReadMode)
         base.SetFileName(filename)
@@ -225,7 +121,15 @@ class ItkTubeProtocol(LinkProtocol):
 
     @register('itk.volume.open')
     def openVolume(self, filename):
-        self.loadDataFile(str(filename))
+        filename = str(filename)
+        if not filename:
+            raise Exception('No filename provided')
+
+        try:
+            self.loadDataFile(filename)
+        except Exception as e:
+            sys.stderr.write('%s\n' % str(e))
+            raise Exception('Failed to load file.')
 
         # Get ITK image data
         pointer = long(self.itkImage.GetBufferPointer())
@@ -236,63 +140,10 @@ class ItkTubeProtocol(LinkProtocol):
         pixelSize = itkCTypeToDType[self.itkPixelType]
         itkBinaryImageContent = np.array(buf, dtype=np.dtype('<i' + str(pixelSize))).tobytes()
 
-        # Send data to client
-        return {
+        resp = {
             "extent": (0, size[0]-1, 0, size[1]-1, 0, size[2]-1),
             "origin": list(self.itkImage.GetOrigin()),
             "spacing": list(self.itkImage.GetSpacing()),
             "typedArray": itkCTypeToJsArray[self.itkPixelType],
-            "scalars": self.addAttachment(itkBinaryImageContent)
         }
-
-    @register('itk.tube.get')
-    def getTubes(self):
-        return self.tubeCache
-
-    @register('itk.tube.generate')
-    def generateTube(self, i, j, k, scale=2.0):
-        coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
-        itemToProcess = {
-            'id': self.curTubeId,
-            'parent': -1, # denotes this tube's parent as not a tube
-            'position': coords,
-            'scale': scale,
-            'status': 'pending',
-            'color': [1, 0, 0], # default to red
-        }
-        self.curTubeId += 1
-        self.tubeCache.append(itemToProcess)
-        self.scheduleQueueProcessing()
-        return itemToProcess
-
-    @register('itk.tube.delete')
-    def deleteTube(self, tubeId):
-        tube = self.idToSpatialObject[tubeId]
-        self.segmentTubes.DeleteTube(tube)
-        del self.idToSpatialObject[tubeId]
-        for index, item in enumerate(self.tubeCache):
-            if item['id'] == tubeId:
-                del self.tubeCache[index]
-                self.curIndex -= 1
-                break
-        return okay()
-
-    @register('itk.tube.setcolor')
-    def setTubeColor(self, tubeId, color):
-        for item in self.tubeCache:
-            if item['id'] == tubeId:
-                item['color'] = color
-                break
-        return okay()
-
-    @register('itk.tube.reparent')
-    def reparentTubes(self, parent, children):
-        if type(parent) is not int or type(children) is not list:
-            return error('Invalid arguments')
-
-        if parent in children:
-            return error('Cannot have tube be parent of itself')
-        for tube in self.tubeCache:
-            if tube['id'] in children:
-                tube['parent'] = parent
-        return okay()
+        return self.makeResponse(resp, itkBinaryImageContent)

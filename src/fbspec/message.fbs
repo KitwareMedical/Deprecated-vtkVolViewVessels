@@ -1,0 +1,16 @@
+namespace Message;
+
+enum Type:byte {
+  Response,
+  Request,
+}
+
+table Message {
+  id:long;
+  type:Type;
+  target:string;
+  payload:string;
+  binaryAttachment1:[ubyte];
+}
+
+root_type Message;

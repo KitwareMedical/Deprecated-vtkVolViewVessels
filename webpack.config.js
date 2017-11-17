@@ -34,6 +34,11 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
+        exclude: [
+          /node_modules/,
+          // these are compiled from flatbuffers, so don't pre-process it
+          /src\/fbspec/,
+        ],
         options: {
           presets: ['es2015', 'stage-2', 'react'],
           plugins: [
@@ -66,7 +71,17 @@ module.exports = {
         loader: 'url-loader?limit=60000',
         include: /fonts/,
       },
-      { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre', options: { configFile: eslintrcPath } },
+      {
+        test: /\.js$/,
+        loader: 'eslint-loader',
+        exclude: [
+          /node_modules/,
+          // these are compiled from flatbuffers, so don't lint it
+          /src\/fbspec/,
+        ],
+        enforce: 'pre',
+        options: { configFile: eslintrcPath }
+      },
       {
         test: /\.less$/,
         use: [
@@ -74,6 +89,10 @@ module.exports = {
           'css-loader',
           'less-loader',
         ],
+      },
+      {
+        test: /\.node$/,
+        use: 'node-loader',
       },
     ],
   },
