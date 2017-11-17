@@ -36,7 +36,6 @@ export default class Api {
       .then((imageDesc) => {
         const scalars = new Uint8Array(imageDesc.scalars);
         const values = new window[imageDesc.typedArray](scalars.buffer);
-        console.log(values);
         const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
         delete imageDesc.scalars;
         delete imageDesc.typedArray;
