@@ -42,6 +42,18 @@ class Client {
     this.callbacks = {};
     this.msgId = 0;
 
+    // This promise resolves when client has connected with the server
+    // Use this in front of every API call. Note this does not guarantee
+    // the connection exists. This only resolves when the FIRST connection
+    // is made, but ignores disconnects.
+    this.waitForConnect = new Promise((resolve, reject) => {
+      const onConnect = () => {
+        this.sock.removeListener('connect', onConnect);
+        resolve();
+      };
+      this.sock.on('connect', onConnect);
+    });
+
     this.sock.on('message', (data) => {
       const message = Message.Message.getRootAsMessage(new flatbuffers.ByteBuffer(data));
       if (message.type() === Message.Type.Response) {
@@ -87,27 +99,22 @@ class ITKTubeClient extends Client {
   }
 
   openFile(filename) {
-    return new Promise((resolve, reject) => {
-      try {
+    return this.waitForConnect
+      .then(() => new Promise((resolve, reject) => {
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.volume.open', [filename]);
         this.request(msg, ({ result: imageInfo, attachment: scalars }) => {
           resolve(Object.assign(imageInfo, { scalars }));
         });
-      } catch (e) {
-        reject(e);
-      }
-    });
+      }));
   }
 }
 
 function run(uri, startFn, stopFn) {
   const sock = zmq.socket('pair');
 
-  sock.on('connect', () => {
-    if (startFn) {
-      startFn(new ITKTubeClient(sock));
-    }
-  });
+  if (startFn) {
+    startFn(new ITKTubeClient(sock));
+  }
 
   sock.on('disconnect', () => {
     if (stopFn) {
