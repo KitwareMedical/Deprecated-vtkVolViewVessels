@@ -7,11 +7,13 @@ export const setImage = Action('setImage', image => (data, setData) => {
   const { sliceMode } = data;
   const sliceMax = image.getDimensions()[sliceMode] - 1;
   const slicePos = Math.ceil(sliceMax / 2);
+  const scalarRange = image.getPointData().getScalars().getRange();
 
   setData({
     ...data,
 
     image,
+    scalarRange,
     slicePos,
     sliceMax,
   });
@@ -36,6 +38,7 @@ export const imageLoader = api => (store, action) => {
 
 const data = () => wrapDataState({
   image: null,
+  scalarRange: [0, 1],
 
   // NOTE this is UI state, but is here because setting
   // the image affects UI state. Maybe I can move this

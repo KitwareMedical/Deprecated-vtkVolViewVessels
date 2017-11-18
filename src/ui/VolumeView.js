@@ -80,13 +80,13 @@ export default class VolumeView extends React.Component {
       colorMap,
       scalarOpacity,
       transferFunctionWidget,
+      imageScalarRange,
     } = props;
 
     if (prevImageData !== imageData) {
       const needToAddActor = prevImageData == null;
-      const dataRange = imageData.getPointData().getScalars().getRange();
 
-      this.lookupTable.setMappingRange(...dataRange);
+      this.lookupTable.setMappingRange(...imageScalarRange);
       this.lookupTable.updateRange();
 
       if (this.transferFunctionWidget) {
@@ -232,6 +232,7 @@ VolumeView.propTypes = {
   colorMap: PropTypes.object.isRequired,
   scalarOpacity: PropTypes.number,
   imageData: PropTypes.object,
+  imageScalarRange: PropTypes.array,
   transferFunctionWidget: PropTypes.object,
   tubes: PropTypes.array,
   visible: PropTypes.bool.isRequired,
@@ -240,6 +241,7 @@ VolumeView.propTypes = {
 VolumeView.defaultProps = {
   scalarOpacity: 0,
   imageData: null,
+  imageScalarRange: [0, 1],
   transferFunctionWidget: null,
   tubes: [],
 };
