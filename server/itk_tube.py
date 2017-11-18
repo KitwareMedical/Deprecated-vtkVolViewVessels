@@ -30,6 +30,19 @@ itkCTypeToOthers = {
         itk.US: (ctypes.c_ushort, 'UInt16Array', 2, 'i'),
 }
 
+# While this may seem weird, the itk module has a property access
+# side-effect of loading in the required module for that property
+# via lazy-loading.
+# These lines force itk module load on startup so that calls to open
+# ITK images and segment tubes will be faster.
+itk.CompositeTransform
+itk.TranslationTransform
+itk.ScaleTransform
+itk.Image
+itk.SegmentTubes
+itk.ImageIOFactory.CreateImageIO
+itk.ImageFileReader
+
 class ITKTubeProtocol(Protocol):
     def __init__(self, *args, **kwargs):
         super(ITKTubeProtocol, self).__init__(*args, **kwargs)
