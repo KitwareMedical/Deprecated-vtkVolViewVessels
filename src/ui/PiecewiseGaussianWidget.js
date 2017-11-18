@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import vtkPiecewiseGaussianWidget from 'vtk.js/Sources/Interaction/Widgets/PiecewiseGaussianWidget';
+import vtkFasterPiecewiseGaussianWidget from '../util/FasterPiecewiseGaussianWidget';
 
 import { connectComponent } from '../state';
 import style from '../Tube.mcss';
@@ -13,7 +13,7 @@ class PiecewiseGaussianWidget extends React.Component {
     super(props);
 
     // TODO transfer creation of this widget to the VolumeStore?
-    this.transferFunctionWidget = vtkPiecewiseGaussianWidget.newInstance({ numberOfBins: 256, size: [400, 168] });
+    this.transferFunctionWidget = vtkFasterPiecewiseGaussianWidget.newInstance({ numberOfBins: 256, size: [400, 168] });
     this.transferFunctionWidget.updateStyle({
       backgroundColor: 'rgba(255, 255, 255, 0.6)',
       histogramColor: 'rgba(100, 100, 100, 0.5)',

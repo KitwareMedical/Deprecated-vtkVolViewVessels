@@ -90,6 +90,7 @@ export default class VolumeView extends React.Component {
       this.lookupTable.updateRange();
 
       if (this.transferFunctionWidget) {
+        this.transferFunctionWidget.setDataRange(imageScalarRange);
         this.transferFunctionWidget.setDataArray(imageData.getPointData().getScalars().getData());
         this.transferFunctionWidget.applyOpacity(this.piecewiseFunction);
       }
