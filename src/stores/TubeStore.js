@@ -130,9 +130,7 @@ export const tubeSideEffects = api => (store, action) => {
       break;
 
     case 'setTubeColor': {
-      const [id, color] = action.args;
-      const normColor = [color.r / 255, color.g / 255, color.b / 255];
-      api.setTubeColor(id, normColor);
+      api.setTubeColor(...action.args);
       break;
     }
 
