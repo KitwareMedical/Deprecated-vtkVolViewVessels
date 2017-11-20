@@ -46,6 +46,7 @@ class ITKTubeProtocol(Protocol):
         super(ITKTubeProtocol, self).__init__(*args, **kwargs)
         self.imageData = None
         self.curTubeId = 0
+        self.tubeCache = dict()
 
         self.worker = TubeWorker()
         self.worker.start()
@@ -100,6 +101,10 @@ class ITKTubeProtocol(Protocol):
         imgArray = np.ctypeslib.as_array(
                 (imgCType * length).from_address(ctypes.addressof(imageBuffer.contents)))
 
+        # clear tube cache
+        self.tubeCache.clear()
+
+        # prepare response
         resp = {
             "extent": (0, size[0]-1, 0, size[1]-1, 0, size[2]-1),
             "origin": list(image.GetOrigin()),
@@ -127,6 +132,8 @@ class ITKTubeProtocol(Protocol):
             tube['status'] = 'done'
             if mesh:
                 tube['mesh'] = mesh
+                # only add to tube cache if mesh exists
+                self.tubeCache[tube['id']] = tube
 
             self.publish('itk.tube.segmentresult', tube)
 
@@ -134,3 +141,10 @@ class ITKTubeProtocol(Protocol):
         deferred.on_success(success)
 
         return self.makeResponse(tube)
+
+    @register('itk.tube.setcolor')
+    def setTubeColor(self, tubeId, color):
+        try:
+            self.tubeCache[tubeId]['color'] = color
+        except:
+            raise Exception('Failed to set tube color for %s', str(tubeId))

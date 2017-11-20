@@ -136,6 +136,15 @@ class ITKTubeClient extends Client {
         });
       }));
   }
+
+  setTubeColor(id, color) {
+    return this.waitForConnect
+      .then(() => new Promise((resolve, reject) => {
+        const args = [id, color];
+        const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.setcolor', args);
+        this.request(msg, () => resolve());
+      }));
+  }
 }
 
 function run(uri, startFn, stopFn) {
