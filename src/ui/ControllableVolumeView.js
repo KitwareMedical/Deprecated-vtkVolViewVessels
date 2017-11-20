@@ -15,6 +15,7 @@ import { ColorPresets, setScalarOpacity, setColorMap, setVolumeVisibility } from
 function ControllableVolumeView({
   stores: { volumeStore },
   image,
+  scalarRange,
   tubes,
   scalarOpacity,
   colorMap,
@@ -25,6 +26,7 @@ function ControllableVolumeView({
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <VolumeView
         imageData={image}
+        imageScalarRange={scalarRange}
         visible={visible}
         tubes={tubes}
         scalarOpacity={scalarOpacity}
@@ -46,6 +48,7 @@ function ControllableVolumeView({
 
 ControllableVolumeView.propTypes = {
   image: PropTypes.object,
+  scalarRange: PropTypes.array,
   tubes: PropTypes.array,
   scalarOpacity: PropTypes.number,
   transferFunctionWidget: PropTypes.object,
@@ -57,6 +60,7 @@ ControllableVolumeView.propTypes = {
 
 ControllableVolumeView.defaultProps = {
   image: null,
+  scalarRange: [0, 1],
   tubes: [],
   scalarOpacity: 0,
   transferFunctionWidget: null,
@@ -68,7 +72,10 @@ export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStor
     switch (updated) {
       case 'imageStore':
         if (changedKeys.includes('image')) {
-          return { image: imageStore.image };
+          return {
+            image: imageStore.image,
+            scalarRange: imageStore.scalarRange,
+          };
         }
         return null;
       case 'tubeStore':

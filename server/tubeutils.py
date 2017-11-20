@@ -2,6 +2,10 @@ from StringIO import StringIO
 
 import itk
 
+def Enum(*names):
+    enums = dict(zip(names, range(len(names))))
+    return type('Enum', (object,), enums)
+
 def DowncastToVesselTubeSOPoint(soPoint):
     '''Hacky way to downcast SpatialObjectPoint.'''
     buf = StringIO()

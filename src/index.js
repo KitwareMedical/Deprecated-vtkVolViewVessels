@@ -38,4 +38,5 @@ function main(dataManager) {
 }
 
 // mode.local.run(main);
-mode.remote.run(main);
+// mode.remote.run(main);
+mode.zmq.run('tcp://127.0.0.1:4555', main);

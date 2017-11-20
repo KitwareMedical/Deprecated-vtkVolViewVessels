@@ -17,6 +17,7 @@ const SliceModeList = ['X', 'Y', 'Z'];
 function ControllableSliceView({
   stores: { imageStore, segmentStore },
   image,
+  scalarRange,
   slicePosition,
   sliceMaximum,
   sliceMode,
@@ -25,6 +26,7 @@ function ControllableSliceView({
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <SliceView
         imageData={image}
+        imageScalarRange={scalarRange}
         sliceMode={sliceMode}
         slice={slicePosition}
         onPickIJK={coords => segmentStore.dispatch(segmentTube(coords))}
@@ -43,6 +45,7 @@ function ControllableSliceView({
 
 ControllableSliceView.propTypes = {
   image: PropTypes.object,
+  scalarRange: PropTypes.array,
   slicePosition: PropTypes.number,
   sliceMaximum: PropTypes.number,
   sliceMode: PropTypes.number,
@@ -51,6 +54,7 @@ ControllableSliceView.propTypes = {
 
 ControllableSliceView.defaultProps = {
   image: null,
+  scalarRange: [0, 1],
   slicePosition: 0,
   sliceMaximum: 1,
   sliceMode: 2,
@@ -59,6 +63,7 @@ ControllableSliceView.defaultProps = {
 export default connectComponent(ControllableSliceView, 'imageStore',
   ({ imageStore }, props) => ({
     image: imageStore.image,
+    scalarRange: imageStore.scalarRange,
     slicePosition: imageStore.slicePos,
     sliceMaximum: imageStore.sliceMax,
     sliceMode: imageStore.sliceMode,

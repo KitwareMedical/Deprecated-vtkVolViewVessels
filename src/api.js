@@ -7,7 +7,7 @@ export default class Api {
     this.listeners = {};
 
     // subscribe to server events
-    this.subscription = this.dataManager.ITKTube.onTubeGeneratorChange((item) => {
+    this.subscription = this.dataManager.onTubeGeneratorChange((item) => {
       // TODO figure out why remote sends as array
       let tubeItem = item;
       if (tubeItem instanceof Array) {
@@ -32,44 +32,37 @@ export default class Api {
   }
 
   loadImage(filename) {
-    return new Promise((resolve, reject) => {
-      this.dataManager.ITKTube.openFile(filename)
-        .then((dataDescription) => {
-          const reader = new FileReader();
-          reader.readAsArrayBuffer(dataDescription.scalars);
+    return this.dataManager.openFile(filename)
+      .then((imageDesc) => {
+        const scalars = new Uint8Array(imageDesc.scalars);
+        const values = new window[imageDesc.typedArray](scalars.buffer);
+        const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
+        delete imageDesc.scalars;
+        delete imageDesc.typedArray;
+        const imageData = vtkImageData.newInstance(imageDesc);
+        imageData.getPointData().setScalars(dataArray);
 
-          reader.addEventListener('loadend', () => {
-            const values = new window[dataDescription.typedArray](reader.result);
-            const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
-            delete dataDescription.scalars;
-            delete dataDescription.typedArray;
-            const imageData = vtkImageData.newInstance(dataDescription);
-            imageData.getPointData().setScalars(dataArray);
-
-            resolve(imageData);
-          });
-        })
-        .catch(error => reject(error));
-    });
+        return imageData;
+      });
   }
 
   loadTubes() {
-    return this.dataManager.ITKTube.getTubes();
+    return this.dataManager.getTubes();
   }
 
   segmentTube(coords, scale) {
-    return this.dataManager.ITKTube.generateTube(...coords, scale);
+    return this.dataManager.generateTube(coords, scale);
   }
 
   setTubeColor(id, color) {
-    return this.dataManager.ITKTube.setTubeColor(id, color);
+    return this.dataManager.setTubeColor(id, color);
   }
 
   reparentTubes(parent, children) {
-    return this.dataManager.ITKTube.reparentTubes(parent, children);
+    return this.dataManager.reparentTubes(parent, children);
   }
 
   deleteTube(id) {
-    return this.dataManager.ITKTube.deleteTube(id);
+    return this.dataManager.deleteTube(id);
   }
 }

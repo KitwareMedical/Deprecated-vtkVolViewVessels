@@ -1,83 +1,123 @@
-r"""
-    This module is a ITK Web server application.
-    The following command line illustrates how to use it::
+import json
+import threading
+import zmq
+import flatbuffers
 
-        $ python .../server/itk-tube.py --data /.../path-to-your-data-file
+from Message import Message
+from Message.Type import Type as MessageType
 
-        --data
-             Path to file to load.
+from message_wrapper import MessageWrapper
 
-    Any WSLink executable script comes with a set of standard arguments that can be overriden if need be::
+ENDPOINT_PROPERTY = '__endpoint'
 
-        --port 8080
-             Port number on which the HTTP server will listen.
+def register(endpoint):
+    '''Registers an endpoint to a decorated function in the Protocol class.'''
+    def decorator(func):
+        if not hasattr(func, ENDPOINT_PROPERTY):
+            setattr(func, ENDPOINT_PROPERTY, endpoint)
+        else:
+            raise Exception('Endpoint %s exists on %s' % (endpoint, repr(func)))
+        return func
+    return decorator
 
-        --content /path-to-web-content/
-             Directory that you want to serve as static web content.
-             By default, this variable is empty which means that we rely on another
-             server to deliver the static content and the current process only
-             focuses on the WebSocket connectivity of clients.
-"""
+class Protocol(object):
+    def __init__(self, zmq_socket):
+        self._sock = zmq_socket
+        self._endpoints = dict()
 
-# import to process args
-import os
-import argparse
+        # get all endpoints
+        for prop in dir(self):
+            attr = getattr(self, prop)
+            if hasattr(attr, ENDPOINT_PROPERTY) and callable(attr):
+                endpoint = getattr(attr, ENDPOINT_PROPERTY)
+                self._endpoints[endpoint] = attr
 
-# import itk modules.
-import itk
-from itkTypes import itkCType
-import ctypes
+    def cleanup(self):
+        '''Optional cleanup hook when server is stopped.'''
+        pass
 
-# import Twisted reactor for later callback
-from twisted.internet import reactor
+    def send(self, msg):
+        '''Sends a MessageWrapper to the client.
 
-# import Web connectivity
-from wslink import register
-from wslink import server
-from wslink.websocket import ServerProtocol
+        For internal use only.
+        '''
+        self._sock.send(msg.tobytes())
 
-from itk_tube import ItkTubeProtocol
+    def publish(self, name, retval=None, binaryAttachment=None):
+        # make response message, then change response to publish
+        msg = self.makeResponse(retval, binaryAttachment)
+        msg.type = MessageType.Publish
 
-# =============================================================================
-# Create Web Server to handle requests
-# =============================================================================
+        # use "target" as the channel name
+        msg.target = name
 
-class _ItkTubeServer(ServerProtocol):
+        self.send(msg)
 
-    dataFile = ''
-    authKey = 'wslink-secret'
+    def delegate(self, message):
+        target = message.Target()
+        if target in self._endpoints:
+            func = self._endpoints[target]
+            args = json.loads(message.Payload() or '[]')
 
-    @staticmethod
-    def add_arguments(parser):
-        parser.add_argument("--data", default=None, help="path to data file to load", dest="dataFile")
+            try:
+                resp = func(*args)
+            except Exception as e:
+                resp = self.makeException(e)
 
-    @staticmethod
-    def configure(args):
-        _ItkTubeServer.authKey  = args.authKey
-        _ItkTubeServer.dataFile = args.dataFile
+            if resp is None:
+                resp = self.makeResponse()
 
-    def initialize(self):
-        # register custom protocol
-        protocol = ItkTubeProtocol()
-        # protocol.loadDataFile(self.dataFile)
-        self.registerLinkProtocol(protocol)
+            if not isinstance(resp, MessageWrapper):
+                raise Exception('Return value of %s endpoint should '
+                                'come from self.makeResponse()!' % target)
 
-        # Update authentication key to use
-        self.updateSecret(_ItkTubeServer.authKey)
+            # set correct response ID
+            resp.id = message.Id()
+            self.send(resp)
 
-# =============================================================================
-# Main: Parse args and start server
-# =============================================================================
+    def makeResponse(self, retval=None, binaryAttachment=None):
+        '''Makes a response message.'''
+        payload = None
+        if retval:
+            # json can only serialize dict/list
+            if type(retval) is not dict and type(retval) is not list:
+                retval = [retval]
+            payload = json.dumps(retval)
 
-if __name__ == "__main__":
-    # Create argument parser
-    parser = argparse.ArgumentParser(description="ITK Tube - Web Server")
+        # assert type(binaryAttachment) is bytes or bytearray
 
-    # Add arguments
-    server.add_arguments(parser)
-    _ItkTubeServer.add_arguments(parser)
-    args = parser.parse_args()
-    _ItkTubeServer.configure(args)
+        # message ID should be modified before sending
+        return MessageWrapper(-1, MessageType.Response,
+                payload=payload,
+                binaryAttachment1=binaryAttachment)
 
-    # Start server
-    server.start_webserver(options=args, protocol=_ItkTubeServer)
+    def makeException(self, exc):
+        '''Makes an exception response message.'''
+        payload = json.dumps({ 'reason': str(exc) })
+        # message ID should be modified before sending
+        return MessageWrapper(-1, MessageType.Exception, payload=payload)
+
+class Server(object):
+    def __init__(self):
+        self.context = zmq.Context()
+
+    def start(self, host, port, protocol, proto='tcp'):
+        sock = self.context.socket(zmq.PAIR)
+        print ('%s://%s:%d' % (proto, host, port))
+        sock.bind('%s://%s:%d' % (proto, host, port))
+
+        # create protocol
+        delegator = protocol(sock)
+
+        # start single-worker server
+        try:
+            while True:
+                data = sock.recv()
+                msg = Message.Message.GetRootAsMessage(data, 0)
+                if msg.Type() == MessageType.Request:
+                    try:
+                        delegator.delegate(msg)
+                    except Exception as e:
+                        print e
+        except KeyboardInterrupt:
+            delegator.cleanup()

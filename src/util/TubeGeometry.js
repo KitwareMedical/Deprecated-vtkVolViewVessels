@@ -17,7 +17,7 @@ export default function createTubeGeometry(mesh) {
   cone.setHeight(1);
   cone.update();
 
-  const pts = mesh.map(({ x, y, z, radius }) => [x, y, z, radius]);
+  const pts = mesh.map(([[x, y, z], radius]) => [x, y, z, radius]);
 
   const npoints = cone.getOutputData().getPoints().getData().length / 3;
   const polylen = cone.getOutputData().getPolys().getData().length;
