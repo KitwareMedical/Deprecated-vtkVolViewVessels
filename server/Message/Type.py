@@ -6,4 +6,5 @@ class Type(object):
     Response = 0
     Request = 1
     Publish = 2
+    Exception = 3
 

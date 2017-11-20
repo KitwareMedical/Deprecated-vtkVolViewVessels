@@ -62,8 +62,7 @@ class Protocol(object):
             try:
                 resp = func(*args)
             except Exception as e:
-                # TODO
-                resp = e
+                resp = self.makeException(e)
 
             if resp is None:
                 resp = self.makeResponse()
@@ -91,6 +90,12 @@ class Protocol(object):
         return MessageWrapper(-1, MessageType.Response,
                 payload=payload,
                 binaryAttachment1=binaryAttachment)
+
+    def makeException(self, exc):
+        '''Makes an exception response message.'''
+        payload = json.dumps({ 'reason': str(exc) })
+        # message ID should be modified before sending
+        return MessageWrapper(-1, MessageType.Exception, payload=payload)
 
 class Server(object):
     def __init__(self):

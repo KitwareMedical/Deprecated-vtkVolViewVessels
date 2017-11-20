@@ -12,7 +12,8 @@ var Message = Message || {};
 Message.Type = {
   Response: 0,
   Request: 1,
-  Publish: 2
+  Publish: 2,
+  Exception: 3
 };
 
 /**

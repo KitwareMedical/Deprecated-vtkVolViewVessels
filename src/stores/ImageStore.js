@@ -32,7 +32,7 @@ export const imageLoader = api => (store, action) => {
         store.dispatch(clearLoading());
         store.dispatch(setImage(image));
       })
-      .catch(reason => store.dispatch(setError('Failed to load file', reason.data.exception)));
+      .catch(({ reason }) => store.dispatch(setError('Failed to load file', reason)));
   }
 };
 

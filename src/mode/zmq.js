@@ -57,17 +57,21 @@ class Client {
 
     this.sock.on('message', (data) => {
       const message = Message.Message.getRootAsMessage(new flatbuffers.ByteBuffer(data));
-      if (message.type() === Message.Type.Response) {
+      if (message.type() === Message.Type.Response || message.type() === Message.Type.Exception) {
         const id = message.id().low;
         if (id in this.callbacks) {
-          const callback = this.callbacks[id];
+          const [okCallback, excCallback] = this.callbacks[id];
           delete this.callbacks[id];
 
-          const args = {
-            result: JSON.parse(message.payload()),
-            attachment: message.binaryAttachment1Array(),
-          };
-          callback(args);
+          if (message.type() === Message.Type.Response && okCallback) {
+            const args = {
+              result: JSON.parse(message.payload()),
+              attachment: message.binaryAttachment1Array(),
+            };
+            okCallback(args);
+          } else if (message.type() === Message.Type.Exception && excCallback) {
+            excCallback(JSON.parse(message.payload()));
+          }
         }
       } else if (message.type() === Message.Type.Publish) {
         const name = message.target();
@@ -79,7 +83,6 @@ class Client {
           };
           callbacks.forEach(func => func(args));
         }
-      } else {
         console.warn('Received invalid message. Ignoring.');
       }
     });
@@ -93,11 +96,11 @@ class Client {
     return this.msgId;
   }
 
-  request(msg, respCallback) {
+  request(msg, respCallback, excCallback) {
     if (msg.id in this.callbacks) {
       throw new Error(`Message ID ${msg.id} already in use!`);
     }
-    this.callbacks[msg.id] = respCallback;
+    this.callbacks[msg.id] = [respCallback, excCallback];
 
     const data = new Buffer(msg.tobytes());
     this.sock.send(data);
@@ -122,7 +125,7 @@ class ITKTubeClient extends Client {
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.volume.open', [filename]);
         this.request(msg, ({ result: imageInfo, attachment: scalars }) => {
           resolve(Object.assign(imageInfo, { scalars }));
-        });
+        }, reject);
       }));
   }
 
@@ -133,7 +136,7 @@ class ITKTubeClient extends Client {
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.segment', args);
         this.request(msg, ({ result: tube }) => {
           resolve(tube);
-        });
+        }, reject);
       }));
   }
 
@@ -142,7 +145,7 @@ class ITKTubeClient extends Client {
       .then(() => new Promise((resolve, reject) => {
         const args = [id, color];
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.setcolor', args);
-        this.request(msg, () => resolve());
+        this.request(msg, () => resolve(), reject);
       }));
   }
 
@@ -151,7 +154,7 @@ class ITKTubeClient extends Client {
       .then(() => new Promise((resolve, reject) => {
         const args = [id];
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.delete', args);
-        this.request(msg, () => resolve());
+        this.request(msg, () => resolve(), reject);
       }));
   }
 
@@ -160,7 +163,7 @@ class ITKTubeClient extends Client {
       .then(() => new Promise((resolve, reject) => {
         const args = [parent, children];
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.reparent', args);
-        this.request(msg, () => resolve());
+        this.request(msg, () => resolve(), reject);
       }));
   }
 }

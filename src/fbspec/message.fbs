@@ -4,6 +4,7 @@ enum Type:byte {
   Response,
   Request,
   Publish,
+  Exception, // this is a special kind of Response
 }
 
 table Message {
