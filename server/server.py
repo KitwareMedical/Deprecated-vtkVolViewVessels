@@ -43,8 +43,15 @@ class Protocol(object):
         '''
         self._sock.send(msg.tobytes())
 
-    def publish(self, retval=None, binaryAttachment=None):
-        pass
+    def publish(self, name, retval=None, binaryAttachment=None):
+        # make response message, then change response to publish
+        msg = self.makeResponse(retval, binaryAttachment)
+        msg.type = MessageType.Publish
+
+        # use "target" as the channel name
+        msg.target = name
+
+        self.send(msg)
 
     def delegate(self, message):
         target = message.Target()

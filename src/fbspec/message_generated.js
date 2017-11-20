@@ -11,7 +11,8 @@ var Message = Message || {};
  */
 Message.Type = {
   Response: 0,
-  Request: 1
+  Request: 1,
+  Publish: 2
 };
 
 /**

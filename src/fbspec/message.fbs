@@ -3,6 +3,7 @@ namespace Message;
 enum Type:byte {
   Response,
   Request,
+  Publish,
 }
 
 table Message {
