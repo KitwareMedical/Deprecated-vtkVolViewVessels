@@ -51,7 +51,7 @@ export default class Api {
   }
 
   segmentTube(coords, scale) {
-    return this.dataManager.generateTube(...coords, scale);
+    return this.dataManager.generateTube(coords, scale);
   }
 
   setTubeColor(id, color) {

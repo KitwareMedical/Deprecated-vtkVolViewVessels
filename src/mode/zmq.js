@@ -40,6 +40,7 @@ class Client {
   constructor(zmqSocket) {
     this.sock = zmqSocket;
     this.callbacks = {};
+    this.subscriptions = {};
     this.msgId = 0;
 
     // This promise resolves when client has connected with the server
@@ -68,6 +69,16 @@ class Client {
           };
           callback(args);
         }
+      } else if (message.type() === Message.Type.Publish) {
+        const name = message.target();
+        if (name in this.subscriptions) {
+          const callbacks = this.subscriptions[name];
+          const args = {
+            result: JSON.parse(message.payload()),
+            attachment: message.binaryAttachment1Array(),
+          };
+          callbacks.forEach(func => func(args));
+        }
       } else {
         console.warn('Received invalid message. Ignoring.');
       }
@@ -82,7 +93,6 @@ class Client {
     return this.msgId;
   }
 
-  // Internal use only
   request(msg, respCallback) {
     if (msg.id in this.callbacks) {
       throw new Error(`Message ID ${msg.id} already in use!`);
@@ -91,6 +101,13 @@ class Client {
 
     const data = new Buffer(msg.tobytes());
     this.sock.send(data);
+  }
+
+  subscribe(name, callback) {
+    if (!(name in this.subscriptions)) {
+      this.subscriptions[name] = [];
+    }
+    this.subscriptions[name].push(callback);
   }
 }
 
