@@ -1,0 +1,4 @@
+https://github.com/google/flatbuffers/archive/master.zip#subdirectory=python
+numpy==1.13.3
+pkg-resources==0.0.0
+pyzmq==16.0.3
