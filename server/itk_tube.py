@@ -12,6 +12,9 @@ from server import register, Protocol
 # import tube utils
 from tubeutils import GetTubePoints
 
+# import tube threaded worker
+from tube_worker import TubeWorker
+
 # maps itk ctype to other types
 itkCTypeToOthers = {
         itk.B: (ctypes.c_bool, 'UInt8Array', 1, 'i'),
@@ -35,49 +38,25 @@ itkCTypeToOthers = {
 # via lazy-loading.
 # These lines force itk module load on startup so that calls to open
 # ITK images and segment tubes will be faster.
-itk.CompositeTransform
-itk.TranslationTransform
-itk.ScaleTransform
-itk.Image
-itk.SegmentTubes
 itk.ImageIOFactory.CreateImageIO
 itk.ImageFileReader
 
 class ITKTubeProtocol(Protocol):
     def __init__(self, *args, **kwargs):
         super(ITKTubeProtocol, self).__init__(*args, **kwargs)
-
-    def loadDataFile(self, filename):
-        # Load file in ITK
-        self.loadItkImage(filename)
-
-        # setup image to world transform, since segmenttubes
-        # will use the world coords.
-        self.imageToWorldTransform = itk.CompositeTransform[itk.D, 3].New()
-        translate = itk.TranslationTransform[itk.D, 3].New()
-        translate.Translate(self.itkImage.GetOrigin())
-        scale = itk.ScaleTransform[itk.D, 3].New()
-        scale.Scale(self.itkImage.GetSpacing())
-        self.imageToWorldTransform.AppendTransform(translate)
-        self.imageToWorldTransform.AppendTransform(scale)
-
-        # setup segmenter
-        imgType = itk.Image[self.itkPixelType, self.dimensions]
-        self.segmentTubes = itk.SegmentTubes[imgType].New()
-        self.segmentTubes.SetInputImage(self.itkImage)
-        self.segmentTubes.SetDebug(True)
+        self.imageData = None
         self.curTubeId = 0
 
-        scaleVector = self.itkImage.GetSpacing()
-        offsetVector = self.itkImage.GetOrigin()
+        self.worker = TubeWorker()
+        self.worker.start()
 
-        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
-                .SetScale(scaleVector)
-        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
-                .SetOffset(offsetVector)
-        self.segmentTubes.GetTubeGroup().GetObjectToParentTransform() \
-                .SetMatrix(self.itkImage.GetDirection())
-        self.segmentTubes.GetTubeGroup().ComputeObjectToWorldTransform()
+    def cleanup(self):
+        self.worker.stop()
+
+    def getNextTubeId(self):
+        v = self.curTubeId
+        self.curTubeId += 1
+        return v
 
     def loadItkImage(self, filename):
         base = itk.ImageIOFactory.CreateImageIO(filename, itk.ImageIOFactory.ReadMode)
@@ -92,9 +71,11 @@ class ITKTubeProtocol(Protocol):
         reader.SetFileName(filename)
         reader.Update()
 
-        self.itkImage = reader.GetOutput()
-        self.itkPixelType = itkctype
-        self.dimensions = base.GetNumberOfDimensions()
+        image = reader.GetOutput()
+        dimensions = base.GetNumberOfDimensions()
+
+        self.worker.setImage(image, itkctype, dimensions)
+        return image, itkctype, dimensions
 
     @register('itk.volume.open')
     def openVolume(self, filename):
@@ -103,16 +84,17 @@ class ITKTubeProtocol(Protocol):
             raise Exception('No filename provided')
 
         try:
-            self.loadDataFile(filename)
+            image, pixelType, dimension = self.loadItkImage(filename)
+            self.imageData = (image, pixelType, dimension)
         except Exception as e:
             sys.stderr.write('%s\n' % str(e))
             raise Exception('Failed to load file.')
 
         # Get ITK image data
-        imgCType, imgJsArrType, pixelSize, pixelDType = itkCTypeToOthers[self.itkPixelType]
-        pointer = long(self.itkImage.GetBufferPointer())
+        imgCType, imgJsArrType, pixelSize, pixelDType = itkCTypeToOthers[pixelType]
+        pointer = long(image.GetBufferPointer())
         imageBuffer = ctypes.cast(pointer, ctypes.POINTER(imgCType))
-        size = self.itkImage.GetLargestPossibleRegion().GetSize()
+        size = image.GetLargestPossibleRegion().GetSize()
         length = size[0]*size[1]*size[2]
 
         imgArray = np.ctypeslib.as_array(
@@ -120,8 +102,8 @@ class ITKTubeProtocol(Protocol):
 
         resp = {
             "extent": (0, size[0]-1, 0, size[1]-1, 0, size[2]-1),
-            "origin": list(self.itkImage.GetOrigin()),
-            "spacing": list(self.itkImage.GetSpacing()),
+            "origin": list(image.GetOrigin()),
+            "spacing": list(image.GetSpacing()),
             "typedArray": imgJsArrType,
         }
         return self.makeResponse(resp, imgArray.tobytes())

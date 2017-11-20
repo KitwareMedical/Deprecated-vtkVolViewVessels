@@ -32,6 +32,10 @@ class Protocol(object):
                 endpoint = getattr(attr, ENDPOINT_PROPERTY)
                 self._endpoints[endpoint] = attr
 
+    def cleanup(self):
+        '''Optional cleanup hook when server is stopped.'''
+        pass
+
     def send(self, msg):
         '''Sends a MessageWrapper to the client.
 
@@ -94,8 +98,11 @@ class Server(object):
         delegator = protocol(sock)
 
         # start single-worker server
-        while True:
-            data = sock.recv()
-            msg = Message.Message.GetRootAsMessage(data, 0)
-            if msg.Type() == MessageType.Request:
-                delegator.delegate(msg)
+        try:
+            while True:
+                data = sock.recv()
+                msg = Message.Message.GetRootAsMessage(data, 0)
+                if msg.Type() == MessageType.Request:
+                    delegator.delegate(msg)
+        except KeyboardInterrupt:
+            delegator.cleanup()
