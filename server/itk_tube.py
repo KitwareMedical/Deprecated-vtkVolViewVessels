@@ -156,3 +156,21 @@ class ITKTubeProtocol(Protocol):
             del self.tubeCache[tubeId]
         except:
             raise Exception('Failed to delete tube %s', str(tubeId))
+
+    @register('itk.tube.reparent')
+    def reparentTubes(self, parent, children):
+        if type(parent) is not int or type(children) is not list:
+            raise Exception('Invalid arguments to reparent')
+
+        if parent in children:
+            raise Exception('Cannot have tube be parent of itself')
+
+        if parent not in self.tubeCache:
+            raise Exception('Parent tube does not exist')
+
+        try:
+            for child in children:
+                self.worker.reparentTube(parent, child)
+                self.tubeCache[child]['parent'] = parent
+        except:
+            raise Exception('Failed to reparent children to parent')

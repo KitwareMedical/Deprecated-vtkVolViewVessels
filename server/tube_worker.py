@@ -52,6 +52,10 @@ class TubeWorker(threading.Thread):
     def deleteTube(self, tubeId):
         self.segmenter.GetTubeGroup().RemoveSpatialObject(self.tubeCache[tubeId])
 
+    def reparentTube(self, parentId, childId):
+        child, parent = self.tubeCache[childId], self.tubeCache[parentId]
+        child.SetParent(parent)
+
     def _setImage(self, deferred, image, pixelType, dimensions):
         self.imageData = (image, pixelType, dimensions)
 

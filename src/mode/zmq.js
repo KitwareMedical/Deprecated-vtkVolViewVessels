@@ -154,6 +154,15 @@ class ITKTubeClient extends Client {
         this.request(msg, () => resolve());
       }));
   }
+
+  reparentTubes(parent, children) {
+    return this.waitForConnect
+      .then(() => new Promise((resolve, reject) => {
+        const args = [parent, children];
+        const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.reparent', args);
+        this.request(msg, () => resolve());
+      }));
+  }
 }
 
 function run(uri, startFn, stopFn) {
