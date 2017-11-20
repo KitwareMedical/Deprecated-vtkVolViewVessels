@@ -4,7 +4,7 @@ import time
 
 import itk
 
-from tubeutils import Enum
+from tubeutils import Enum, GetTubePoints
 from deferred import Deferred
 
 # While this may seem weird, the itk module has a property access
@@ -15,11 +15,14 @@ from deferred import Deferred
 itk.CompositeTransform
 itk.TranslationTransform
 itk.ScaleTransform
+itk.SegmentTubes
 itk.Image
+itk.Point
 
 Actions = Enum(
     'STOP',
     'SETIMAGE',
+    'SEGMENT',
 )
 
 class TubeWorker(threading.Thread):
@@ -28,6 +31,7 @@ class TubeWorker(threading.Thread):
         self.queue = Queue.Queue()
 
         self.segmenter = None
+        self.imageData = None
 
     def stop(self):
         self.queue.put((Actions.STOP, None, None))
@@ -39,7 +43,14 @@ class TubeWorker(threading.Thread):
         # TODO handle case when segmentation is occurring when setImage() is called
         self._setImage(deferred, image, pixelType, dimensions)
 
+    def segmentTube(self, tubeId, coords, scale):
+        deferred = Deferred()
+        self.queue.put((Actions.SEGMENT, deferred, tubeId, coords, scale))
+        return deferred
+
     def _setImage(self, deferred, image, pixelType, dimensions):
+        self.imageData = (image, pixelType, dimensions)
+
         # setup segmenter
         imgType = itk.Image[pixelType, dimensions].New()
         self.segmenter = itk.SegmentTubes[imgType].New()
@@ -69,6 +80,40 @@ class TubeWorker(threading.Thread):
                 .SetMatrix(image.GetDirection())
         self.segmenter.GetTubeGroup().ComputeObjectToWorldTransform()
 
+    def _segmentTube(self, deferred, tubeId, coords, scale):
+        image, pixelType, dimensions = self.imageData
+
+        # extract tube
+        seed = itk.Point[itk.D, dimensions](coords)
+        index = image.TransformPhysicalPointToContinuousIndex(seed)
+
+        scaleNorm = image.GetSpacing()[0]
+        if scale/scaleNorm < 0.3:
+            raise Exception('scale/scaleNorm < 0.3')
+        self.segmenter.SetRadius(scale / scaleNorm)
+
+        tube = self.segmenter.ExtractTube(index, tubeId, True)
+        if tube:
+            self.segmenter.AddTube(tube)
+            tube.ComputeObjectToWorldTransform()
+
+            points = GetTubePoints(tube)
+
+            # transform tube points
+            tube.ComputeObjectToWorldTransform()
+            transform = tube.GetIndexToWorldTransform()
+            scaling = [transform.GetMatrix()(i,i) for i in range(3)]
+            scale = sum(scaling) / len(scaling)
+
+            for i in range(len(points)):
+                pt, radius = points[i]
+                pt = list(transform.TransformPoint(pt))
+                points[i] = (pt, radius*scale)
+
+            deferred.resolve(points)
+        else:
+            deferred.resolve(None)
+
     def run(self):
         while True:
             try:
@@ -80,7 +125,12 @@ class TubeWorker(threading.Thread):
             except Queue.Empty:
                 continue
 
-            if action is Actions.STOP:
-                return
-            elif action is Actions.SETIMAGE:
-                self._setImage(deferred, *args)
+            try:
+                if action is Actions.STOP:
+                    return
+                elif action is Actions.SETIMAGE:
+                    self._setImage(deferred, *args)
+                elif action is Actions.SEGMENT:
+                    self._segmentTube(deferred, *args)
+            except Exception as e:
+                print '[TubeWorker]: %s' % str(e)

@@ -121,7 +121,7 @@ export const setSelection = (keys, rows) => data => ({
 export const tubeSideEffects = api => (store, action) => {
   switch (action.name) {
     case 'listenForTubes':
-      api.addEventListener('segment', tube => store.dispatch(updateTube(tube)));
+      api.addEventListener('segment', ({ result: tube }) => store.dispatch(updateTube(tube)));
       break;
 
     case 'loadTubes':

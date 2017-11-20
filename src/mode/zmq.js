@@ -113,6 +113,7 @@ class Client {
 
 class ITKTubeClient extends Client {
   onTubeGeneratorChange(callback) {
+    this.subscribe('itk.tube.segmentresult', callback);
   }
 
   openFile(filename) {
@@ -121,6 +122,17 @@ class ITKTubeClient extends Client {
         const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.volume.open', [filename]);
         this.request(msg, ({ result: imageInfo, attachment: scalars }) => {
           resolve(Object.assign(imageInfo, { scalars }));
+        });
+      }));
+  }
+
+  generateTube(coords, scale) {
+    return this.waitForConnect
+      .then(() => new Promise((resolve, reject) => {
+        const args = [coords, scale];
+        const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.segment', args);
+        this.request(msg, ({ result: tube }) => {
+          resolve(tube);
         });
       }));
   }

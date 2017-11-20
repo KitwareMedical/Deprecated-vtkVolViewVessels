@@ -107,3 +107,30 @@ class ITKTubeProtocol(Protocol):
             "typedArray": imgJsArrType,
         }
         return self.makeResponse(resp, imgArray.tobytes())
+
+    @register('itk.tube.segment')
+    def segmentTube(self, coords, scale):
+        coords = list(self.worker.imageToWorldTransform.TransformPoint(coords))
+        tube = {
+            'id': self.getNextTubeId(),
+            'parent': -1, # denotes this tube's parent as not a tube
+            'status': 'pending',
+            'mesh': None,
+            'color': [1, 0, 0], # default to red
+            'params': {
+                'seedpoint': coords,
+                'scale': scale,
+            },
+        }
+
+        def success(mesh):
+            tube['status'] = 'done'
+            if mesh:
+                tube['mesh'] = mesh
+
+            self.publish('itk.tube.segmentresult', tube)
+
+        deferred = self.worker.segmentTube(tube['id'], coords, scale)
+        deferred.on_success(success)
+
+        return self.makeResponse(tube)
