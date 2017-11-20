@@ -1,5 +1,6 @@
 import threading
 import Queue
+import time
 
 import itk
 
@@ -71,6 +72,7 @@ class TubeWorker(threading.Thread):
     def run(self):
         while True:
             try:
+                time.sleep(0.1)
                 msg = self.queue.get(False, 0.5)
                 action = msg[0]
                 deferred = msg[1]
