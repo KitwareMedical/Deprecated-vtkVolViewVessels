@@ -39,7 +39,7 @@ class MessageWrapper(MessageType):
         if self.binaryAttachment1:
             attachment = builder.CreateByteVector(self.binaryAttachment1)
         if self.target:
-            target = builder.CreateString(target)
+            target = builder.CreateString(self.target)
         if self.payload:
             payload = builder.CreateString(self.payload)
 
