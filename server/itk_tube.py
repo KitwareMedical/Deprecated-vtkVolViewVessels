@@ -148,3 +148,11 @@ class ITKTubeProtocol(Protocol):
             self.tubeCache[tubeId]['color'] = color
         except:
             raise Exception('Failed to set tube color for %s', str(tubeId))
+
+    @register('itk.tube.delete')
+    def deleteTube(self, tubeId):
+        try:
+            self.worker.deleteTube(tubeId)
+            del self.tubeCache[tubeId]
+        except:
+            raise Exception('Failed to delete tube %s', str(tubeId))

@@ -145,6 +145,15 @@ class ITKTubeClient extends Client {
         this.request(msg, () => resolve());
       }));
   }
+
+  deleteTube(id) {
+    return this.waitForConnect
+      .then(() => new Promise((resolve, reject) => {
+        const args = [id];
+        const msg = new MessageWrapper(this.getNextId(), Message.Type.Request, 'itk.tube.delete', args);
+        this.request(msg, () => resolve());
+      }));
+  }
 }
 
 function run(uri, startFn, stopFn) {

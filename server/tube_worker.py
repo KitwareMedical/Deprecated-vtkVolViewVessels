@@ -32,6 +32,7 @@ class TubeWorker(threading.Thread):
 
         self.segmenter = None
         self.imageData = None
+        self.tubeCache = dict()
 
     def stop(self):
         self.queue.put((Actions.STOP, None, None))
@@ -47,6 +48,9 @@ class TubeWorker(threading.Thread):
         deferred = Deferred()
         self.queue.put((Actions.SEGMENT, deferred, tubeId, coords, scale))
         return deferred
+
+    def deleteTube(self, tubeId):
+        self.segmenter.GetTubeGroup().RemoveSpatialObject(self.tubeCache[tubeId])
 
     def _setImage(self, deferred, image, pixelType, dimensions):
         self.imageData = (image, pixelType, dimensions)
@@ -80,6 +84,9 @@ class TubeWorker(threading.Thread):
                 .SetMatrix(image.GetDirection())
         self.segmenter.GetTubeGroup().ComputeObjectToWorldTransform()
 
+        # clear tube cache
+        self.tubeCache.clear()
+
     def _segmentTube(self, deferred, tubeId, coords, scale):
         image, pixelType, dimensions = self.imageData
 
@@ -94,6 +101,7 @@ class TubeWorker(threading.Thread):
 
         tube = self.segmenter.ExtractTube(index, tubeId, True)
         if tube:
+            self.tubeCache[tubeId] = tube
             self.segmenter.AddTube(tube)
             tube.ComputeObjectToWorldTransform()
 
