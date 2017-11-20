@@ -110,6 +110,9 @@ class Server(object):
                 data = sock.recv()
                 msg = Message.Message.GetRootAsMessage(data, 0)
                 if msg.Type() == MessageType.Request:
-                    delegator.delegate(msg)
+                    try:
+                        delegator.delegate(msg)
+                    except Exception as e:
+                        print e
         except KeyboardInterrupt:
             delegator.cleanup()
