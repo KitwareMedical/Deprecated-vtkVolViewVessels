@@ -42,6 +42,7 @@ module.exports = {
         options: {
           presets: ['es2015', 'stage-2', 'react'],
           plugins: [
+            'transform-decorators-legacy',
             ['import', { libraryName: 'antd', style: true }]
           ],
         },

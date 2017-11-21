@@ -1,5 +1,6 @@
 module.exports = {
   extends: ['airbnb'], // , 'prettier'
+  parser: 'babel-eslint',
   rules: {
     'max-len': ["warn", 160, 4, {"ignoreUrls": true}],
     'no-multi-spaces': ["error", { exceptions: { "ImportDeclaration": true } }],
