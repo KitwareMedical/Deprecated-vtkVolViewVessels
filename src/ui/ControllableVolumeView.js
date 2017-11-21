@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 
 import ColorMaps from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps.json';
@@ -15,6 +16,8 @@ const ColorPresets = ColorMaps
   .sort((a, b) => a.Name.localeCompare(b.Name))
   .filter((p, i, arr) => !i || p.Name !== arr[i - 1].Name);
 
+const DEFAULT_OPACITY = 15;
+
 @observer
 class Container extends React.Component {
   static propTypes = {
@@ -25,8 +28,20 @@ class Container extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      opacity: 0,
+    this.state = this.initialState;
+
+    const { stores: { imageStore } } = props;
+
+    // reset state every time the image changes
+    this.disposer = reaction(
+      () => imageStore.image,
+      () => this.setState(this.initialState),
+    );
+  }
+
+  get initialState() {
+    return {
+      opacity: DEFAULT_OPACITY,
       colorMap: ColorPresets[0],
       visible: true,
     };
