@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { reaction } from 'mobx';
+import { observer } from 'mobx-react';
 
 import style from '../Tube.mcss';
 
@@ -9,6 +10,7 @@ import SliceControls from './SliceControls';
 
 const SliceModeList = ['X', 'Y', 'Z'];
 
+@observer
 class Container extends React.Component {
   static propTypes = {
     stores: PropTypes.object.isRequired,
