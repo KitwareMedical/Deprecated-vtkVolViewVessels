@@ -15,6 +15,7 @@ export default class ImageStore {
     return this.api.openFile(filename)
       .then((imageDesc) => {
         const reader = new FileReader();
+
         reader.addEventListener('load', (ev) => {
           const values = new window[imageDesc.typedArray](ev.target.result);
           const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
@@ -26,6 +27,8 @@ export default class ImageStore {
 
           this.setImageData(imageData);
         });
+
+        reader.readAsArrayBuffer(imageDesc.scalars);
       });
     // TODO catch
   }
