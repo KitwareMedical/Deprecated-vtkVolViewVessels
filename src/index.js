@@ -7,6 +7,7 @@ import enUS from 'antd/lib/locale-provider/en_US';
 import App from './ui/App';
 
 import ImageStore from './stores/ImageStore';
+import TubeStore from './stores/TubeStore';
 
 import mode from './mode';
 import initElectron from './electron_util';
@@ -15,6 +16,7 @@ function main(dataManager) {
   // store setup
   const stores = Object.freeze({
     imageStore: new ImageStore(dataManager.ITKTube),
+    tubeStore: new TubeStore(dataManager.ITKTube),
   });
 
   // electron setup
