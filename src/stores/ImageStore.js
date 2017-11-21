@@ -1,50 +1,37 @@
-import { Action } from '../state';
-import wrapDataState, { setLoading, clearLoading, setError } from './DataStateStore';
+import { action, observable } from 'mobx';
 
-export const loadImage = Action('loadImage', filename => () => { /* noop */ });
+import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
+import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
-export const setImage = Action('setImage', image => (data, setData) => {
-  const { sliceMode } = data;
-  const sliceMax = image.getDimensions()[sliceMode] - 1;
-  const slicePos = Math.ceil(sliceMax / 2);
-  const scalarRange = image.getPointData().getScalars().getRange();
+// TODO extends LoadAndErrorStore
+export default class ImageStore {
+  @observable image;
 
-  setData({
-    ...data,
-
-    image,
-    scalarRange,
-    slicePos,
-    sliceMax,
-  });
-});
-
-export const setSlicePos = slicePos => data => ({ ...data, slicePos });
-
-export const setSliceMode = sliceMode => data => ({ ...data, sliceMode });
-
-export const imageLoader = api => (store, action) => {
-  if (action.name === 'loadImage') {
-    store.dispatch(setLoading());
-
-    api.loadImage(...action.args)
-      .then((image) => {
-        store.dispatch(clearLoading());
-        store.dispatch(setImage(image));
-      })
-      .catch(({ reason }) => store.dispatch(setError('Failed to load file', reason)));
+  constructor(api) {
+    this.api = api;
   }
-};
 
-const data = () => wrapDataState({
-  image: null,
-  scalarRange: [0, 1],
+  openImage(filename) {
+    return this.api.openFile(filename)
+      .then((imageDesc) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', (ev) => {
+          const values = new window[imageDesc.typedArray](ev.target.result);
+          const dataArray = vtkDataArray.newInstance({ name: 'Scalars', values });
 
-  // NOTE this is UI state, but is here because setting
-  // the image affects UI state. Maybe I can move this
-  // into the ControllableSliceView...
-  sliceMode: 2, // Z axis
-  slicePos: 0,
-  sliceMax: 1,
-});
-export default data;
+          delete imageDesc.scalars;
+          delete imageDesc.typedArray;
+          const imageData = vtkImageData.newInstance(imageDesc);
+          imageData.getPointData().setScalars(dataArray);
+
+          this.setImageData(imageData);
+        });
+      });
+    // TODO catch
+  }
+
+  @action('setImageData')
+  setImageData(imageData) {
+    this.image = imageData;
+  }
+}
