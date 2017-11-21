@@ -5,7 +5,7 @@ import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
 // TODO extends LoadAndErrorStore
 export default class ImageStore {
-  @observable image;
+  @observable image = null;
 
   constructor(api) {
     this.api = api;
