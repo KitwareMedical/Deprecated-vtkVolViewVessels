@@ -7,6 +7,7 @@ import vtkFasterPiecewiseGaussianWidget from '../util/FasterPiecewiseGaussianWid
 
 import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
+import Info from './Info';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 
 const TabPane = Tabs.TabPane;
@@ -48,6 +49,9 @@ class App extends React.Component {
           />
         </div>
         <Tabs style={{ marginTop: '10px' }} type="card">
+          <TabPane forceRender key="info" tab="Info">
+            <Info stores={stores} />
+          </TabPane>
           <TabPane forceRender key="volume" tab="Volume">
             <PiecewiseGaussianWidget transferFunctionWidget={this.transferFunctionWidget} />
           </TabPane>
