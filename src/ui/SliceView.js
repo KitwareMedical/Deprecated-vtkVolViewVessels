@@ -76,7 +76,6 @@ export default class SliceView extends React.Component {
 
     const {
       imageData,
-      imageScalarRange,
       slice,
       sliceMode,
     } = props;
@@ -89,7 +88,7 @@ export default class SliceView extends React.Component {
       this.mapper.setInputData(imageData);
 
       // set actor properties
-      const [scalarMin, scalarMax] = imageScalarRange;
+      const [scalarMin, scalarMax] = imageData.getPointData().getScalars().getRange();
       this.actor.getProperty().setColorWindow(scalarMax - scalarMin);
       this.actor.getProperty().setColorLevel((scalarMax + scalarMin) / 2.0);
 
@@ -143,14 +142,12 @@ SliceView.propTypes = {
   sliceMode: PropTypes.number.isRequired,
   slice: PropTypes.number.isRequired,
   imageData: PropTypes.object,
-  imageScalarRange: PropTypes.array,
   onPickIJK: PropTypes.func,
   onWindowLevelChange: PropTypes.func,
 };
 
 SliceView.defaultProps = {
   imageData: null,
-  imageScalarRange: [0, 1],
   onPickIJK: () => {},
   onWindowLevelChange: () => {},
 };
