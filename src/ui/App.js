@@ -9,6 +9,7 @@ import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
 import Info from './Info';
 import SegmentControls from './SegmentControls';
+import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
 
 const TabPane = Tabs.TabPane;
@@ -56,6 +57,7 @@ class App extends React.Component {
           <TabPane forceRender key="tubes" tab="Tubes">
             <div className={[style.horizontalContainer, style.controller].join(' ')}>
               <SegmentControls stores={stores} />
+              <TubeTreeView stores={stores} />
             </div>
           </TabPane>
           <TabPane forceRender key="volume" tab="Volume">

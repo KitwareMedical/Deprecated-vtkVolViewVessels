@@ -1,12 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { observer } from 'mobx-react';
 import { Spin, Button, Table } from 'antd';
 
-import { connectComponent } from '../state';
 import style from '../Tube.mcss';
-
-import { setTubeVisibility, setTubeColor, deleteTube, reparentTubes, setSelection } from '../stores/TubeStore';
 
 import PopupColorPicker from './PopupColorPicker';
 
@@ -41,32 +38,70 @@ function convertToTree(tubes) {
   return tree;
 }
 
-function TubeTreeView({
-  stores: { tubeStore },
-  tubes,
-  selection,
-}) {
-  const tubeTree = convertToTree(tubes);
+@observer
+class Container extends React.Component {
+  static propTypes = {
+    stores: PropTypes.object.isRequired,
+  };
 
-  const makeTubeControls = (color, visible, onColorChange, onVisibilityChange, onDelete) => (
+  constructor(props) {
+    super(props);
+
+    this.state = this.initialState;
+  }
+
+  get initialState() {
+    return {
+      selection: {
+        keys: [],
+        rows: [],
+      },
+    };
+  }
+
+  render() {
+    const { stores: { tubeStore } } = this.props;
+    const { selection } = this.state;
+    const tubeTree = convertToTree(tubeStore.tubes);
+    return (
+      <TubeTreeView
+        tubeTree={tubeTree}
+        selection={selection}
+      />
+    );
+  }
+}
+
+export default Container;
+
+function TubeTreeView({
+  tubeTree,
+  selection,
+  onColorChange,
+  onVisibilityChange,
+  onDelete,
+  onReparent,
+  onSelectionChange,
+}) {
+  const makeTubeControls = (color, visible, changeColor, changeVisible, deleteTube) => (
     <span>
       <PopupColorPicker
         color={color}
-        onChange={rgb => onColorChange(rgb)}
+        onChange={rgb => changeColor(rgb)}
       />
       <span className="ant-divider" />
-      <Button onClick={() => onVisibilityChange()}>
+      <Button onClick={changeVisible}>
         <i className={visible ? 'fa fa-eye' : 'fa fa-eye-slash'} />
       </Button>
       <span className="ant-divider" />
-      <Button onClick={() => onDelete()}>
+      <Button onClick={deleteTube}>
         <i className="fa fa-trash" />
       </Button>
     </span>
   );
 
-  const makeReparentButton = onReparent => (
-    <Button onClick={() => onReparent()}>
+  const makeReparentButton = reparentTubes => (
+    <Button onClick={reparentTubes}>
       Make parent
     </Button>
   );
@@ -92,18 +127,16 @@ function TubeTreeView({
               tube.color.map(c => c * 255),
               tube.visible,
               // onColorChange
-              rgb => tubeStore.dispatch(setTubeColor(tube.id, [rgb.r / 255, rgb.g / 255, rgb.b / 255])),
+              rgb => onColorChange(tube.id, [rgb.r / 255, rgb.g / 255, rgb.b / 255]),
               // onVisibilityChange
-              () => tubeStore.dispatch(setTubeVisibility(tube.id, !tube.visible)),
+              () => onVisibilityChange(tube.id, !tube.visible),
               // onDelete
-              () => tubeStore.dispatch(deleteTube(tube.id)),
+              () => onDelete(tube.id),
             );
           }
 
           // selection exists, so show reparent button
-          return makeReparentButton(
-            () => tubeStore.dispatch(reparentTubes(tube.id)),
-          );
+          return makeReparentButton(onReparent);
         }
         // tube is pending, so show spinner
         return <Spin />;
@@ -113,7 +146,7 @@ function TubeTreeView({
 
   const rowSelection = {
     selectedRowKeys: selection.keys,
-    onChange: (keys, rows) => tubeStore.dispatch(setSelection(keys, rows)),
+    onChange: onSelectionChange,
   };
 
   return (
@@ -132,24 +165,23 @@ function TubeTreeView({
 }
 
 TubeTreeView.propTypes = {
-  tubes: PropTypes.array,
+  tubeTree: PropTypes.array.isRequired,
   selection: PropTypes.shape({
-    keys: PropTypes.array,
-    rows: PropTypes.array,
-  }),
+    keys: PropTypes.array.isRequired,
+    rows: PropTypes.array.isRequired,
+  }).isRequired,
 
-  stores: PropTypes.object.isRequired,
+  onColorChange: PropTypes.func,
+  onVisibilityChange: PropTypes.func,
+  onDelete: PropTypes.func,
+  onReparent: PropTypes.func,
+  onSelectionChange: PropTypes.func,
 };
 
 TubeTreeView.defaultProps = {
-  tubes: [],
-  selection: {
-    keys: [],
-    rows: [],
-  },
+  onColorChange: () => {},
+  onVisibilityChange: () => {},
+  onDelete: () => {},
+  onReparent: () => {},
+  onSelectionChange: () => {},
 };
-
-export default connectComponent(TubeTreeView, 'tubeStore', ({ tubeStore }, props) => ({
-  tubes: tubeStore.tubeOrder.map(id => tubeStore.tubes[id]),
-  selection: tubeStore.selection,
-}));
