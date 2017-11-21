@@ -80,17 +80,21 @@ export default class VolumeView extends React.Component {
       colorMap,
       scalarOpacity,
       transferFunctionWidget,
-      imageScalarRange,
     } = props;
+
+    if (!this.transferFunctionWidget || prevTransferFunctionWidget !== transferFunctionWidget) {
+      this.setTransferFunctionWidget(transferFunctionWidget);
+    }
 
     if (prevImageData !== imageData) {
       const needToAddActor = prevImageData == null;
 
-      this.lookupTable.setMappingRange(...imageScalarRange);
+      const scalarRange = imageData.getPointData().getScalars().getRange();
+      this.lookupTable.setMappingRange(...scalarRange);
       this.lookupTable.updateRange();
 
       if (this.transferFunctionWidget) {
-        this.transferFunctionWidget.setDataRange(imageScalarRange);
+        this.transferFunctionWidget.setDataRange(scalarRange);
         this.transferFunctionWidget.setDataArray(imageData.getPointData().getScalars().getData());
         this.transferFunctionWidget.applyOpacity(this.piecewiseFunction);
       }
@@ -171,17 +175,12 @@ export default class VolumeView extends React.Component {
       }
     }
 
-    if (prevTransferFunctionWidget !== transferFunctionWidget) {
-      this.setTransferFunctionWidget(transferFunctionWidget);
-    }
-
     this.renderWindow.render();
   }
 
   setTransferFunctionWidget(widget) {
     this.transferFunctionWidget = widget;
 
-    this.transferFunctionWidget.setColorTransferFunction(this.lookupTable);
     this.transferFunctionWidget.applyOpacity(this.piecewiseFunction);
 
     // Manage update when opacity change
@@ -233,7 +232,6 @@ VolumeView.propTypes = {
   colorMap: PropTypes.object.isRequired,
   scalarOpacity: PropTypes.number,
   imageData: PropTypes.object,
-  imageScalarRange: PropTypes.array,
   transferFunctionWidget: PropTypes.object,
   tubes: PropTypes.array,
   visible: PropTypes.bool.isRequired,
@@ -242,7 +240,6 @@ VolumeView.propTypes = {
 VolumeView.defaultProps = {
   scalarOpacity: 0,
   imageData: null,
-  imageScalarRange: [0, 1],
   transferFunctionWidget: null,
   tubes: [],
 };

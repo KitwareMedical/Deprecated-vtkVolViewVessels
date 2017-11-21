@@ -1,46 +1,90 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { observer } from 'mobx-react';
+
+import ColorMaps from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction/ColorMaps.json';
+
+import style from '../Tube.mcss';
 
 import VolumeView from './VolumeView';
 import VolumeQuickControls from './VolumeQuickControls';
 
-import { connectComponent } from '../state';
-import style from '../Tube.mcss';
+const ColorPresets = ColorMaps
+  .filter(p => p.RGBPoints)
+  .filter(p => p.ColorSpace !== 'CIELAB')
+  .sort((a, b) => a.Name.localeCompare(b.Name))
+  .filter((p, i, arr) => !i || p.Name !== arr[i - 1].Name);
 
-// TODO move ColorPresets to some constants module
-import { ColorPresets, setScalarOpacity, setColorMap, setVolumeVisibility } from '../stores/VolumeStore';
+@observer
+class Container extends React.Component {
+  static propTypes = {
+    stores: PropTypes.object.isRequired,
+    transferFunctionWidget: PropTypes.object.isRequired,
+  };
 
-// TODO move scalarOpacity and colorMap to internal state, since nothing else
-// uses that state.
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      opacity: 0,
+      colorMap: ColorPresets[0],
+      visible: true,
+    };
+  }
+
+  render() {
+    const { opacity, colorMap, visible } = this.state;
+    const {
+      stores: { imageStore },
+      transferFunctionWidget,
+    } = this.props;
+
+    return (
+      <ControllableVolumeView
+        image={imageStore.image}
+        transferFunctionWidget={transferFunctionWidget}
+        opacity={opacity}
+        colorMap={colorMap}
+        visible={visible}
+        onScalarOpacityChange={value => this.setState({ opacity: value })}
+        onColorMapChange={mapName => this.setState({ colorMap: ColorPresets.find(map => map.Name === mapName) })}
+        onVisibilityChange={v => this.setState({ visible: v })}
+      />
+    );
+  }
+}
+
+export default Container;
+
 function ControllableVolumeView({
-  stores: { volumeStore },
   image,
-  scalarRange,
   tubes,
-  scalarOpacity,
+  opacity,
   colorMap,
   transferFunctionWidget,
   visible,
+  onScalarOpacityChange,
+  onColorMapChange,
+  onVisibilityChange,
 }) {
   return (
     <div className={[style.verticalContainer, style.itemStretch].join(' ')}>
       <VolumeView
         imageData={image}
-        imageScalarRange={scalarRange}
-        visible={visible}
         tubes={tubes}
-        scalarOpacity={scalarOpacity}
+        visible={visible}
+        scalarOpacity={opacity}
         colorMap={colorMap}
         transferFunctionWidget={transferFunctionWidget}
       />
       <VolumeQuickControls
-        scalarOpacity={scalarOpacity}
+        scalarOpacity={opacity}
         colorMap={colorMap}
         presets={ColorPresets}
         visible={visible}
-        onScalarOpacityChange={value => volumeStore.dispatch(setScalarOpacity(value))}
-        onColorMapChange={name => volumeStore.dispatch(setColorMap(name))}
-        onVisibilityChange={v => volumeStore.dispatch(setVolumeVisibility(v))}
+        onScalarOpacityChange={onScalarOpacityChange}
+        onColorMapChange={onColorMapChange}
+        onVisibilityChange={onVisibilityChange}
       />
     </div>
   );
@@ -48,48 +92,20 @@ function ControllableVolumeView({
 
 ControllableVolumeView.propTypes = {
   image: PropTypes.object,
-  scalarRange: PropTypes.array,
   tubes: PropTypes.array,
-  scalarOpacity: PropTypes.number,
-  transferFunctionWidget: PropTypes.object,
+  opacity: PropTypes.number.isRequired,
+  transferFunctionWidget: PropTypes.object.isRequired,
   colorMap: PropTypes.object.isRequired,
-  visible: PropTypes.bool,
-
-  stores: PropTypes.object.isRequired,
+  visible: PropTypes.bool.isRequired,
+  onScalarOpacityChange: PropTypes.func,
+  onColorMapChange: PropTypes.func,
+  onVisibilityChange: PropTypes.func,
 };
 
 ControllableVolumeView.defaultProps = {
   image: null,
-  scalarRange: [0, 1],
   tubes: [],
-  scalarOpacity: 0,
-  transferFunctionWidget: null,
-  visible: true,
+  onScalarOpacityChange: () => {},
+  onColorMapChange: () => {},
+  onVisibilityChange: () => {},
 };
-
-export default connectComponent(ControllableVolumeView, ['imageStore', 'tubeStore', 'volumeStore'],
-  ({ imageStore, tubeStore, volumeStore }, props, updated, changedKeys) => {
-    switch (updated) {
-      case 'imageStore':
-        if (changedKeys.includes('image')) {
-          return {
-            image: imageStore.image,
-            scalarRange: imageStore.scalarRange,
-          };
-        }
-        return null;
-      case 'tubeStore':
-        return { tubes: tubeStore.tubeOrder.map(id => tubeStore.tubes[id]).filter(tube => tube.mesh) };
-      case 'volumeStore':
-        return {
-          scalarOpacity: volumeStore.scalarOpacity,
-          colorMap: volumeStore.colorMap,
-          transferFunctionWidget: volumeStore.transferFunctionWidget,
-          visible: volumeStore.volumeVisible,
-        };
-      default:
-        // return the defaults, with the colorMap coming from the volumeRender store
-        return { colorMap: volumeStore.colorMap, ...ControllableVolumeView.defaultProps };
-    }
-  },
-);
