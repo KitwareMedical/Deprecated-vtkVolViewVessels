@@ -1,11 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Tabs } from 'antd';
 
 import style from '../Tube.mcss';
 import vtkFasterPiecewiseGaussianWidget from '../util/FasterPiecewiseGaussianWidget';
 
 import ControllableSliceView from './ControllableSliceView';
 import ControllableVolumeView from './ControllableVolumeView';
+import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
+
+const TabPane = Tabs.TabPane;
 
 class App extends React.Component {
   componentWillMount() {
@@ -43,6 +47,11 @@ class App extends React.Component {
             transferFunctionWidget={this.transferFunctionWidget}
           />
         </div>
+        <Tabs style={{ marginTop: '10px' }} type="card">
+          <TabPane forceRender key="volume" tab="Volume">
+            <PiecewiseGaussianWidget transferFunctionWidget={this.transferFunctionWidget} />
+          </TabPane>
+        </Tabs>
       </div>
     );
   }
