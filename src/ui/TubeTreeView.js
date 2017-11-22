@@ -70,6 +70,11 @@ class Container extends React.Component {
         onVisibilityChange={(id, visible) => tubeStore.setTubeVisibility(id, visible)}
         onColorChange={(id, color) => tubeStore.setTubeColor(id, color)}
         onDelete={id => tubeStore.deleteTube(id)}
+        onReparent={(parent) => {
+          tubeStore.reparent(parent, this.state.selection.rows.map(t => t.id));
+          // clear selection
+          this.setState({ selection: { keys: [], rows: [] } });
+        }}
         onSelectionChange={(keys, rows) => this.setState({ selection: { keys, rows } })}
       />
     );
@@ -140,7 +145,7 @@ function TubeTreeView({
           }
 
           // selection exists, so show reparent button
-          return makeReparentButton(onReparent);
+          return makeReparentButton(() => onReparent(tube.id));
         }
         // tube is pending, so show spinner
         return <Spin />;
