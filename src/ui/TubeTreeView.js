@@ -28,14 +28,14 @@ class Container extends React.Component {
     };
   }
 
-  createTubeTree(tubeOrder, tubes) {
-    const keys = Object.keys(tubes);
+  createTubeTree(tubes) {
+    const keys = tubes.keys();
 
     // shallow copy tubes
     const tubesCopy = {};
     for (let i = 0; i < keys.length; ++i) {
       const id = keys[i];
-      tubesCopy[id] = Object.assign({}, tubes[id]);
+      tubesCopy[id] = Object.assign({}, tubes.get(id));
     }
 
     // assign children
@@ -52,7 +52,7 @@ class Container extends React.Component {
     }
 
     // create tree as ordered list, with only tubes that have no parents
-    const tree = tubeOrder
+    const tree = keys
       .filter(id => tubesCopy[id].parent === -1)
       .map(id => tubesCopy[id]);
 
@@ -62,7 +62,7 @@ class Container extends React.Component {
   render() {
     const { stores: { tubeStore } } = this.props;
     const { selection } = this.state;
-    const tubeTree = this.createTubeTree(tubeStore.tubeOrder, tubeStore.tubes);
+    const tubeTree = this.createTubeTree(tubeStore.tubes);
     return (
       <TubeTreeView
         tubeTree={tubeTree}

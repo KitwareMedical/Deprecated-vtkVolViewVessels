@@ -50,13 +50,16 @@ class Container extends React.Component {
   render() {
     const { opacity, colorMap, visible } = this.state;
     const {
-      stores: { imageStore },
+      stores: { imageStore, tubeStore },
       transferFunctionWidget,
     } = this.props;
+
+    const tubes = tubeStore.tubes.values().filter(tube => tube.mesh);
 
     return (
       <ControllableVolumeView
         image={imageStore.image}
+        tubes={tubes}
         transferFunctionWidget={transferFunctionWidget}
         opacity={opacity}
         colorMap={colorMap}

@@ -2,8 +2,7 @@ import { action, observable } from 'mobx';
 
 // TODO extends LoadAndErrorStore
 export default class TubeStore {
-  @observable tubeOrder = [];
-  @observable tubes = {};
+  @observable tubes = observable.map({});
   @observable segmentParams = {
     scale: 2.0,
   };
@@ -13,7 +12,7 @@ export default class TubeStore {
 
     this.api.onTubeGeneratorChange((result) => {
       const [tube] = result;
-      if (!(tube.id in this.tubes)) {
+      if (!this.tubes.has(tube.id)) {
         console.warn('Received untracked tube result????');
       }
       this.updateTube(tube);
@@ -34,18 +33,19 @@ export default class TubeStore {
 
   @action('addTube')
   addTube(tube) {
-    this.tubeOrder.push(tube.id);
-    this.tubes = {
-      ...this.tubes,
-      [tube.id]: Object.assign(tube, {
-        visible: true,
-      }),
-    };
+    this.tubes.set(tube.id, Object.assign(tube, {
+      visible: true,
+    }));
   }
 
   @action('updateTube')
   updateTube(tube) {
-    this.tubes[tube.id] = Object.assign(this.tubes[tube.id], tube);
+    if (tube.mesh) {
+      // we create a new tube object when updating
+      this.tubes.set(tube.id, Object.assign({}, this.tubes.get(tube.id), tube));
+    } else {
+      this.tubes.delete(tube.id);
+    }
   }
 }
 
