@@ -47,6 +47,11 @@ export default class TubeStore {
       this.tubes.delete(tube.id);
     }
   }
+
+  @action('setTubeVisibility')
+  setTubeVisibility(id, visible) {
+    this.tubes.set(id, Object.assign({}, this.tubes.get(id), { visible }));
+  }
 }
 
 /*

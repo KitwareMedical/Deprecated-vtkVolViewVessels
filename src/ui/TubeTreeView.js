@@ -67,6 +67,7 @@ class Container extends React.Component {
       <TubeTreeView
         tubeTree={tubeTree}
         selection={selection}
+        onVisibilityChange={(id, visible) => tubeStore.setTubeVisibility(id, visible)}
       />
     );
   }
