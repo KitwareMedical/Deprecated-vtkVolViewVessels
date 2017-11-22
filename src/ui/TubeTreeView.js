@@ -69,6 +69,7 @@ class Container extends React.Component {
         selection={selection}
         onVisibilityChange={(id, visible) => tubeStore.setTubeVisibility(id, visible)}
         onColorChange={(id, color) => tubeStore.setTubeColor(id, color)}
+        onDelete={id => tubeStore.deleteTube(id)}
       />
     );
   }

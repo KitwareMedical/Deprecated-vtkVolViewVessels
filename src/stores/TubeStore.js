@@ -59,6 +59,13 @@ export default class TubeStore {
     // TODO handle errors
     this.api.setTubeColor(id, color);
   }
+
+  @action('deleteTube')
+  deleteTube(id) {
+    // TODO handle errors
+    this.tubes.delete(id);
+    this.api.deleteTube(id);
+  }
 }
 
 /*
