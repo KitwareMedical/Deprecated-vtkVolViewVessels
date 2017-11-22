@@ -52,6 +52,13 @@ export default class TubeStore {
   setTubeVisibility(id, visible) {
     this.tubes.set(id, Object.assign({}, this.tubes.get(id), { visible }));
   }
+
+  @action('setTubeColor')
+  setTubeColor(id, color) {
+    this.tubes.set(id, Object.assign({}, this.tubes.get(id), { color }));
+    // TODO handle errors
+    this.api.setTubeColor(id, color);
+  }
 }
 
 /*
