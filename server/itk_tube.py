@@ -142,9 +142,9 @@ class ItkTubeProtocol(LinkProtocol):
         index = self.itkImage.TransformPhysicalPointToContinuousIndex(seed)
 
         scaleNorm = self.itkImage.GetSpacing()[0]
-        if itemToProcess['scale']/scaleNorm < 0.3:
+        if itemToProcess['params']['scale']/scaleNorm < 0.3:
             raise Exception('scale/scaleNorm < 0.3')
-        self.segmentTubes.SetRadius(itemToProcess['scale']/scaleNorm)
+        self.segmentTubes.SetRadius(itemToProcess['params']['scale']/scaleNorm)
 
         tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
         if tube:
@@ -162,10 +162,10 @@ class ItkTubeProtocol(LinkProtocol):
 
             for i in range(len(points)):
                 pt, radius = points[i]
-                pt = transform.TransformPoint(pt)
+                pt = list(transform.TransformPoint(pt))
                 points[i] = (pt, radius*scale)
 
-            itemToProcess['mesh'] = [{ 'x': pos[0], 'y': pos[1], 'z': pos[2], 'radius': r } for pos, r in points]
+            itemToProcess['mesh'] = points
             self.curIndex += 1
         else:
             itemToProcess['mesh'] = None
@@ -225,13 +225,13 @@ class ItkTubeProtocol(LinkProtocol):
         return self.tubeCache
 
     @register('itk.tube.generate')
-    def generateTube(self, i, j, k, scale=2.0):
-        coords = list(self.imageToWorldTransform.TransformPoint((i, j, k)))
+    def generateTube(self, coords, params):
+        coords = list(self.imageToWorldTransform.TransformPoint(coords))
         itemToProcess = {
             'id': self.curTubeId,
             'parent': -1, # denotes this tube's parent as not a tube
             'position': coords,
-            'scale': scale,
+            'params': params,
             'status': 'pending',
             'color': [1, 0, 0], # default to red
         }

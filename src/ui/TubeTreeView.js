@@ -7,37 +7,6 @@ import style from '../Tube.mcss';
 
 import PopupColorPicker from './PopupColorPicker';
 
-function convertToTree(tubes) {
-  // NOTE: maybe don't recreate this every update.
-
-  // Make a copy so we don't pollute the original tube object.
-  const tubesCopy = tubes.map(tube => Object.assign({}, tube));
-
-  // fast tube lookup
-  // use references so we can modify the tube metadata
-  const tubeLookup = tubesCopy.reduce((lookup, tube) => {
-    lookup[tube.id] = tube;
-    return lookup;
-  }, {});
-
-  // init tree with top-level nodes
-  const tree = tubesCopy.filter(tube => tube.parent === -1);
-
-  // construct the tree
-  for (let i = 0; i < tubesCopy.length; ++i) {
-    if (tubesCopy[i].parent !== -1) {
-      const parentTube = tubeLookup[tubesCopy[i].parent];
-      // make children array if it doesn't exist
-      if (parentTube.children === undefined) {
-        parentTube.children = [];
-      }
-      parentTube.children.push(tubesCopy[i]);
-    }
-  }
-
-  return tree;
-}
-
 @observer
 class Container extends React.Component {
   static propTypes = {
@@ -59,10 +28,41 @@ class Container extends React.Component {
     };
   }
 
+  createTubeTree(tubeOrder, tubes) {
+    const keys = Object.keys(tubes);
+
+    // shallow copy tubes
+    const tubesCopy = {};
+    for (let i = 0; i < keys.length; ++i) {
+      const id = keys[i];
+      tubesCopy[id] = Object.assign({}, tubes[id]);
+    }
+
+    // assign children
+    for (let i = 0; i < keys.length; ++i) {
+      const id = keys[i];
+      const tube = tubesCopy[id];
+      if (tube.parent !== -1) {
+        const parent = tubesCopy[tube.parent];
+        if (!parent.children) {
+          parent.children = [];
+        }
+        parent.children.push(tube);
+      }
+    }
+
+    // create tree as ordered list, with only tubes that have no parents
+    const tree = tubeOrder
+      .filter(id => tubesCopy[id].parent === -1)
+      .map(id => tubesCopy[id]);
+
+    return tree;
+  }
+
   render() {
     const { stores: { tubeStore } } = this.props;
     const { selection } = this.state;
-    const tubeTree = convertToTree(tubeStore.tubes);
+    const tubeTree = this.createTubeTree(tubeStore.tubeOrder, tubeStore.tubes);
     return (
       <TubeTreeView
         tubeTree={tubeTree}

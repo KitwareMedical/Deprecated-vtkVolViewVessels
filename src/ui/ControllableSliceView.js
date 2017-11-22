@@ -41,7 +41,7 @@ class Container extends React.Component {
   }
 
   render() {
-    const { stores: { imageStore } } = this.props;
+    const { stores: { imageStore, tubeStore } } = this.props;
     const { slice, sliceMax, sliceMode } = this.state;
     return (
       <ControllableSliceView
@@ -49,7 +49,7 @@ class Container extends React.Component {
         slice={slice}
         sliceMax={sliceMax}
         sliceMode={sliceMode}
-        onPick={coords => 0}
+        onPick={coords => tubeStore.segmentTube(coords)}
         onSliceChange={newSlice => this.setState({ slice: newSlice })}
         onSliceModeChange={mode => this.setState({ sliceMode: SliceModeList.indexOf(mode) })}
       />
