@@ -1,4 +1,4 @@
-import { extendObservable, action, observable } from 'mobx';
+import { action, observable } from 'mobx';
 
 // TODO extends LoadAndErrorStore
 export default class TubeStore {
@@ -35,16 +35,17 @@ export default class TubeStore {
   @action('addTube')
   addTube(tube) {
     this.tubeOrder.push(tube.id);
-    extendObservable(this.tubes, {
+    this.tubes = {
+      ...this.tubes,
       [tube.id]: Object.assign(tube, {
         visible: true,
       }),
-    });
+    };
   }
 
   @action('updateTube')
   updateTube(tube) {
-    extendObservable(this.tubes[tube.id], tube);
+    this.tubes[tube.id] = Object.assign(this.tubes[tube.id], tube);
   }
 }
 
