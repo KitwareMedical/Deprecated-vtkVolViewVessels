@@ -59,6 +59,16 @@ itkCTypeToOthers = {
         itk.US: (ctypes.c_ushort, 'UInt16Array', 2, 'i'),
 }
 
+# preload itk modules here so we don't incur lazy load
+# on user request.
+itk.TranslationTransform
+itk.CompositeTransform
+itk.ScaleTransform
+itk.SegmentTubes
+itk.Image
+itk.ImageFileReader
+itk.ImageIOFactory
+
 def okay(payload=None):
     return { 'status': 'ok', 'result': payload }
 
