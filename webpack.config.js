@@ -2,10 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
-const entry = path.join(__dirname, './src/index.js');
-const sourcePath = path.join(__dirname, './src');
-const outputPath = path.join(__dirname, './dist');
-const eslintrcPath = path.join(__dirname, './.eslintrc.js');
+const entry = path.join(__dirname, 'src', 'index.js');
+const sourcePath = path.join(__dirname, 'src');
+const outputPath = path.join(__dirname, 'dist');
+const eslintrcPath = path.join(__dirname, '.eslintrc.js');
 
 module.exports = {
   entry,
@@ -95,7 +95,7 @@ module.exports = {
       sourcePath,
     ],
     alias: {
-      PVWStyle: path.join(__dirname, './node_modules/paraviewweb/style'),
+      PVWStyle: path.join(__dirname, 'node_modules', 'paraviewweb', 'style'),
     },
   },
   externals: [
