@@ -1,8 +1,8 @@
 import { action, observable } from 'mobx';
 
-import LoadAndErrorStore from './LoadAndErrorStore';
+import MessageStore from './MessageStore';
 
-export default class TubeStore extends LoadAndErrorStore {
+export default class TubeStore extends MessageStore {
   @observable tubes = observable.map({});
   @observable segmentParams = {
     scale: 2.0,
@@ -21,11 +21,20 @@ export default class TubeStore extends LoadAndErrorStore {
     });
   }
 
+  openTubes(filename) {
+    this.api.openTubes(filename)
+      .then((tubeGroup) => {
+        console.log('done');
+      });
+  }
+
   saveTubes(filename) {
     this.startLoading('Saving tubes...');
 
     this.api.saveTubes(filename)
-      .then(() => this.doneLoading())
+      .then(() => {
+        this.setSuccess('Tubes saved');
+      })
       .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 

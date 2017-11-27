@@ -3,9 +3,9 @@ import { action, observable } from 'mobx';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
-import LoadAndErrorStore from './LoadAndErrorStore';
+import MessageStore from './MessageStore';
 
-export default class ImageStore extends LoadAndErrorStore {
+export default class ImageStore extends MessageStore {
   @observable image = null;
 
   constructor(api) {

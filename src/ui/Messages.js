@@ -10,13 +10,14 @@ class Messages extends React.Component {
     this.closeHandlers = new Map();
 
     const { imageStore, tubeStore } = this.props.stores;
-    this.errorOrLoad(imageStore);
-    this.errorOrLoad(tubeStore);
+    this.listenForMessages(imageStore);
+    this.listenForMessages(tubeStore);
   }
 
-  errorOrLoad(store) {
+  listenForMessages(store) {
     autorun(() => this.showLoading(store));
     autorun(() => this.showError(store));
+    autorun(() => this.showSuccess(store));
   }
 
   showLoading(store) {
@@ -31,13 +32,22 @@ class Messages extends React.Component {
   }
 
   showError(store) {
-    if (store.lastError.title || store.lastError.description) {
-      notification.error({
-        message: store.lastError.title,
-        description: store.lastError.description,
+    this.showNotification(store, 'lastError', 'error');
+  }
+
+  showSuccess(store) {
+    this.showNotification(store, 'lastSuccess', 'success');
+  }
+
+  showNotification(store, storeProperty, notificationType) {
+    if (store[storeProperty].title || store[storeProperty].description) {
+      notification[notificationType]({
+        message: store[storeProperty].title,
+        description: store[storeProperty].description,
       });
     }
   }
+
 
   render() {
     return null;
