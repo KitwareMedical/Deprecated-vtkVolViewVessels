@@ -5,29 +5,22 @@ import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import App from './ui/App';
-import Api from './api';
 
-import imageData, { imageLoader } from './stores/ImageStore';
-import tubeData, { tubeSideEffects } from './stores/TubeStore';
-import volumeData from './stores/VolumeStore';
-import segmentData, { segmenter } from './stores/SegmentStore';
-
-import Store from './stores/stores';
+import ImageStore from './stores/ImageStore';
+import TubeStore from './stores/TubeStore';
 
 import mode from './mode';
 import initElectron from './electron_util';
 
 function main(dataManager) {
-  const api = new Api(dataManager);
-  const stores = {
-    imageStore: new Store(imageData(), imageLoader(api)),
-    tubeStore: new Store(tubeData(), tubeSideEffects(api)),
-    volumeStore: new Store(volumeData()),
-    segmentStore: new Store(segmentData(), segmenter(api)),
-  };
+  // store setup
+  const stores = Object.freeze({
+    imageStore: new ImageStore(dataManager.ITKTube),
+    tubeStore: new TubeStore(dataManager.ITKTube),
+  });
 
   // electron setup
-  initElectron(api, stores);
+  initElectron(stores);
 
   render(
     <LocaleProvider locale={enUS}>
@@ -38,5 +31,4 @@ function main(dataManager) {
 }
 
 // mode.local.run(main);
-// mode.remote.run(main);
-mode.zmq.run('tcp://127.0.0.1:4555', main);
+mode.remote.run(main);

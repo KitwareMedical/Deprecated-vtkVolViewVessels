@@ -1,39 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { connectComponent } from '../state';
 import style from '../Tube.mcss';
 
-function Info({ image }) {
+function Info({ stores: { imageStore } }) {
+  const image = imageStore.image;
+
+  let infoText = 'No image loaded';
+  if (image) {
+    infoText = (
+      <div style={{ marginTop: '10px' }}>
+        <h2>Image Info</h2>
+        <ul>
+          <li>Bounds: {image.getBounds().join(', ')}</li>
+          <li>Origin: {image.getOrigin().join(', ')}</li>
+          <li>Spacing: {image.getSpacing().join(', ')}</li>
+        </ul>
+      </div>
+    );
+  }
   return (
     <div className={[style.horizontalContainer, style.controller].join(' ')}>
       <div className={[style.itemStretch, style.border].join(' ')}>
-        {
-          image ?
-            <div style={{ marginTop: '10px' }}>
-              <h2>Image Info</h2>
-              <ul>
-                <li>Bounds: {image.getBounds().join(', ')}</li>
-                <li>Origin: {image.getOrigin().join(', ')}</li>
-                <li>Spacing: {image.getSpacing().join(', ')}</li>
-              </ul>
-            </div>
-          :
-            'No image loaded'
-        }
+        {infoText}
       </div>
     </div>
   );
 }
 
 Info.propTypes = {
-  image: PropTypes.object,
+  stores: PropTypes.object.isRequired,
 };
 
-Info.defaultProps = {
-  image: null,
-};
-
-export default connectComponent(Info, 'imageStore', ({ imageStore }, props) => ({
-  image: imageStore.image,
-}));
+export default Info;

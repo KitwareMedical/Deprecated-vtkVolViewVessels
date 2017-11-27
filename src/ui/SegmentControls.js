@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { observer } from 'mobx-react';
 
-import { connectComponent } from '../state';
 import style from '../Tube.mcss';
-
-import { setSegmentScale } from '../stores/SegmentStore';
 
 import LabeledSlider from './LabeledSlider';
 
-function SegmentControls({ stores: { segmentStore }, scale }) {
+function SegmentControls({ stores: { tubeStore } }) {
   const sliderLabel = (value, pos) => (
     <span style={{ lineHeight: 2.5 }}><label className={style.label}>Scale: </label>{value.toFixed(2)}</span>
   );
@@ -20,20 +18,16 @@ function SegmentControls({ stores: { segmentStore }, scale }) {
         className={style.slider}
         step={0.05}
         min={0}
-        value={scale}
+        value={tubeStore.segmentParams.scale}
         max={20}
-        onChange={value => segmentStore.dispatch(setSegmentScale(value))}
+        onChange={scale => tubeStore.updateSegmentParams({ scale })}
       />
     </div>
   );
 }
 
 SegmentControls.propTypes = {
-  scale: PropTypes.number.isRequired,
-
   stores: PropTypes.object.isRequired,
 };
 
-export default connectComponent(SegmentControls, 'segmentStore', ({ segmentStore }, props) => ({
-  scale: segmentStore.scale,
-}));
+export default observer(SegmentControls);

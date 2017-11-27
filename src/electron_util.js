@@ -1,10 +1,8 @@
 import { ipcRenderer } from 'electron';
 
-import { loadImage } from './stores/ImageStore';
-
-export default function init(api, { imageStore }) {
+export default function init({ imageStore }) {
   // listen for signals from main process
   ipcRenderer.on('openFile', (event, filename) => {
-    imageStore.dispatch(loadImage(filename));
+    imageStore.openImage(filename);
   });
 }
