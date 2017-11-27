@@ -311,5 +311,9 @@ class ItkTubeProtocol(LinkProtocol):
 
         if parent in children:
             raise Exception('Cannot have tube be parent of itself')
+
+        parentTube = self.tubeCache[parent].tube
         for child in children:
+            # reparents child tube to parent tube
+            parentTube.AddSpatialObject(self.tubeCache[child].tube)
             self.tubeCache[child].parent = parent
