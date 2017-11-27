@@ -25,6 +25,26 @@ module.exports = function createMenu(mainWindow) {
             );
           },
         },
+        {
+          label: 'Save tubes...',
+          accelerator: 'CmdOrCtrl+S',
+          click() {
+            dialog.showSaveDialog(
+                mainWindow,
+                {
+                  title: 'Save tubes',
+                  filters: [
+                    { name: '.tre', 'extensions': ['tre'] },
+                  ],
+                },
+                (filename) => {
+                  if (filename) {
+                    mainWindow.webContents.send('saveTubes', filename);
+                  }
+                },
+            );
+          },
+        },
       ],
     },
     {

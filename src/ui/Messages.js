@@ -9,8 +9,9 @@ class Messages extends React.Component {
     super(props);
     this.closeHandlers = new Map();
 
-    const { imageStore } = this.props.stores;
+    const { imageStore, tubeStore } = this.props.stores;
     this.errorOrLoad(imageStore);
+    this.errorOrLoad(tubeStore);
   }
 
   errorOrLoad(store) {

@@ -1,13 +1,15 @@
 import { action, observable } from 'mobx';
 
-// TODO extends LoadAndErrorStore
-export default class TubeStore {
+import LoadAndErrorStore from './LoadAndErrorStore';
+
+export default class TubeStore extends LoadAndErrorStore {
   @observable tubes = observable.map({});
   @observable segmentParams = {
     scale: 2.0,
   };
 
   constructor(api) {
+    super();
     this.api = api;
 
     this.api.onTubeGeneratorChange((result) => {
@@ -17,6 +19,14 @@ export default class TubeStore {
       }
       this.updateTube(tube);
     });
+  }
+
+  saveTubes(filename) {
+    this.startLoading('Saving tubes...');
+
+    this.api.saveTubes(filename)
+      .then(() => this.doneLoading())
+      .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 
   segmentTube(coords) {
