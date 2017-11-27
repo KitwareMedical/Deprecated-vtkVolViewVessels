@@ -1,28 +1,27 @@
 {
-  "name": "tube",
+  "name": "vtkvolview-vessels",
   "version": "0.0.0-semantically-release",
-  "description": "Medical Web Viewer",
+  "description": "Vessel viewer and segmenter",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitware/slicer-web.git"
+    "url": "git+https://github.com/KitwareMedical/vtkVolViewVessels.git",
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/kitware/slicer-web/issues"
+    "url": "https://github.com/KitwareMedical/vtkVolViewVessels/issues",
   },
-  "homepage": "https://github.com/kitware/slicer-web#readme",
-  "main": "./dist/slicer-web.js",
+  "homepage": "https://github.com/KitwareMedical/vtkVolViewVessels",
   "dependencies": {
     "antd": "^2.13.7",
     "daikon": "1.2.17",
-    "flatbuffers": "^1.7.0",
     "mobx": "^3.3.1",
     "mobx-react": "^4.3.4",
     "paraviewweb": "2.5.6",
     "prop-types": "^15.6.0",
     "react-color": "^2.13.8",
     "vtk.js": "git://github.com/Kitware/vtk-js.git#c49f74f5538f7b2f43299221b77ba8a0c2066593",
-    "zeromq": "^4.6.0"
+    "react": "15.3.1",
+    "react-dom": "15.3.1"
   },
   "devDependencies": {
     "axios": "0.14.0",
@@ -48,8 +47,6 @@
     "mout": "1.0.0",
     "node-loader": "^0.6.0",
     "normalize.css": "4.1.1",
-    "react": "15.3.1",
-    "react-dom": "15.3.1",
     "style-loader": "^0.19.0"
   },
   "scripts": {
