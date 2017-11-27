@@ -5,6 +5,6 @@ module.exports = {
   label: 'About vtkVolViewVessels',
   click: () => openAboutWindow({
     icon_path: join(__dirname, 'icon.png'),
-    package_json_dir: join(__dirname, '../'),
+    package_json_dir: join(__dirname, '..'),
   }),
 };

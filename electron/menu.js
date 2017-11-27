@@ -1,4 +1,4 @@
-const { app, dialog, Menu } = require('electron');
+const { app, shell, dialog, Menu } = require('electron');
 const aboutPage = require('./aboutPage');
 
 module.exports = function createMenu(mainWindow) {

@@ -2,10 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
-const entry = path.join(__dirname, './src/index.js');
-const sourcePath = path.join(__dirname, './src');
-const outputPath = path.join(__dirname, './dist');
-const eslintrcPath = path.join(__dirname, './.eslintrc.js');
+const entry = path.join(__dirname, 'src', 'index.js');
+const sourcePath = path.join(__dirname, 'src');
+const outputPath = path.join(__dirname, 'dist');
+const eslintrcPath = path.join(__dirname, '.eslintrc.js');
 
 module.exports = {
   entry,
@@ -34,11 +34,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: [
-          /node_modules/,
-          // these are compiled from flatbuffers, so don't pre-process it
-          /src\/fbspec/,
-        ],
+        exclude: /node_modules/,
         options: {
           presets: ['es2015', 'stage-2', 'react'],
           plugins: [
@@ -75,11 +71,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'eslint-loader',
-        exclude: [
-          /node_modules/,
-          // these are compiled from flatbuffers, so don't lint it
-          /src\/fbspec/,
-        ],
+        exclude: /node_modules/,
         enforce: 'pre',
         options: { configFile: eslintrcPath }
       },
@@ -103,7 +95,7 @@ module.exports = {
       sourcePath,
     ],
     alias: {
-      PVWStyle: path.join(__dirname, './node_modules/paraviewweb/style'),
+      PVWStyle: path.join(__dirname, 'node_modules', 'paraviewweb', 'style'),
     },
   },
   externals: [

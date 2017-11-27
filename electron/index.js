@@ -1,5 +1,6 @@
-const shelljs = require('shelljs');
-const { app, shell, BrowserWindow, dialog, Menu } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
+const path = require('path');
+const url = require('url');
 const getPort = require('get-port');
 const createMenu = require('./menu');
 
@@ -9,9 +10,13 @@ let server;
 function makeWindow() {
   mainWindow = new BrowserWindow({
     fullscreen: false,
-    icon: `${__dirname}/src/icon.png`
+    icon: path.join(__dirname, 'src', 'icon.png'),
   });
-  mainWindow.loadURL(`file://${__dirname}/../dist/index.html`);
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, '..', 'dist', 'index.html'),
+    protocol: 'file:',
+    slashes: true,
+  }));
   mainWindow.openDevTools();
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -41,8 +46,3 @@ app.on('activate', () => {
     makeWindow();
   }
 });
-
-// app.setAboutPanelOptions({
-//   applicationName: 'ParaViewWeb - Visualizer',
-//   copyright: 'Kitware 2017',
-// });
