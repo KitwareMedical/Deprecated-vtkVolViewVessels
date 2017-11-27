@@ -269,6 +269,15 @@ class ItkTubeProtocol(LinkProtocol):
             "scalars": self.addAttachment(imgArray.tobytes()),
         }
 
+    @register('itk.tube.save')
+    def saveTubes(self, filename):
+        dim = 3
+        tubeGroup = self.segmentTubes.GetTubeGroup()
+
+        writer = itk.SpatialObjectWriter[dim].New()
+        writer.SetFileName(str(filename))
+        writer.SetInput(tubeGroup)
+        writer.Update()
 
     @register('itk.tube.generate')
     def generateTube(self, coords, params):
