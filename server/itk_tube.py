@@ -71,12 +71,6 @@ itk.ImageFileReader
 itk.ImageIOFactory
 itk.SpatialObjectReader
 
-def okay(payload=None):
-    return { 'status': 'ok', 'result': payload }
-
-def error(reason=None):
-    return { 'status': 'error', 'reason': reason }
-
 __id = 0
 def get_next_id():
     '''Simple ID generator.'''
