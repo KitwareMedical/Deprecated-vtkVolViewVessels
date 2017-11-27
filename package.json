@@ -55,6 +55,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack --progress --colors",
+    "build:watch": "webpack --progress --colors --watch",
     "build:debug": "webpack --progress --colors --display-modules",
     "build:release": "npm run build -- -p",
     "test": "mocha -r babel-core/register ./tests/*.js",
