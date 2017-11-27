@@ -23,6 +23,7 @@ r"""
 import os
 import argparse
 
+from json import JSONEncoder
 import numpy as np
 
 # import itk modules.
@@ -68,12 +69,80 @@ itk.SegmentTubes
 itk.Image
 itk.ImageFileReader
 itk.ImageIOFactory
+itk.SpatialObjectReader
 
 def okay(payload=None):
     return { 'status': 'ok', 'result': payload }
 
 def error(reason=None):
     return { 'status': 'error', 'reason': reason }
+
+__id = 0
+def get_next_id():
+    '''Simple ID generator.'''
+    global __id
+    __id += 1
+    return __id
+
+def reset_id_counter():
+    global __id
+    __id = 0
+
+class Tube(JSONEncoder):
+    def __init__(self, _id=-1, parent=-1, params=None, status='pending', color=None, **kwargs):
+        super(Tube, self).__init__(**kwargs)
+        self.id = _id
+        self.parent = parent
+        self.params = params or dict()
+        self.status = status
+        self.color = color or [1, 0, 0] # default to red
+        self.tube = None
+        self._mesh = None
+
+    @property
+    def mesh(self):
+        if not self.tube:
+            return None
+        if self._mesh:
+            return self._mesh
+
+        # generate mesh
+        points = GetTubePoints(self.tube)
+
+        # transform tube points properly
+        self.tube.ComputeObjectToWorldTransform()
+        transform = self.tube.GetIndexToWorldTransform()
+        scaling = [transform.GetMatrix()(i,i) for i in range(3)]
+        scale = sum(scaling) / len(scaling)
+
+        for i in range(len(points)):
+            pt, radius = points[i]
+            pt = list(transform.TransformPoint(pt))
+            points[i] = (pt, radius*scale)
+
+        self._mesh = points
+        return self._mesh
+
+    def copyfrom(self, obj):
+        '''Copies certain properties from a given dictionary.'''
+        if type(obj) is not dict:
+            raise Exception('Given object is not a dict!')
+
+        self.id = obj.get('id', self.id)
+        self.parent = obj.get('parent', self.parent)
+        self.params = obj.get('params', self.params)
+        self.status = obj.get('status', self.status)
+        self.color = obj.get('color', self.color)
+
+    def serialize(self):
+        return dict(
+            id=self.id,
+            parent=self.parent,
+            params=self.params,
+            status=self.status,
+            color=self.color,
+            mesh=self.mesh,
+        )
 
 # =============================================================================
 # Create Web Server to handle requests
@@ -82,14 +151,13 @@ def error(reason=None):
 class ItkTubeProtocol(LinkProtocol):
 
     timelapse = 0.1 # Time in seconds
-    processingLoad = 0
 
     def __init__(self):
         self.idToSpatialObject = dict()
         # NOTE maybe not the most memory-efficient cache since we store points
         # in array form here?
-        self.tubeCache = []
-        self.curIndex = 0
+        self.tubeCache = {}
+        self.pendingTubes = []
 
     def loadDataFile(self, filename):
         # Load file in ITK
@@ -110,7 +178,6 @@ class ItkTubeProtocol(LinkProtocol):
         self.segmentTubes = itk.SegmentTubes[imgType].New()
         self.segmentTubes.SetInputImage(self.itkImage)
         self.segmentTubes.SetDebug(True)
-        self.curTubeId = 0
 
         scaleVector = self.itkImage.GetSpacing()
         offsetVector = self.itkImage.GetOrigin()
@@ -123,19 +190,18 @@ class ItkTubeProtocol(LinkProtocol):
                 .SetMatrix(self.itkImage.GetDirection())
         self.segmentTubes.GetTubeGroup().ComputeObjectToWorldTransform()
 
+        # reset id counter between segments
+        reset_id_counter()
+
     def scheduleQueueProcessing(self):
-        if self.processingLoad == 0:
-            self.processingLoad += 1
+        if len(self.pendingTubes) > 0:
             reactor.callLater(ItkTubeProtocol.timelapse, self.processQueue)
 
     def processQueue(self):
-        self.processingLoad -= 1
-
-        if self.curIndex >= len(self.tubeCache):
+        if len(self.pendingTubes) == 0:
             return
 
-        # Find anything in the queue that need processing
-        itemToProcess = self.tubeCache[self.curIndex]
+        itemToProcess = self.pendingTubes.pop(0)
 
         # extract tube
         seed = itk.Point[itk.D, self.dimensions](itemToProcess['position'])
@@ -146,36 +212,19 @@ class ItkTubeProtocol(LinkProtocol):
             raise Exception('scale/scaleNorm < 0.3')
         self.segmentTubes.SetRadius(itemToProcess['params']['scale']/scaleNorm)
 
-        tube = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
-        if tube:
-            self.segmentTubes.AddTube(tube)
-            self.idToSpatialObject[itemToProcess['id']] = tube
-            tube.ComputeObjectToWorldTransform()
-
-            points = GetTubePoints(tube)
-
-            # transform tube points properly
-            tube.ComputeObjectToWorldTransform()
-            transform = tube.GetIndexToWorldTransform()
-            scaling = [transform.GetMatrix()(i,i) for i in range(3)]
-            scale = sum(scaling) / len(scaling)
-
-            for i in range(len(points)):
-                pt, radius = points[i]
-                pt = list(transform.TransformPoint(pt))
-                points[i] = (pt, radius*scale)
-
-            itemToProcess['mesh'] = points
-            self.curIndex += 1
-        else:
-            itemToProcess['mesh'] = None
-            # don't increment curIndex, since we are deleting array elms
-            del self.tubeCache[self.curIndex]
-
+        tubeObj = self.segmentTubes.ExtractTube(index, itemToProcess['id'], True)
         itemToProcess['status'] = 'done'
 
+        tube = Tube()
+        tube.copyfrom(itemToProcess)
+
+        if tubeObj:
+            self.segmentTubes.AddTube(tubeObj)
+            tube.tube = tubeObj
+            self.tubeCache[tube.id] = tube
+
         # Publish any update
-        self.publish('itk.tube.mesh', itemToProcess)
+        self.publish('itk.tube.mesh', tube.serialize())
 
         # Reschedule ourself
         self.scheduleQueueProcessing()
@@ -220,54 +269,38 @@ class ItkTubeProtocol(LinkProtocol):
             "scalars": self.addAttachment(imgArray.tobytes()),
         }
 
-    @register('itk.tube.get')
-    def getTubes(self):
-        return self.tubeCache
 
     @register('itk.tube.generate')
     def generateTube(self, coords, params):
         coords = list(self.imageToWorldTransform.TransformPoint(coords))
         itemToProcess = {
-            'id': self.curTubeId,
+            'id': get_next_id(),
             'parent': -1, # denotes this tube's parent as not a tube
             'position': coords,
             'params': params,
             'status': 'pending',
             'color': [1, 0, 0], # default to red
         }
-        self.curTubeId += 1
-        self.tubeCache.append(itemToProcess)
+        self.pendingTubes.append(itemToProcess)
         self.scheduleQueueProcessing()
         return itemToProcess
 
     @register('itk.tube.delete')
     def deleteTube(self, tubeId):
-        tube = self.idToSpatialObject[tubeId]
-        self.segmentTubes.DeleteTube(tube)
-        del self.idToSpatialObject[tubeId]
-        for index, item in enumerate(self.tubeCache):
-            if item['id'] == tubeId:
-                del self.tubeCache[index]
-                self.curIndex -= 1
-                break
-        return okay()
+        tube = self.tubeCache[tubeId]
+        self.segmentTubes.DeleteTube(tube.tube)
+        del self.tubeCache[tubeId]
 
     @register('itk.tube.setcolor')
     def setTubeColor(self, tubeId, color):
-        for item in self.tubeCache:
-            if item['id'] == tubeId:
-                item['color'] = color
-                break
-        return okay()
+        self.tubeCache[tubeId].color = color
 
     @register('itk.tube.reparent')
     def reparentTubes(self, parent, children):
         if type(parent) is not int or type(children) is not list:
-            return error('Invalid arguments')
+            raise Exception('Invalid arguments')
 
         if parent in children:
-            return error('Cannot have tube be parent of itself')
-        for tube in self.tubeCache:
-            if tube['id'] in children:
-                tube['parent'] = parent
-        return okay()
+            raise Exception('Cannot have tube be parent of itself')
+        for child in children:
+            self.tubeCache[child].parent = parent
