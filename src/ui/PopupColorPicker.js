@@ -36,6 +36,7 @@ export default class PopupColorPicker extends React.Component {
 
   onColorChange(color) {
     this.props.onChange(color.rgb);
+    this.setState({ visible: false });
   }
 
   render() {
