@@ -10,13 +10,12 @@ class Messages extends React.Component {
     this.closeHandlers = new Map();
 
     const { imageStore } = this.props.stores;
-
-    autorun(() => this.errorOrLoad(imageStore));
+    this.errorOrLoad(imageStore);
   }
 
   errorOrLoad(store) {
-    this.showLoading(store);
-    this.showError(store);
+    autorun(() => this.showLoading(store));
+    autorun(() => this.showError(store));
   }
 
   showLoading(store) {
