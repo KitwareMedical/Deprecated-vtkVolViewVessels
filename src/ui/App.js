@@ -11,6 +11,7 @@ import Info from './Info';
 import SegmentControls from './SegmentControls';
 import TubeTreeView from './TubeTreeView';
 import PiecewiseGaussianWidget from './PiecewiseGaussianWidget';
+import Messages from './Messages';
 
 const TabPane = Tabs.TabPane;
 
@@ -64,6 +65,7 @@ class App extends React.Component {
             <PiecewiseGaussianWidget transferFunctionWidget={this.transferFunctionWidget} />
           </TabPane>
         </Tabs>
+        <Messages stores={stores} />
       </div>
     );
   }

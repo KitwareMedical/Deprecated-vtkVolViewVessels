@@ -3,15 +3,19 @@ import { action, observable } from 'mobx';
 import vtkDataArray from 'vtk.js/Sources/Common/Core/DataArray';
 import vtkImageData from 'vtk.js/Sources/Common/DataModel/ImageData';
 
-// TODO extends LoadAndErrorStore
-export default class ImageStore {
+import LoadAndErrorStore from './LoadAndErrorStore';
+
+export default class ImageStore extends LoadAndErrorStore {
   @observable image = null;
 
   constructor(api) {
+    super();
     this.api = api;
   }
 
   openImage(filename) {
+    this.startLoading('Loading image...');
+
     return this.api.openFile(filename)
       .then((imageDesc) => {
         const reader = new FileReader();
@@ -25,12 +29,15 @@ export default class ImageStore {
           const imageData = vtkImageData.newInstance(imageDesc);
           imageData.getPointData().setScalars(dataArray);
 
+          this.doneLoading();
           this.setImageData(imageData);
         });
 
         reader.readAsArrayBuffer(imageDesc.scalars);
+      })
+      .catch((error) => {
+        this.setError(`Error in ${error.data.method}`, error.data.exception);
       });
-    // TODO catch
   }
 
   @action('setImageData')
