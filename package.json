@@ -4,11 +4,11 @@
   "description": "Vessel viewer and segmenter",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KitwareMedical/vtkVolViewVessels.git",
+    "url": "git+https://github.com/KitwareMedical/vtkVolViewVessels.git"
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/KitwareMedical/vtkVolViewVessels/issues",
+    "url": "https://github.com/KitwareMedical/vtkVolViewVessels/issues"
   },
   "homepage": "https://github.com/KitwareMedical/vtkVolViewVessels",
   "dependencies": {
