@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { reaction } from 'mobx';
 
 import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
@@ -21,6 +22,12 @@ function main(dataManager) {
 
   // electron setup
   initElectron(stores);
+
+  // whenever an image is loaded, clear tubes.
+  reaction(
+    () => stores.imageStore.image,
+    () => stores.tubeStore.reset(),
+  );
 
   render(
     <LocaleProvider locale={enUS}>

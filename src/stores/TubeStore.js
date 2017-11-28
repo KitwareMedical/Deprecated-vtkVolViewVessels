@@ -2,10 +2,12 @@ import { action, observable } from 'mobx';
 
 import MessageStore from './MessageStore';
 
+const DEFAULT_SCALE = 2.0;
+
 export default class TubeStore extends MessageStore {
   @observable tubes = observable.map({});
   @observable segmentParams = {
-    scale: 2.0,
+    scale: DEFAULT_SCALE,
   };
 
   constructor(api) {
@@ -43,6 +45,12 @@ export default class TubeStore extends MessageStore {
       .then((tube) => {
         this.addTube(tube);
       });
+  }
+
+  @action('reset')
+  reset() {
+    this.tubes.clear();
+    this.segmentParams.scale = DEFAULT_SCALE;
   }
 
   @action('updateSegmentParams')
