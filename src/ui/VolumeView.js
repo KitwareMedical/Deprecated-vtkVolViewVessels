@@ -86,6 +86,11 @@ export default class VolumeView extends React.Component {
       this.setTransferFunctionWidget(transferFunctionWidget);
     }
 
+    // set actor visibility before setting new imagedata
+    if (this.actor) {
+      this.actor.setVisibility(visible);
+    }
+
     if (prevImageData !== imageData) {
       const needToAddActor = prevImageData == null;
 
@@ -103,16 +108,12 @@ export default class VolumeView extends React.Component {
 
       if (needToAddActor) {
         this.renderer.addActor(this.actor);
-        this.renderer.resetCamera();
       }
 
       this.renderer.resetCamera();
       // update the transfer function widget
       this.resize();
     }
-
-    // set actor visibility
-    this.actor.setVisibility(visible);
 
     if (prevTubes !== tubes) {
       const newCache = {};
