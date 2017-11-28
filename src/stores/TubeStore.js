@@ -44,7 +44,8 @@ export default class TubeStore extends MessageStore {
     return this.api.generateTube(coords, this.segmentParams)
       .then((tube) => {
         this.addTube(tube);
-      });
+      })
+      .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 
   @action('reset')
@@ -82,26 +83,28 @@ export default class TubeStore extends MessageStore {
 
   @action('setTubeColor')
   setTubeColor(id, color) {
-    this.tubes.set(id, Object.assign({}, this.tubes.get(id), { color }));
-    // TODO handle errors
-    this.api.setTubeColor(id, color);
+    this.api.setTubeColor(id, color)
+      .then(() => this.tubes.set(id, Object.assign({}, this.tubes.get(id), { color })))
+      .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 
   @action('deleteTube')
   deleteTube(id) {
-    // TODO handle errors
     // TODO delete all children of current tube
-    this.tubes.delete(id);
-    this.api.deleteTube(id);
+    this.api.deleteTube(id)
+      .then(() => this.tubes.delete(id))
+      .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 
   @action('reparent')
   reparent(parent, children) {
-    // TODO handle case when parent is inside children
-    for (let i = 0; i < children.length; ++i) {
-      const child = children[i];
-      this.tubes.set(child, Object.assign({}, this.tubes.get(child), { parent }));
-    }
-    this.api.reparentTubes(parent, children);
+    this.api.reparentTubes(parent, children)
+      .then(() => {
+        for (let i = 0; i < children.length; ++i) {
+          const child = children[i];
+          this.tubes.set(child, Object.assign({}, this.tubes.get(child), { parent }));
+        }
+      })
+      .catch(error => this.setError(`Error in ${error.data.method}`, error.data.exception));
   }
 }
