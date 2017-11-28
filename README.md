@@ -2,6 +2,18 @@
 
 ## Setup
 
+Checkout and initialize submodules:
+
+```
+git clone https://github.com/KitwareMedical/vtkVolViewVessels.git
+git submodule init
+```
+
+### Dependencies
+
+- Python 2. Python 3 support not yet tested.
+- nodejs + npm. LTS version should suffice.
+
 ### Desktop Client
 
 Prepare and build the client and desktop code:

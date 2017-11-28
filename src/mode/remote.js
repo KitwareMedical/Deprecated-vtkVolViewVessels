@@ -1,9 +1,6 @@
 import network from '../network';
 
 function run(startFn, stopFn) {
-  network.onReady(() => {
-    startFn(network.getClient());
-  });
   network.connect({
     application: 'ITKTube',
     // dummy url
@@ -11,6 +8,8 @@ function run(startFn, stopFn) {
     // TODO don't hardcode this
     sessionURL: 'ws://localhost:8080/ws',
   });
+
+  startFn(network.getClient());
 }
 
 export default {
