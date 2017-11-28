@@ -19,7 +19,7 @@
     "paraviewweb": "2.5.6",
     "prop-types": "^15.6.0",
     "react-color": "^2.13.8",
-    "vtk.js": "git://github.com/Kitware/vtk-js.git#c49f74f5538f7b2f43299221b77ba8a0c2066593",
+    "vtk.js": "^5.6.1",
     "react": "15.3.1",
     "react-dom": "15.3.1"
   },
