@@ -7,6 +7,8 @@ const { spawn } = require('child_process');
 const createMenu = require('./menu');
 const appConfig = require('./config');
 
+const DEBUG = process.env.DEBUG || false;
+
 let mainWindow;
 let server;
 
@@ -69,10 +71,13 @@ function makeWindow() {
     protocol: 'file:',
     slashes: true,
   }));
-  mainWindow.openDevTools();
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  if (DEBUG) {
+    mainWindow.openDevTools();
+  }
 }
 
 app.on('ready', () => {
