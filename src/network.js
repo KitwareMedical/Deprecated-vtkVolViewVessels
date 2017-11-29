@@ -1,6 +1,10 @@
 import { createClient } from 'paraviewweb/src/IO/WebSocket/ParaViewWebClient';
 import SmartConnect from 'wslink/src/SmartConnect';
 
+// Only try to connect 20 times
+const MAX_CONN_ATTEMPTS = 20;
+const RETRY_TIMEOUT = 500; // milliseconds
+
 let connection = null;
 let client = null;
 let smartConnect = null;
@@ -63,9 +67,13 @@ function connect(config = {}) {
   smartConnect = SmartConnect.newInstance({ config });
   smartConnect.onConnectionReady(start);
 
+  let retryCount = 0;
   const scheduleConnect = () => {
-    // Don't need exponential back-off for local connection
-    setTimeout(() => smartConnect.connect(), 500);
+    ++retryCount;
+    if (retryCount <= MAX_CONN_ATTEMPTS) {
+      // Don't need exponential back-off for local connection
+      setTimeout(() => smartConnect.connect(), RETRY_TIMEOUT);
+    }
   };
   smartConnect.onConnectionError(scheduleConnect);
   scheduleConnect();
