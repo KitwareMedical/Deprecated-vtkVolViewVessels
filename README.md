@@ -1,5 +1,8 @@
 # vtkVolViewVessels
 
+Vessel viewer and segmentation editor.
+Built using ITK+TubeTK, Python, and Electron.
+
 ## Setup
 
 Checkout and initialize submodules:
@@ -7,69 +10,75 @@ Checkout and initialize submodules:
 ```
 git clone https://github.com/KitwareMedical/vtkVolViewVessels.git
 git submodule init
+git submodule update
 ```
 
-### Dependencies
+### Software Dependencies
 
 - Python 2. Python 3 support not yet tested.
 - nodejs + npm. LTS version should suffice.
 
-### Desktop Client
+### Server setup
 
-Prepare and build the client and desktop code:
-
-```
-# build client
-cd vtkVolViewVessels/
-npm install
-npm run build
-
-# prepare desktop
-cd electron/
-npm install
-```
-
-### Server
-
-First build [ITKTubeTK](https://github.com/floryst/ITKTubeTK/tree/swig_python_threads).
+First build [ITKTubeTK](https://github.com/KitwareMedical/ITKTubeTK).
 This build will take some time.
 
 ```
 cd ITKTubeTK/
 mkdir build && cd build/
 cmake ..
-make -j2 # change the -j switch for your machine
+make -j2 # change the -j switch as necessary
 ```
 
-In the meantime, optionally setup a virtualenv. Currently this has been tested only
-with Python 2. Python 3 support has not yet been tested. Install `twisted` and `wslink`.
+In the meantime, optionally setup a virtualenv.
 
 ```
 virtualenv -p /usr/bin/python2 .venv
 source .venv/bin/activate
+```
+
+You will need to install three python packages.
+
+```
 pip install twisted wslink numpy
 ```
 
-Once the build is done, copy `run.sh.example` to `run.sh`. Edit the first two lines for
-your current environment. The `ITKBuildRoot` points to the build directory of ITKTubeTK.
-The `source...` line points to the activate script of your virtualenv. 
+### Desktop Client
 
-Once that is set up, run `./run.sh server/server.py`. Note that the run script isn't
-required. If your environment exports all the needed variables from the run script,
-then the run script is not needed.
+Prepare and build the client and desktop code:
+
+```
+# build web client
+cd vtkVolViewVessels/
+npm install
+npm run build
+
+# prepare electron desktop app
+cd electron/
+npm install
+```
 
 ## Running
 
-Once the client and server has all been set up, first run the server. Then,
-from another terminal, run the desktop application.
+Once the client and server has all been set up, you will need to edit
+`electron/config.js`. Inside, you should set the appropriate variables.
+
+- `PYTHON`: This is your python executable.
+- `VIRTUALENV`: If you optionally set up a virtualenv, specify the root dir
+                here. (Full paths preferred.)
+- `ITK_TUBETK_ROOT`: This is the root dir of your build of ITKTubeTK. (Full
+                     paths preferred.)
+- `PORT`: If you want to specify the TCP port used for client/server
+          communication, set it here.
+
+Once you've configured `electron/config.js`, run the application like so:
 
 ```
-# terminal 1
-./run.sh server/server.py
-
-# terminal 2
 cd electron/
 npm run start
 ```
 
-For Windows machines, use `run.bat` accordingly.
+## Developing
+
+To open the devtools in electron, launch the application with the environment
+variable `DEBUG=1`.

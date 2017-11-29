@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { reaction } from 'mobx';
 
-import { LocaleProvider } from 'antd';
+import { LocaleProvider, notification } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
 import App from './ui/App';
@@ -11,7 +11,7 @@ import ImageStore from './stores/ImageStore';
 import TubeStore from './stores/TubeStore';
 
 import mode from './mode';
-import initElectron from './electron_util';
+import { init as initElectron, getHostPort } from './electron_util';
 
 function main(dataManager) {
   // store setup
@@ -37,5 +37,16 @@ function main(dataManager) {
   );
 }
 
+function onError() {
+  notification.error({
+    duration: 0,
+    message: 'Server failed to start',
+    description: (
+      <p>Check the console output for issues, and verify your <code>electron/config</code> is correct.</p>
+    ),
+  });
+}
+
 // mode.local.run(main);
-mode.remote.run(main);
+const [host, port] = getHostPort();
+mode.remote.run(host, port, main, () => {}, onError);

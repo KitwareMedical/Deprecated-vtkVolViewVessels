@@ -2,10 +2,64 @@ const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const url = require('url');
 const getPort = require('get-port');
+const { spawn } = require('child_process');
+
 const createMenu = require('./menu');
+const appConfig = require('./config');
+
+const DEBUG = process.env.DEBUG || false;
 
 let mainWindow;
 let server;
+
+function startServer() {
+  const host = 'localhost';
+  return getPort().then((port) => {
+    // this is accessed by the renderer process
+    process.env.SERVER_HOST = host;
+    process.env.SERVER_PORT = port;
+
+    const env = Object.assign({}, process.env);
+
+    env.PYTHONPATH = [
+      // ITK TubeTK paths
+      path.join(appConfig.ITK_TUBETK_ROOT, 'ITK-build', 'Wrapping', 'Generators', 'Python'),
+      path.join(appConfig.ITK_TUBETK_ROOT, 'ITK-build', 'lib'),
+      path.join(appConfig.ITK_TUBETK_ROOT, 'TubeTK-build', 'lib'),
+    ].join(path.delimiter);
+
+    if (appConfig.VIRTUALENV) {
+      env.PYTHONHOME = appConfig.VIRTUALENV;
+    }
+
+    server = spawn(
+      appConfig.PYTHON,
+      [
+        path.join('server', 'server.py'),
+        '--port', appConfig.PORT || port,
+        '--host', host,
+        '--timeout', 2*365*24*60*60, // 2 years; please don't run this for 2 years...
+      ],
+      {
+        cwd: path.join(__dirname, '..'),
+        env,
+        windowsHide: true,
+      },
+    );
+
+    server.stdout.on('data', (data) => {
+      process.stdout.write(String(data));
+    });
+
+    server.stderr.on('data', (data) => {
+      process.stdout.write(String(data));
+    });
+
+    server.on('close', (data) => {
+      server = null;
+    });
+  });
+}
 
 function makeWindow() {
   mainWindow = new BrowserWindow({
@@ -17,15 +71,23 @@ function makeWindow() {
     protocol: 'file:',
     slashes: true,
   }));
-  mainWindow.openDevTools();
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  if (DEBUG) {
+    mainWindow.openDevTools();
+  }
 }
 
 app.on('ready', () => {
-  makeWindow();
-  Menu.setApplicationMenu(createMenu(mainWindow));
+  startServer().then(() => {
+    makeWindow();
+    Menu.setApplicationMenu(createMenu(mainWindow));
+  }).catch((error) => {
+    console.error(error);
+    exit();
+  });
 });
 
 // Quit when all windows are closed.

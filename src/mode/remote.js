@@ -1,12 +1,12 @@
 import network from '../network';
 
-function run(startFn, stopFn) {
+function run(host, port, startFn, stopFn, errorFn) {
+  network.onError(errorFn);
   network.connect({
     application: 'ITKTube',
     // dummy url
     sessionManagerURL: 'file://dummyurl',
-    // TODO don't hardcode this
-    sessionURL: 'ws://localhost:8080/ws',
+    sessionURL: `ws://${host}:${port}/ws`,
   });
 
   startFn(network.getClient());
