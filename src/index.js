@@ -11,7 +11,7 @@ import ImageStore from './stores/ImageStore';
 import TubeStore from './stores/TubeStore';
 
 import mode from './mode';
-import initElectron from './electron_util';
+import { init as initElectron, getHostPort } from './electron_util';
 
 function main(dataManager) {
   // store setup
@@ -38,4 +38,5 @@ function main(dataManager) {
 }
 
 // mode.local.run(main);
-mode.remote.run(main);
+const [host, port] = getHostPort();
+mode.remote.run(host, port, main);

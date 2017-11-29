@@ -1,6 +1,10 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 
-export default function init({ imageStore, tubeStore }) {
+export function getHostPort() {
+  return [remote.process.env.SERVER_HOST, remote.process.env.SERVER_PORT];
+}
+
+export function init({ imageStore, tubeStore }) {
   // listen for signals from main process
   ipcRenderer.on('openFile', (event, filename) => {
     imageStore.openImage(filename);
