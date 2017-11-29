@@ -70,3 +70,15 @@ Once the client and server has all been set up, you will need to edit
                      paths preferred.)
 - `PORT`: If you want to specify the TCP port used for client/server
           communication, set it here.
+
+Once you've configured `electron/config.js`, run the application like so:
+
+```
+cd electron/
+npm run start
+```
+
+## Developing
+
+To open the devtools in electron, launch the application with the environment
+variable `DEBUG=1`.
