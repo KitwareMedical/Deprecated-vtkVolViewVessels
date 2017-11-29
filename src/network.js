@@ -2,13 +2,14 @@ import { createClient } from 'paraviewweb/src/IO/WebSocket/ParaViewWebClient';
 import SmartConnect from 'wslink/src/SmartConnect';
 
 // Only try to connect 20 times
-const MAX_CONN_ATTEMPTS = 20;
+const MAX_CONN_ATTEMPTS = 10;
 const RETRY_TIMEOUT = 500; // milliseconds
 
 let connection = null;
 let client = null;
 let smartConnect = null;
 let readyCallback = null;
+let errorCallback = null;
 
 const customProtocols = {
   ITKTube: session => ({
@@ -73,6 +74,8 @@ function connect(config = {}) {
     if (retryCount <= MAX_CONN_ATTEMPTS) {
       // Don't need exponential back-off for local connection
       setTimeout(() => smartConnect.connect(), RETRY_TIMEOUT);
+    } else if (errorCallback) {
+      errorCallback();
     }
   };
   smartConnect.onConnectionError(scheduleConnect);
@@ -95,10 +98,15 @@ function onReady(callback) {
   }
 }
 
+function onError(callback) {
+  errorCallback = callback;
+}
+
 export default {
   exit,
   connect,
   getClient,
   getConnection,
   onReady,
+  onError,
 };

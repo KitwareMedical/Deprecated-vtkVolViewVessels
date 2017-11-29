@@ -1,6 +1,7 @@
 import network from '../network';
 
-function run(host, port, startFn, stopFn) {
+function run(host, port, startFn, stopFn, errorFn) {
+  network.onError(errorFn);
   network.connect({
     application: 'ITKTube',
     // dummy url
