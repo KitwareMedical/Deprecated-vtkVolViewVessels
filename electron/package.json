@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "electron .",
-    "postinstall": "rm -rf web && mkdir -p web && cp -r ../dist web/www && cp -r ../server web/server",
+    "postinstall": "node postinstall.js",
     "build:all": "electron-packager . --all --icon ./icon.icns --out ./bin/ --overwrite",
     "build:mac": "electron-packager . --darwin --icon ./icon.icns --out ./bin/ --overwrite",
     "build:win": "electron-packager . --win32 --out ./bin/ --overwrite",
