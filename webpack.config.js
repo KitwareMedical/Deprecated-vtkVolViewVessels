@@ -68,13 +68,16 @@ module.exports = {
         loader: 'url-loader?limit=60000',
         include: /fonts/,
       },
-      {
+      /*{
         test: /\.js$/,
         loader: 'eslint-loader',
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          /deps\/wslink/,
+        ],
         enforce: 'pre',
         options: { configFile: eslintrcPath }
-      },
+      },*/
       {
         test: /\.less$/,
         use: [

@@ -18,7 +18,7 @@
     "paraviewweb": "2.5.6",
     "prop-types": "^15.6.0",
     "react-color": "^2.13.8",
-    "vtk.js": "^5.6.1",
+    "vtk.js": "5.6.1",
     "react": "15.3.1",
     "react-dom": "15.3.1",
     "wslink": "file:./deps/wslink/js"

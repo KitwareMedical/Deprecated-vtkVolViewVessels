@@ -50,6 +50,8 @@ Prepare and build the client and desktop code:
 ```
 # build web client
 cd vtkVolViewVessels/
+npm submodule init
+npm submodule update
 npm install
 npm run build
 
@@ -78,7 +80,7 @@ cd electron/
 npm run start
 ```
 
-## Developing
+## Developing/Debugging
 
 To open the devtools in electron, launch the application with the environment
 variable `DEBUG=1`.
