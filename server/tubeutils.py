@@ -1,4 +1,8 @@
-from StringIO import StringIO
+import sys
+if sys.version_info >= (3, 0):
+  from io import StringIO
+else:
+  from StringIO import StringIO
 
 import itk
 
