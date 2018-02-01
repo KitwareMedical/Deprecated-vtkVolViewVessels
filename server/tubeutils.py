@@ -13,7 +13,8 @@ def Enum(*names):
 def DowncastToVesselTubeSOPoint(soPoint):
     '''Hacky way to downcast SpatialObjectPoint.'''
     buf = StringIO()
-    print >> buf, soPoint
+    #print >> buf, soPoint
+    print( soPoint, file=buf )
     buf.seek(0)
     props = buf.read().split("\n")
 
