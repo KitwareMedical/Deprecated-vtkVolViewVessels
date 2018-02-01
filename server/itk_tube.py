@@ -31,6 +31,10 @@ import itk
 from itkTypes import itkCType
 import ctypes
 
+import sys
+if sys.version_info > (3,0):
+    long = int
+
 # import Twisted reactor for later callback
 from twisted.internet import reactor
 
@@ -229,7 +233,7 @@ class ItkTubeProtocol(LinkProtocol):
         base.ReadImageInformation()
 
         componentType = base.GetComponentType()
-        itkctype = itkCType.GetCType(base.GetComponentTypeAsString(componentType))
+        itkctype = itkCType.GetCType("float")
         imageType = itk.Image[itkctype, base.GetNumberOfDimensions()]
 
         reader = itk.ImageFileReader[imageType].New()
