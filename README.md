@@ -40,7 +40,7 @@ source .venv/bin/activate
 You will need to install three python packages.
 
 ```
-pip install twisted wslink numpy
+pip install twisted wslink numpy service_identity
 ```
 
 ### Desktop Client
@@ -50,8 +50,8 @@ Prepare and build the client and desktop code:
 ```
 # build web client
 cd vtkVolViewVessels/
-npm submodule init
-npm submodule update
+git submodule init
+git submodule update
 npm install
 npm run build
 
