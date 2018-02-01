@@ -21,12 +21,22 @@ function startServer() {
 
     const env = Object.assign({}, process.env);
 
-    env.PYTHONPATH = [
-      // ITK TubeTK paths
-      path.join(appConfig.ITK_TUBETK_ROOT, 'ITK-build', 'Wrapping', 'Generators', 'Python'),
-      path.join(appConfig.ITK_TUBETK_ROOT, 'ITK-build', 'lib'),
-      path.join(appConfig.ITK_TUBETK_ROOT, 'TubeTK-build', 'lib'),
-    ].join(path.delimiter);
+    // ITK TubeTK paths
+    if (appConfig.ITK_ROOT) {
+      env.PYTHONPATH = [
+        path.join(appConfig.ITK_ROOT, 'Wrapping', 'Generators', 'Python'),
+        path.join(appConfig.ITK_ROOT, 'lib'),
+        path.join(appConfig.ITK_TUBETK_ROOT, 'TubeTK-build', 'lib'),
+      ].join(path.delimiter);
+    } else {
+      env.PYTHONPATH = [
+        path.join(appConfig.ITK_TUBETK_ROOT,
+          'ITK-build', 'Wrapping', 'Generators', 'Python'),
+        path.join(appConfig.ITK_TUBETK_ROOT, 'ITK-build', 'lib'),
+        path.join(appConfig.ITK_TUBETK_ROOT, 'TubeTK-build', 'lib'),
+      ].join(path.delimiter);
+    }
+
 
     if (appConfig.VIRTUALENV) {
       env.PYTHONHOME = appConfig.VIRTUALENV;

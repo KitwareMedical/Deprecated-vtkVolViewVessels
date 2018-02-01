@@ -6,7 +6,7 @@ module.exports = {
  * This is your python executable. If the entry is not a full path, then
  * the PATH environment variable is searched.
  */
-PYTHON: '/usr/bin/python',
+PYTHON: '/Users/aylward/Anaconda3/python.exe',
 
 // If you have a custom python install on on Windows, specify the path like so:
 //PYTHON: 'c:\Python\bin\python.exe',
@@ -23,10 +23,17 @@ VIRTUALENV: '',
 //VIRTUALENV: '/path/to/.venv/',
 
 /**
+ * The path to the ITK build root.
+ */
+
+ITK_ROOT: '/src/ITK-Release',
+// if built ITKTubeTK using superbuild, set ITK_ROOT to the empty string.
+
+/**
  * The path to the ITKTubeTK build root.
  */
 
-ITK_TUBETK_ROOT: '/path/to/ITKTubeTK/build',
+ITK_TUBETK_ROOT: '/src/ITKTubeTK-Release',
 
 /**
  * (OPTIONAL) Port for the server to bind to. If 0, then a random port will
