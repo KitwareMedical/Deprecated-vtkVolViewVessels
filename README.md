@@ -1,4 +1,4 @@
-# vtkVolViewVessels
+# vtkVolViewVessels (DEPRECATED)
 
 Vessel viewer and segmentation editor.
 Built using ITK+TubeTK, Python, and Electron.
